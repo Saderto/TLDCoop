@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>TLDCompat258</AssemblyName>
+    <RootNamespace>TLDCompat</RootNamespace>
+    <Nullable>disable</Nullable>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Сборки игры 2.58, как у модуля трейнера. -->
+    <PackageReference Include="Il2CppInterop.Runtime" Version="1.5.1" />
+    <Reference Include="..\refs-2.58\*.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

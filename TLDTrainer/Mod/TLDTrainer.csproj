@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>TLDTrainer</AssemblyName>
+    <RootNamespace>TLDTrainer</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MelonLoader берётся из NuGet. Сборки игры — из папки refs-2.58: это обёртки,
+         которые MelonLoader создал для версии игры 2.58 (в NuGet пока только 2.55). -->
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.1" />
+    <PackageReference Include="HarmonyX" Version="2.10.2" />
+    <PackageReference Include="Il2CppInterop.Runtime" Version="1.5.1" />
+    <Reference Include="..\refs-2.58\*.dll" Private="false" />
+    <Compile Include="..\Shared\Features.cs" Link="Shared\Features.cs" />
+  </ItemGroup>
+
+</Project>
