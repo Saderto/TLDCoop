@@ -50,8 +50,8 @@
   {
    "id": "TLDCoop",
    "zip": "TLDCoop.zip",
-   "version": "0.19.66",
-   "size": 35435012,
+   "version": "0.19.67",
+   "size": 35434668,
    "detect": "Mods/TLDCoop.dll",
    "assets": true,
    "title": {
