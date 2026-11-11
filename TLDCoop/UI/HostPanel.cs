@@ -139,15 +139,6 @@ namespace TLDCoop.UI
             var r = Rules.Host;
             Header(lx, ref cy, cw, L.T("Правила", "Rules"));
 
-            r.Downed = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.Downed, L.T("Сначала «ранен»", "“Downed” first"));
-            cy += 24f;
-            Note(lx + 27f, ref cy, cw - 27f, L.T("Друг рядом может поднять за 15 секунд.", "A friend nearby can pick you up within 15 seconds."));
-            if (r.Downed)
-            {
-                r.ReviveItems = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.ReviveItems, L.T("Чтобы поднять, нужен лут по причине", "Picking up needs items for the cause"));
-                cy += 24f;
-                Note(lx + 27f, ref cy, cw - 27f, L.T("Бинты, лекарства и т. п. — смотря от чего ранен.", "Bandages, medicine and so on, depending on the cause."));
-            }
             r.FriendlyFire = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.FriendlyFire, L.T("Урон по своим: пули и стрелы ранят друзей", "Friendly fire: bullets and arrows hurt friends"));
             cy += 28f;
             r.SoloSleep = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.SoloSleep, L.T("Можно спать отдельно", "Sleeping alone allowed"));
@@ -175,8 +166,8 @@ namespace TLDCoop.UI
             Header(lx, ref cy, cw, L.T("Звери", "Animals"));
             r.AnimalsSeeAll = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.AnimalsSeeAll, L.T("Звери видят всех игроков", "Animals see every player"));
             cy += 24f;
-            Note(lx + 27f, ref cy, cw - 27f, L.T("Зверь идёт на ближайшего из вас и переезжает к другу только в момент броска. Выключи, если что-то дёргается: тогда как в 0.12.",
-                "An animal goes for the nearest of you and switches to a friend only when it lunges. Turn it off if something jitters: then it works as in 0.12."));
+            Note(lx + 27f, ref cy, cw - 27f, L.T("Зверь замечает, слышит и чует каждого из вас и идёт на того, кто ближе. Выключено — зверь реагирует только на игрока, который первым пришёл в локацию, а на остальных, пока тот рядом, может не обращать внимания. Выключи, если звери дёргаются или скачут.",
+                "An animal sees, hears and smells each of you and goes for whoever is closest. Off: an animal reacts only to the player who came to the location first and may ignore the others while that player is around. Turn it off if animals jitter or jump."));
             Header(lx, ref cy, cw, L.T("Звери: запас здоровья", "Animals: health"));
             var steps = new byte[] { 4, 5, 6, 8, 10, 12 };
             var names = new[] { "×1", L.T("×1,25", "×1.25"), L.T("×1,5", "×1.5"), "×2", L.T("×2,5", "×2.5"), "×3" };

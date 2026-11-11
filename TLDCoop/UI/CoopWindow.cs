@@ -262,9 +262,6 @@ namespace TLDCoop.UI
             cy += 40f;
             if (Game.Diagnostics.LastResult.Length > 0) Widgets.Text(lx, ref cy, cw, Game.Diagnostics.LastResult, 4f, 13f, Theme.Body);
             if (Game.Load.Summary.Length > 0) Widgets.Text(lx, ref cy, cw, L.T("Нагрузка мода: ", "Mod load: ") + Game.Load.Summary, 4f, 12f, Theme.Dim);
-            string key = Config.PingKeyName;
-            if (key.Length > 0) key = char.ToUpperInvariant(key[0]) + key.Substring(1);
-            Widgets.Text(lx, ref cy, cw, key + L.T(": рядом с раненым другом держи — лечить.", ": hold next to a downed friend to heal."), 6f, 12f, Theme.Dim, TextAnchor.UpperCenter);
         }
 
         private static Color ParseHex(string hex)
@@ -394,7 +391,6 @@ namespace TLDCoop.UI
             DrawPlayerList(lx, ref cy, cw, true);
             // Ошибка в одном разделе не должна прятать всё окно ниже (так пропадали цвет ника и настройки).
             try { DrawSummary(lx, ref cy, cw); } catch (Exception e) { MelonLoader.MelonLogger.Warning("[окно] итоги: " + e.Message); }
-            try { DrawChallenges(lx, ref cy, cw); } catch (Exception e) { MelonLoader.MelonLogger.Warning("[окно] испытания: " + e.Message); }
 
             if (Session.Mode == Mode.Client)
             {
