@@ -40,8 +40,13 @@ class App:
         self.game = None; self.cat = None; self.manifest = {}
         self.checked = set(); self.scroll = 0; self.hover = None; self.frac = 0.0
         self.logs = []; self.areas = []; self.skin_dir = None
+        self.st = None; self.rows = {}; self.pending = False
         root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
         root.geometry('%dx%d' % (W, H)); root.resizable(False, False)
+        try:   # own icon (icon.ico/png next to the script or inside the exe)
+            if os.name == 'nt': root.iconbitmap(default=os.path.join(core.HERE, 'icon.ico'))
+            else: self._icon = tk.PhotoImage(file=os.path.join(core.HERE, 'icon.png')); root.iconphoto(True, self._icon)
+        except Exception: pass
         self.cv = tk.Canvas(root, width=W, height=H, highlightthickness=0, background='#1b2024')
         self.cv.pack()
         self.img_id = self.cv.create_image(0, 0, anchor='nw')
@@ -57,6 +62,7 @@ class App:
 
     # ---------- skin ----------
     def make_skin(self):
+        ui.clear_caches(); self.rows = {}
         self.skin = ui.Skin(self.skin_dir, RU)
         bg = ui.scene(W, H)
         p = ui.Painter(self.skin, bg)
@@ -75,7 +81,7 @@ class App:
                 k, v = self.q.get_nowait()
                 if k == 'log':
                     for ln in str(v).splitlines() or ['']: self.logs.append(ln)
-                    self.logs = self.logs[-200:]
+                    self.logs = self.logs[-200:]; self.st = None
                 elif k == 'prog': self.frac = v
                 elif k == 'call': v()
                 dirty = True
@@ -96,7 +102,7 @@ class App:
     def done(self):
         self.busy = False; self.frac = 0
         if self.game: self.manifest = core.read_manifest(self.game)
-        self.render()
+        self.st = None; self.render()
 
     # ---------- data ----------
     def load(self):
@@ -130,7 +136,7 @@ class App:
         d = os.path.normpath(d)
         if not tld_assets.is_game(d):
             self.say(T('Это не папка игры: ', 'Not a game folder: ') + d); self.render(); return
-        self.game = d; self.manifest = core.read_manifest(d)
+        self.game = d; self.manifest = core.read_manifest(d); self.st = None
         if not self.skin_dir: threading.Thread(target=self.load_skin, daemon=True).start()
         self.render()
 
@@ -144,6 +150,24 @@ class App:
         return [m for m in (self.cat or {}).get('mods', []) if not m.get('hidden')]
 
     # ---------- drawing ----------
+    def later(self):
+        """One redraw when Tk is idle, however many hovers/scrolls came in meanwhile."""
+        if not self.pending:
+            self.pending = True
+            self.root.after_idle(self._later)
+    def _later(self):
+        self.pending = False; self.render()
+
+    def states(self):
+        """Mod states and the MelonLoader version, read from disk only after something changed."""
+        if self.st is None:
+            st = {}
+            if self.game:
+                st['__ml'] = core.melonloader_version(self.game)
+                for m in self.mods(): st[m['id']] = core.mod_state(self.game, m, self.manifest)
+            self.st = st
+        return self.st
+
     def area(self, key, x, y, w, h, fn):
         self.areas.append((key, x, y, w, h, fn))
 
@@ -153,6 +177,10 @@ class App:
         if enabled: self.area(key, cx - w / 2, cy - h / 2, w, h, fn)
 
     def row_layout(self, p, m):
+        k = (m['id'], RU)
+        if k not in self.rows: self.rows[k] = self._row_layout(p, m)
+        return self.rows[k]
+    def _row_layout(self, p, m):
         desc = p.wrap(m['desc']['ru' if RU else 'en'], 13, ROW_W - 60)
         extra = []
         if m.get('needs'): extra.append(T('Нужно: ', 'Needs: ') + ', '.join(m['needs']))
@@ -179,7 +207,7 @@ class App:
         y += 36
         p.text('MelonLoader', L, y, 13, ui.TEAL)
         if self.game:
-            v = core.melonloader_version(self.game)
+            v = self.states().get('__ml')
             if v is None:
                 p.text(T('не установлен: без него моды не работают', 'not installed: mods need it'), L + 130, y, 15, ui.AMBER)
                 self.btn(p, 'ml', T('Установить', 'Install'), R - 100, y, 170, 30, self.do_ml, en, 13)
@@ -233,7 +261,7 @@ class App:
             if y0 + h < 0 or y0 > LIST_H: continue
             key = 'row:' + m['id']
             if self.hover == key: sp.rect(0, max(0, y0), ROW_W, h, (0.43, 0.51, 0.49, 0.14))
-            st, iv = core.mod_state(self.game, m, self.manifest) if self.game else ('none', None)
+            st, iv = self.states().get(m['id'], ('none', None))
             ui.check(sp, 22, y0 + 24, m['id'] in self.checked)
             title = m['title']['ru' if RU else 'en']
             tw = sp.text(title, 44, y0 + 24, 17, ui.WHITE)
@@ -264,7 +292,7 @@ class App:
             if ax <= x <= ax + aw and ay <= y <= ay + ah: return k, fn
         return None, None
     def set_hover(self, k):
-        if k != self.hover: self.hover = k; self.render()
+        if k != self.hover: self.hover = k; self.later()
     def on_move(self, e):
         k, _ = self.hit(e.x, e.y); self.set_hover(k)
         self.cv.configure(cursor='hand2' if k else '')
@@ -272,13 +300,13 @@ class App:
         k, fn = self.hit(e.x, e.y)
         if fn: fn()
     def on_wheel(self, d):
-        self.scroll += d * 60; self.render()
+        self.scroll += d * 60; self.later()
     def toggle(self, mid):
         if self.busy: return
-        self.checked ^= {mid}; self.render()
+        self.checked ^= {mid}; self.later()
     def check_all(self, on):
         if self.busy: return
-        self.checked = {m['id'] for m in self.mods() if not m.get('extra')} if on else set(); self.render()
+        self.checked = {m['id'] for m in self.mods() if not m.get('extra')} if on else set(); self.later()
     def chosen(self):
         return [m for m in self.mods() if m['id'] in self.checked]
 

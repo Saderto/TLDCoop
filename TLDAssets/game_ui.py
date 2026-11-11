@@ -120,6 +120,19 @@ def _slice9(skin, n, w, h):
             out.paste(im.crop((a0, c0, a1, c1)).resize((b1 - b0, d1 - d0), Image.LANCZOS), (b0, d0))
     return out
 
+# caches: the window is redrawn on every hover, so sprites, text and widths are made once
+_SPR, _TXT, _TW = {}, {}, {}
+
+def clear_caches():
+    _SPR.clear(); _TXT.clear(); _TW.clear()
+
+def _comp(dst, src, x, y):
+    if x < 0 or y < 0:
+        if -x >= src.width or -y >= src.height: return
+        src = src.crop((max(0, -x), max(0, -y), src.width, src.height)); x = max(0, x); y = max(0, y)
+    if x >= dst.width or y >= dst.height: return
+    dst.alpha_composite(src, (x, y))
+
 class Painter:
     """Top-left pixel coordinates (unlike NGUI's centre/y-up); (x, y) of sprites is their centre."""
     def __init__(self, skin, im):
@@ -127,27 +140,48 @@ class Painter:
     def spr(self, n, cx, cy, w, h, c=(1, 1, 1, 1), sliced=False, fallback=None):
         w, h = max(1, int(w)), max(1, int(h))
         if self.s.has(n):
-            im = _slice9(self.s, n, w, h) if sliced else self.s.crop(n).resize((w, h), Image.LANCZOS)
-            self.im.alpha_composite(_tint(im, c), (int(cx - w / 2), int(cy - h / 2)))
+            k = (n, w, h, tuple(c), sliced)
+            im = _SPR.get(k)
+            if im is None:
+                im = _slice9(self.s, n, w, h) if sliced else self.s.crop(n).resize((w, h), Image.LANCZOS)
+                im = _tint(im, c)
+                if len(_SPR) > 600: _SPR.clear()
+                _SPR[k] = im
+            _comp(self.im, im, int(cx - w / 2), int(cy - h / 2))
         elif fallback:
             fallback(self, cx, cy, w, h, c)
     def rect(self, x, y, w, h, c, outline=None):
-        lay = Image.new('RGBA', (max(1, int(w)), max(1, int(h))), tuple(int(v * 255) for v in c))
-        if outline:
-            ImageDraw.Draw(lay).rectangle((0, 0, int(w) - 1, int(h) - 1), outline=tuple(int(v * 255) for v in outline))
-        self.im.alpha_composite(lay, (int(x), int(y)))
+        k = ('rect', max(1, int(w)), max(1, int(h)), tuple(c), tuple(outline) if outline else None)
+        lay = _SPR.get(k)
+        if lay is None:
+            lay = Image.new('RGBA', k[1:3], tuple(int(v * 255) for v in c))
+            if outline:
+                ImageDraw.Draw(lay).rectangle((0, 0, k[1] - 1, k[2] - 1), outline=tuple(int(v * 255) for v in outline))
+            _SPR[k] = lay
+        _comp(self.im, lay, int(x), int(y))
     def tw(self, t, size):
-        f = self.s.font(size); b = f.getbbox(t); return b[2] - b[0]
+        k = (t, size)
+        if k not in _TW:
+            if len(_TW) > 5000: _TW.clear()
+            b = self.s.font(size).getbbox(t); _TW[k] = b[2] - b[0]
+        return _TW[k]
     def text(self, t, x, y, size, c=(1, 1, 1, 1), al='l', shadow=True):
         """y is the vertical centre of the line."""
-        f = self.s.font(size); d = ImageDraw.Draw(self.im)
         w = self.tw(t, size)
         if al == 'c': x -= w / 2
         elif al == 'r': x -= w
         yy = y - size * 0.62
-        col = tuple(int(v * 255) for v in c)
-        if shadow: d.text((x + 1, yy + 1), t, font=f, fill=(0, 0, 0, int(140 * c[3])))
-        d.text((x, yy), t, font=f, fill=col)
+        k = (t, size, tuple(c), shadow)
+        lay = _TXT.get(k)
+        if lay is None:
+            f = self.s.font(size); b = f.getbbox(t)
+            lay = Image.new('RGBA', (max(1, b[2] + 4), max(1, b[3] + 4)))
+            d = ImageDraw.Draw(lay)
+            if shadow: d.text((2, 2), t, font=f, fill=(0, 0, 0, int(140 * c[3])))
+            d.text((1, 1), t, font=f, fill=tuple(int(v * 255) for v in c))
+            if len(_TXT) > 3000: _TXT.clear()
+            _TXT[k] = lay
+        _comp(self.im, lay, int(round(x)) - 1, int(round(yy)) - 1)
         return w
     def wrap(self, t, size, width):
         words = t.split(); lines = []; cur = ''
