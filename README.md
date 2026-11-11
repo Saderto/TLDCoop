@@ -41,7 +41,7 @@ original sources were lost): it builds and works the same, but has no comments a
 | Мод / Mod | Нужно / Needs |
 |---|---|
 | `SmokesBySeagull` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself); плагин `SmokesAudioOn.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOn.dll` plugin in `Plugins` (included in the archive) |
-| `FoodPackBySeagull` | AfflictionComponent, ModData, ComplexLogger, ModSettings. Если стоит AlcoholMod, напитки пьянят / With AlcoholMod installed, drinks make you drunk |
+| `FoodPackBySeagull` | AfflictionComponent, ModData, ComplexLogger, ModSettings, AlcoholMod (+ ModComponent, его требует сам AlcoholMod / required by AlcoholMod itself); с AlcoholMod напитки пьянят / with AlcoholMod drinks make you drunk |
 | `FoodBalanceBySeagull` | ModSettings |
 | `ContainerLabelsBySeagull` | ModData |
 | `TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp` | `TLDAssets.exe` (есть в их архивах, запустить один раз / included in their archives, run it once) |
@@ -65,8 +65,11 @@ is kept next to it as `globalgamemanagers.smokes_bak`).
 - `ComplexLogger.zip`: ComplexLogger 1.0.9, исправлен для игры 2.58+ и MelonLoader 0.7 (Seagull); оригинал The Illusion,
   https://github.com/Arkhorse/Complex-Logger, MIT / fixed for game 2.58+ and MelonLoader 0.7; original by The Illusion, MIT.
 - `ModSettings.zip`: ModSettings 2.2.5 без изменений, авторы Digitalzombie и zeobviouslyfakeacc, MIT / unchanged, MIT.
+- `AlcoholMod.zip`: AlcoholMod 3.0.1 без изменений, авторы ds5678 (оригинал) и No3371, https://github.com/No3371/AlcoholMod, MIT /
+  unchanged, by ds5678 (original) and No3371, MIT.
 
-AfflictionComponent (https://github.com/TLD-Mods/AfflictionComponent) и ModData (https://github.com/dommrogers/ModData)
+AfflictionComponent (https://github.com/TLD-Mods/AfflictionComponent), ModData (https://github.com/dommrogers/ModData) и ModComponent
+(https://github.com/dommrogers/ModComponent)
 берите у авторов; лаунчер скачивает их оттуда сам / get them from their authors; the launcher downloads them from there.
 
 ## Лаунчер / Launcher

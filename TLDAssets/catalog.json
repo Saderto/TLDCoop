@@ -30,6 +30,16 @@
   "TLDCompat258": {
    "zip": "TLDCompat258.zip",
    "path": "UserLibs/TLDCompat258.dll"
+  },
+  "ModComponent": {
+   "repo": "dommrogers/ModComponent",
+   "asset": "ModComponent.dll",
+   "path": "Mods/ModComponent.dll"
+  },
+  "AlcoholMod": {
+   "zip": "AlcoholMod.zip",
+   "path": "Mods/AlcoholMod.dll",
+   "note": "3.0.1 No3371, original ds5678 (MIT)"
   }
  },
  "mods": [
@@ -158,15 +168,17 @@
     "AfflictionComponent",
     "ModData",
     "ComplexLogger",
-    "ModSettings"
+    "ModSettings",
+    "ModComponent",
+    "AlcoholMod"
    ],
    "title": {
     "ru": "Еда и напитки",
     "en": "Food and drinks"
    },
    "desc": {
-    "ru": "Новая еда, напитки и блюда с эффектами; лежат на картах и в контейнерах. Если стоит AlcoholMod, напитки пьянят.",
-    "en": "New food, drinks and dishes with effects, found on maps and in containers. With AlcoholMod installed, drinks make you drunk."
+    "ru": "Новая еда, напитки и блюда с эффектами; лежат на картах и в контейнерах. Вместе с паком ставится AlcoholMod: напитки пьянят.",
+    "en": "New food, drinks and dishes with effects, found on maps and in containers. AlcoholMod is installed with it: drinks make you drunk."
    }
   },
   {
