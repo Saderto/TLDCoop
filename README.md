@@ -72,6 +72,11 @@ needs the assemblies MelonLoader generates in your `MelonLoader/Il2CppAssemblies
 TLDAssets: Python 3.13, `pip install UnityPy==1.25.4 Pillow==12.3.0 numpy==2.5.3`, `python tld_assets.py`;
 exe: PyInstaller 6 (`--onefile`, `--add-data steps;steps --add-data own;own --collect-all UnityPy`).
 
+## Лицензия / License
+
+Код модов: MIT (файл `LICENSE`), автор Seagull. Игра и всё, что из неё взято, к лицензии не относятся.
+Mod code: MIT (`LICENSE`), by Seagull. The game and anything derived from it are not covered.
+
 ## Благодарности / Credits
 
 - SkyCoop (Filigrani, MIT): кооп скачивает его модель игрока из официального релиза, если нет персонажей; некоторые приёмы запуска игры подсмотрены там / the co-op downloads its player model from the official release as a fallback; some game-start techniques were learned from it.
