@@ -6,7 +6,7 @@
 import os, sys, threading, queue, tempfile, shutil, locale, subprocess, traceback, time
 import tkinter as tk
 from tkinter import filedialog
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageChops
 
 import launcher_core as core
 import tld_assets
@@ -45,7 +45,10 @@ class App:
         root.geometry('%dx%d' % (W, H)); root.resizable(False, False)
         try:   # own icon (icon.ico/png next to the script or inside the exe)
             if os.name == 'nt': root.iconbitmap(default=os.path.join(core.HERE, 'icon.ico'))
-            else: self._icon = tk.PhotoImage(file=os.path.join(core.HERE, 'icon.png')); root.iconphoto(True, self._icon)
+        except Exception: pass
+        try:
+            self._icon = ImageTk.PhotoImage(Image.open(os.path.join(core.HERE, 'icon.png')))
+            root.iconphoto(True, self._icon)
         except Exception: pass
         self.cv = tk.Canvas(root, width=W, height=H, highlightthickness=0, background='#1b2024')
         self.cv.pack()
@@ -62,7 +65,7 @@ class App:
 
     # ---------- skin ----------
     def make_skin(self):
-        ui.clear_caches(); self.rows = {}
+        ui.clear_caches(); self.rows = {}; self._list = None; self._frame = None
         self.skin = ui.Skin(self.skin_dir, RU)
         bg = ui.scene(W, H)
         p = ui.Painter(self.skin, bg)
@@ -241,13 +244,35 @@ class App:
             lines += p.wrap(s, 12, ROW_W) or ['']
         for s in lines[-5:]:
             p.text(s, L, ly, 12, ui.GREY, shadow=False); ly += 16
-        self.photo = ImageTk.PhotoImage(im.convert('RGB'))
+        self.show(im.convert('RGB'))
+
+    def show(self, frame):
+        """Sends Tk only the part of the window that changed (a hover changes one button)."""
+        prev = getattr(self, '_frame', None)
+        self._frame = frame
+        if prev is not None and getattr(self, 'photo', None) is not None:
+            box = ImageChops.difference(prev, frame).getbbox()
+            if box is None: return
+            if (box[2] - box[0]) * (box[3] - box[1]) < W * H // 2:
+                part = ImageTk.PhotoImage(frame.crop(box))
+                self.root.tk.call(str(self.photo), 'copy', str(part), '-to', box[0], box[1])
+                return
+        self.photo = ImageTk.PhotoImage(frame)
         self.cv.itemconfigure(self.img_id, image=self.photo)
 
     def draw_list(self, p):
+        hov = self.hover if (self.hover or '').startswith('row:') else None
+        key = (self.scroll, frozenset(self.checked), hov, id(self.st), RU, self.game, len(self.mods()), self.busy)
+        c = getattr(self, '_list', None)
+        if c and c[0] == key:
+            p.im.alpha_composite(c[1], (L, LIST_Y)); self.areas += c[2]; return
+        n0 = len(self.areas)
+        sub = self._draw_list(p)
+        if sub is not None: self._list = (key, sub, self.areas[n0:])
+    def _draw_list(self, p):
         mods = self.mods()
         if not mods:
-            p.text(T('Загружаю…', 'Loading…'), W / 2, LIST_Y + LIST_H / 2, 15, ui.DIM, al='c'); return
+            p.text(T('Загружаю…', 'Loading…'), W / 2, LIST_Y + LIST_H / 2, 15, ui.DIM, al='c'); return None
         lay = []; total = 0
         for m in mods:
             d, e, h = self.row_layout(p, m); lay.append((m, d, e, h, total)); total += h
@@ -285,6 +310,7 @@ class App:
             bh = max(30, LIST_H * LIST_H / total); by = (LIST_H - bh) * self.scroll / (total - LIST_H)
             sp.rect(ROW_W - 5, by, 3, bh, (1, 1, 1, 0.35))
         p.im.alpha_composite(sub, (L, LIST_Y))
+        return sub
 
     # ---------- input ----------
     def hit(self, x, y):
@@ -406,6 +432,10 @@ class App:
 
 def main():
     tld_assets.RU = RU
+    try:   # own taskbar entry, so Windows shows our icon and not python's
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('Seagull.TLDModsLauncher')
+    except Exception: pass
     root = tk.Tk()
     App(root)
     root.mainloop()
