@@ -59,6 +59,22 @@ The `SmokesAudioOn` plugin (source in `SmokesBySeagull/audioon`): the game switc
 plays its sounds through it. Before the game starts the plugin switches it on (one byte in `globalgamemanagers`; the original
 is kept next to it as `globalgamemanagers.smokes_bak`).
 
+### Библиотеки / Libraries
+
+В папке `Libraries` и в релизе / in `Libraries` and in the release:
+- `ComplexLogger.zip`: ComplexLogger 1.0.9, исправлен для игры 2.58+ и MelonLoader 0.7 (Seagull); оригинал The Illusion,
+  https://github.com/Arkhorse/Complex-Logger, MIT / fixed for game 2.58+ and MelonLoader 0.7; original by The Illusion, MIT.
+- `ModSettings.zip`: ModSettings 2.2.5 без изменений, авторы Digitalzombie и zeobviouslyfakeacc, MIT / unchanged, MIT.
+
+AfflictionComponent (https://github.com/TLD-Mods/AfflictionComponent) и ModData (https://github.com/dommrogers/ModData)
+берите у авторов; лаунчер скачивает их оттуда сам / get them from their authors; the launcher downloads them from there.
+
+## Лаунчер / Launcher
+
+`TLDModsLauncher.exe`: выберите моды галочками, он скачает их из релиза, поставит нужные библиотеки и MelonLoader и сам
+соберёт файлы из сюжета / tick the mods; it downloads them from the release, installs the libraries and MelonLoader it
+needs, and builds the story files itself.
+
 ## Установка / Install
 
 1. MelonLoader 0.7 в папке игры / MelonLoader 0.7 in the game folder.
