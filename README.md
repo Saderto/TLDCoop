@@ -47,6 +47,11 @@ original sources were lost): it builds and works the same, but has no comments a
 | `TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp` | `TLDAssets.exe` (есть в их архивах, запустить один раз / included in their archives, run it once) |
 | остальные / the rest | ничего / nothing |
 
+`TLDCompat258.zip` (папка `UserLibs`, код в `TLDTrainer/Compat`) нашим модам не нужен. Это прослойка для старых чужих модов
+(ComplexLogger, FoodPackByTKG, Personality), которые трейнер исправил под игру 2.58+.
+`TLDCompat258.zip` (`UserLibs`, source in `TLDTrainer/Compat`) is not needed by these mods. It is a shim for older third-party
+mods (ComplexLogger, FoodPackByTKG, Personality) patched by the trainer for game 2.58+.
+
 Плагин `SmokesAudioOn` (исходник в `SmokesBySeagull/audioon`): игра выключает встроенный звук Unity, а SmokesBySeagull играет
 свои звуки через него. Плагин перед запуском игры включает его (меняет один байт в `globalgamemanagers`, копию оригинала
 оставляет рядом как `globalgamemanagers.smokes_bak`).
