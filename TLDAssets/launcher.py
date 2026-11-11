@@ -1,6 +1,7 @@
 # Seagull's mods launcher: a window to choose, install, update and remove the mods.
 # Build: pyinstaller --onefile --windowed --name TLDModsLauncher --add-data "steps;steps" --add-data "own;own"
-#        --add-data "catalog.json;." --collect-all UnityPy launcher.py
+#        --add-data "catalog.json;." --collect-all UnityPy --collect-all fmod_toolkit --collect-all archspec launcher.py
+# (without fmod_toolkit and archspec UnityPy cannot decode textures inside the exe)
 import os, sys, threading, queue, tempfile, shutil, locale, subprocess, traceback, time
 import tkinter as tk
 from tkinter import ttk, filedialog

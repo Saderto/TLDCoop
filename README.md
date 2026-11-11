@@ -91,7 +91,7 @@ Mods: .NET 6 SDK, `dotnet build -c Release -p:RefsDir=<folder with the game asse
 needs the assemblies MelonLoader generates in your `MelonLoader/Il2CppAssemblies` and `MelonLoader/net6`; they are not included.
 
 TLDAssets: Python 3.13, `pip install UnityPy==1.25.4 Pillow==12.3.0 numpy==2.5.3`, `python tld_assets.py`;
-exe: PyInstaller 6 (`--onefile`, `--add-data steps;steps --add-data own;own --collect-all UnityPy`).
+exe: PyInstaller 6 (`--onefile`, `--add-data steps;steps --add-data own;own --collect-all UnityPy --collect-all fmod_toolkit --collect-all archspec`; без последних двух не декодируются текстуры / without the last two textures are not decoded). Лаунчер / launcher: то же плюс / the same plus `--windowed --add-data catalog.json;. launcher.py`.
 
 ## Лицензия / License
 
