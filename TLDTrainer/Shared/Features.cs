@@ -35,7 +35,7 @@ namespace TLDTrainer.Shared
     public static class Features
     {
         public const int Port = 47811;
-        public const string Version = "2.5.23";
+        public const string Version = "2.5.24";
 
         public const string CatPlayer = "Игрок";
         public const string CatInventory = "Инвентарь";

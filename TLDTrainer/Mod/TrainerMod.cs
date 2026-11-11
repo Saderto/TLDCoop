@@ -3,7 +3,7 @@ using Il2Cpp;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TLDTrainer.TrainerMod), "TLD Trainer", TLDTrainer.Shared.Features.Version, "IvanC")]
+[assembly: MelonInfo(typeof(TLDTrainer.TrainerMod), "TLD Trainer", TLDTrainer.Shared.Features.Version, "Seagull")]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: HarmonyDontPatchAll]
 

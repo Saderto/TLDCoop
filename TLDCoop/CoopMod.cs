@@ -4,7 +4,7 @@ using TLDCoop.Net;
 using TLDCoop.UI;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TLDCoop.CoopMod), "TLD Coop", TLDCoop.Version.Number, "IvanC")]
+[assembly: MelonInfo(typeof(TLDCoop.CoopMod), "TLD Coop", TLDCoop.Version.Number, "Seagull")]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: HarmonyDontPatchAll]
 
