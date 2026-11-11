@@ -24,6 +24,20 @@ namespace TLDTrainer.App
         private DateTime _nextGoneCheck;
 
         public bool Active { get; private set; }
+
+        // Трейнер запущен игрой в фоне: окно появляется только по клавише, а с выходом из игры трейнер закрывается.
+        public bool Background { get; private set; }
+
+        private bool _openWhenReady;
+
+        public void StartInBackground(bool openNow)
+        {
+            Background = true;
+            Active = true;
+            _wasPlaying = true;
+            _openWhenReady = openNow;
+            ModeChanged?.Invoke();
+        }
         public event Action ModeChanged;
 
         public Overlay(Window window, Ctx ctx)
@@ -46,6 +60,11 @@ namespace TLDTrainer.App
 
         private void Tick()
         {
+            if (_openWhenReady && Native.GameWindow() != IntPtr.Zero && Native.GameRect(out _))
+            {
+                _openWhenReady = false;
+                Open();
+            }
             bool gameFocused = Native.GameFocused();
             bool trainerFocused = Native.TrainerFocused();
             bool gameUp = Native.GameWindow() != IntPtr.Zero;
@@ -95,6 +114,11 @@ namespace TLDTrainer.App
                 if (!GameInstaller.IsGameRunning())
                 {
                     _wasPlaying = false;
+                    if (Background)
+                    {
+                        Application.Current.Shutdown();
+                        return;
+                    }
                     Restore();
                 }
             }
@@ -284,6 +308,11 @@ namespace TLDTrainer.App
         // Обычное окно, как без игры.
         public void Restore()
         {
+            if (Background)
+            {
+                Application.Current.Shutdown();
+                return;
+            }
             Active = false;
             _mini.Editing = false;
             _window.Topmost = false;

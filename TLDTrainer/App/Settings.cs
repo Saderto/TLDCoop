@@ -34,6 +34,9 @@ namespace TLDTrainer.App
         // Прятать окно трейнера, когда игра на экране (открывать клавишей). null = да.
         public bool? HideWhenPlaying { get; set; }
 
+        // Запускать трейнер вместе с игрой (в фоне, открывается клавишей). null = да.
+        public bool? StartWithGame { get; set; }
+
         // Где стоит окно трейнера поверх игры (левый верхний угол, пиксели экрана). null = по центру игры.
         public int? OverlayX { get; set; }
         public int? OverlayY { get; set; }

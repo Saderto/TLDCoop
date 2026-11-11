@@ -9,6 +9,7 @@ namespace TLDTrainer
     {
         private static KeyCode _overlay = KeyCode.Insert, _mini = KeyCode.Home;
         public static int OverlayPresses, MiniPresses;
+        private static float _nextLaunch;
 
         public static void Set(int overlayVk, int miniVk)
         {
@@ -19,7 +20,16 @@ namespace TLDTrainer
         public static void Tick()
         {
             if (!Application.isFocused) return;
-            if (_overlay != KeyCode.None && Input.GetKeyDown(_overlay)) OverlayPresses++;
+            if (_overlay != KeyCode.None && Input.GetKeyDown(_overlay))
+            {
+                OverlayPresses++;
+                // Окно трейнера не запущено — запускаем его, и оно сразу откроется поверх игры.
+                if (UnityEngine.Time.unscaledTime > _nextLaunch && !TrainerMod.AppRunning())
+                {
+                    _nextLaunch = UnityEngine.Time.unscaledTime + 10f;
+                    TrainerMod.StartApp(open: true);
+                }
+            }
             if (_mini != KeyCode.None && Input.GetKeyDown(_mini)) MiniPresses++;
         }
 

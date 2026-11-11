@@ -156,6 +156,15 @@ namespace TLDTrainer.App
                 _ctx.Settings.Save();
             };
             card.Children.Add(Row("Прятать окно трейнера, когда запущена игра", hide));
+            card.Children.Add(Gap(6));
+            var auto = new OffOnSwitch { Value = _ctx.Settings.StartWithGame ?? true };
+            auto.Changed += v =>
+            {
+                _ctx.Settings.StartWithGame = v;
+                _ctx.Settings.Save();
+                AutoStart.Update(_ctx.Settings);
+            };
+            card.Children.Add(Row("Запускать трейнер вместе с игрой (открывается клавишей)", auto));
             return card;
         }
 
@@ -216,6 +225,7 @@ namespace TLDTrainer.App
             if (dir != null)
             {
                 _ctx.Settings.GamePath = dir;
+                AutoStart.Update(_ctx.Settings);
                 _ctx.Settings.Save();
                 Log("Игра найдена: " + dir);
             }

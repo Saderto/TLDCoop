@@ -30,7 +30,7 @@ namespace TLDTrainer.App
         private bool _polling;
         private readonly Button _hide;
 
-        public MainWindow()
+        public MainWindow(bool background = false, bool openNow = false)
         {
             Title = "TLD Trainer";
             Width = 1180;
@@ -169,6 +169,8 @@ namespace TLDTrainer.App
             UpdateConnection();
 
             _ctx.Overlay = new Overlay(this, _ctx);
+            if (background) _ctx.Overlay.StartInBackground(openNow);
+            AutoStart.Update(_ctx.Settings);
             _ctx.Overlay.ModeChanged += () =>
             {
                 _hide.Visibility = _ctx.Overlay.Active ? Visibility.Visible : Visibility.Collapsed;

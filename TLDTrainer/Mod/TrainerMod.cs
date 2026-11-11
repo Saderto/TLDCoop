@@ -26,6 +26,66 @@ namespace TLDTrainer
             Hotkeys.Load();
             Server.Start();
             LoggerInstance.Msg("TLD Trainer загружен.");
+            StartApp(open: false);
+        }
+
+        // Трейнер (окно) запускается сам: при старте игры в фоне, а если его нет — по клавише Ins прямо в игре.
+        // Где он лежит: путь, который записал сам трейнер (Mods\TLDTrainer.app.txt), иначе Mods\TLDTrainer\TLDTrainer.exe.
+        private static string FindApp()
+        {
+            string mods = MelonLoader.Utils.MelonEnvironment.ModsDirectory;
+            string file = System.IO.Path.Combine(mods, "TLDTrainer.app.txt");
+            if (System.IO.File.Exists(file))
+            {
+                string exe = System.IO.File.ReadAllText(file).Trim();
+                if (System.IO.File.Exists(exe)) return exe;
+            }
+            string local = System.IO.Path.Combine(mods, "TLDTrainer", "TLDTrainer.exe");
+            return System.IO.File.Exists(local) ? local : null;
+        }
+
+        public static bool AppRunning()
+        {
+            foreach (var p in System.Diagnostics.Process.GetProcesses())
+            {
+                try
+                {
+                    if (p.ProcessName.StartsWith("TLDTrainer", StringComparison.OrdinalIgnoreCase)) return true;
+                }
+                catch
+                {
+                    // процесс уже закрылся
+                }
+                finally
+                {
+                    p.Dispose();
+                }
+            }
+            return false;
+        }
+
+        public static void StartApp(bool open)
+        {
+            try
+            {
+                if (AppRunning()) return;
+                string exe = FindApp();
+                if (exe == null)
+                {
+                    MelonLogger.Msg("Окно трейнера не найдено: положите TLDTrainer.exe в Mods\\TLDTrainer или откройте его один раз вручную.");
+                    return;
+                }
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe, open ? "--background --open" : "--background")
+                {
+                    UseShellExecute = true,
+                    WorkingDirectory = System.IO.Path.GetDirectoryName(exe),
+                });
+                MelonLogger.Msg(open ? "Трейнер запущен по клавише и сейчас откроется поверх игры." : "Трейнер запущен в фоне: окно открывается клавишей поверх игры.");
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Warning("Не удалось запустить трейнер: " + e.Message);
+            }
         }
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
