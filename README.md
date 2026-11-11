@@ -13,6 +13,11 @@ Mods for The Long Dark (MelonLoader 0.7, game 2.60). All free.
 | `SmokehouseBySeagull` | Коптильня для мяса и рыбы / Smokehouse for meat and fish |
 | `FeatsBySeagull` | Новые подвиги / New feats |
 | `TLDTrainer` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
+| `FoodPackBySeagull` | Новая еда и напитки с эффектами / New food and drinks with effects |
+| `FoodBalanceBySeagull` | Ползунки: сколько еды разных модов на картах и в контейнерах / Sliders: how much food of each food mod spawns on maps and in containers |
+| `ContainerLabelsBySeagull` | Подписи на контейнерах / Labels on containers |
+| `InventorySearchBySeagull` | Поиск в инвентаре / Inventory search |
+| `MarkersBySeagull` | Метки на тропах / Trail markers |
 | `TLDAssets` | Сборщик файлов из игры (см. ниже) / Builder of game-derived files (see below) |
 
 ## Файлы из игры / Game files
@@ -24,12 +29,37 @@ No part of the game is in this repository or in the release archives. The co-op 
 the crank lamp are made from WINTERMUTE episode 5 files; `TLDAssets.exe` builds them on the player's PC from the
 player's own copy of the game.
 
+Код FoodPack, FoodBalance, ContainerLabels, InventorySearch и Markers восстановлен из готовых dll (исходники были потеряны):
+он собирается и работает так же, но без комментариев, и часть имён в нём машинные.
+The code of FoodPack, FoodBalance, ContainerLabels, InventorySearch and Markers was recovered from the built dlls (the
+original sources were lost): it builds and works the same, but has no comments and some names are machine-generated.
+
+## Что нужно для работы / Requirements
+
+Всем модам нужен MelonLoader 0.7 и игра 2.60. Кроме того / All mods need MelonLoader 0.7 and game 2.60. In addition:
+
+| Мод / Mod | Нужно / Needs |
+|---|---|
+| `SmokesBySeagull` | AfflictionComponent; плагин `SmokesAudioOn.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOn.dll` plugin in `Plugins` (included in the archive) |
+| `FoodPackBySeagull` | AfflictionComponent, ModData. Если стоит AlcoholMod, напитки пьянят / With AlcoholMod installed, drinks make you drunk |
+| `FoodBalanceBySeagull` | ModSettings |
+| `ContainerLabelsBySeagull` | ModData |
+| `TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp` | `TLDAssets.exe` (есть в их архивах, запустить один раз / included in their archives, run it once) |
+| остальные / the rest | ничего / nothing |
+
+Плагин `SmokesAudioOn` (исходник в `SmokesBySeagull/audioon`): игра выключает встроенный звук Unity, а SmokesBySeagull играет
+свои звуки через него. Плагин перед запуском игры включает его (меняет один байт в `globalgamemanagers`, копию оригинала
+оставляет рядом как `globalgamemanagers.smokes_bak`).
+The `SmokesAudioOn` plugin (source in `SmokesBySeagull/audioon`): the game switches Unity's own audio off, and SmokesBySeagull
+plays its sounds through it. Before the game starts the plugin switches it on (one byte in `globalgamemanagers`; the original
+is kept next to it as `globalgamemanagers.smokes_bak`).
+
 ## Установка / Install
 
 1. MelonLoader 0.7 в папке игры / MelonLoader 0.7 in the game folder.
 2. Распакуйте нужные архивы из Releases в папку игры (в них папка `Mods`) / Extract the archives you want from Releases into the game folder (they contain `Mods`).
-3. Положите `TLDAssets.exe` в `Mods` и запустите его при закрытой игре. Он сам найдёт игру через Steam и соберёт файлы для установленных модов (около 30 с). Нужен скачанный эпизод 5 WINTERMUTE.
-   Put `TLDAssets.exe` into `Mods` and run it with the game closed. It finds the game through Steam and builds the files for the installed mods (about 30 s). WINTERMUTE episode 5 must be downloaded.
+3. Если ставили кооп, дробовик, стимулятор или фонарь, запустите `Mods\TLDAssets.exe` при закрытой игре. Он сам найдёт игру через Steam и соберёт файлы для установленных модов (около 30 с). Нужен скачанный эпизод 5 WINTERMUTE.
+   If you installed the co-op, shotgun, stim or crank lamp, run `Mods\TLDAssets.exe` with the game closed. It finds the game through Steam and builds the files for the installed mods (about 30 s). WINTERMUTE episode 5 must be downloaded.
 4. В коопе у обоих игроков должны стоять одни и те же моды / In co-op both players need the same mods.
 
 ## Сборка / Build
