@@ -254,19 +254,17 @@
   {
    "id": "TLDTrainer",
    "zip": "TLDTrainer.zip",
-   "version": "2.5.24",
-   "size": 66528638,
+   "version": "2.5.25",
+   "size": 66530369,
    "detect": "Mods/TLDTrainer.dll",
-   "strip": "TLDTrainer_2.5.24/",
-   "other_to": "TLDTrainer/",
-   "exe": "TLDTrainer/TLDTrainer.exe",
+   "exe": "Mods/TLDTrainer/TLDTrainer.exe",
    "title": {
     "ru": "Трейнер",
     "en": "Trainer"
    },
    "desc": {
-    "ru": "Окно трейнера поверх игры: читы, предметы, карта, телепорт, задания. Программа ставится в папку игры TLDTrainer.",
-    "en": "Trainer window over the game: cheats, items, map, teleport, quests. The program goes to the TLDTrainer folder of the game."
+    "ru": "Окно трейнера поверх игры: читы, предметы, карта, телепорт, задания. Открывается прямо в игре по Ins.",
+    "en": "Trainer window over the game: cheats, items, map, teleport, quests. Opens right in the game with Ins."
    }
   },
   {
