@@ -26,12 +26,15 @@ Download the launcher, tick the mods and press "Install"; it sets up MelonLoader
 
 ## Файлы из игры / Game files
 
-В репозитории и в архивах нет частей игры. Персонажи коопа, дробовик, стимулятор и фонарь с ручкой сделаны из файлов
-эпизода 5 WINTERMUTE. Эти файлы собирает у игрока программа `TLDAssets.exe` из его собственной копии игры.
+Копий файлов игры в репозитории и в архивах нет. Персонажи коопа, дробовик, стимулятор и фонарь с ручкой сделаны из
+файлов эпизода 5 WINTERMUTE: их собирает у игрока программа `TLDAssets.exe` из его собственной копии игры.
+Часть картинок FoodPack, копчёное мясо и рыба Smokehouse и фон значков Feats нарисованы поверх игровых текстур.
+Оформление лаунчера (рамки, кнопки, шрифты) он тоже берёт из установленной у игрока игры.
 
-No part of the game is in this repository or in the release archives. The co-op characters, the shotgun, the stim and
-the crank lamp are made from WINTERMUTE episode 5 files; `TLDAssets.exe` builds them on the player's PC from the
-player's own copy of the game.
+There are no copies of game files in this repository or in the archives. The co-op characters, the shotgun, the stim
+and the crank lamp are made from WINTERMUTE episode 5 files; `TLDAssets.exe` builds them on the player's PC from the
+player's own copy of the game. Some FoodPack images, the Smokehouse smoked meat and fish and the Feats badge background
+are painted over game textures. The launcher also takes its look (frames, buttons, fonts) from the player's installed game.
 
 Код FoodPack, FoodBalance, ContainerLabels, InventorySearch и Markers восстановлен из готовых dll (исходники были потеряны):
 он собирается и работает так же, но без комментариев, и часть имён в нём машинные.
@@ -82,9 +85,22 @@ AfflictionComponent (https://github.com/TLD-Mods/AfflictionComponent), ModData (
 соберёт файлы из сюжета / tick the mods; it downloads them from the release, installs the libraries and MelonLoader it
 needs, and builds the story files itself.
 
+- Обновления: при запуске он читает список модов `TLDAssets/catalog.json` отсюда и показывает «есть обновление».
+  Updates: on start it reads the mod list `TLDAssets/catalog.json` from here and shows "update available".
+- «Удалить» убирает только файлы, которые поставил сам лаунчер; сохранения и настройки остаются. Что он поставил,
+  записано в `Mods\SeagullMods.json`. / "Remove" deletes only the files the launcher installed (listed in
+  `Mods\SeagullMods.json`); saves and settings stay.
+- В сеть он ходит только на GitHub (этот репозиторий и страницы авторов библиотек). Картинки и шрифты для окна хранит в
+  `%LOCALAPPDATA%\SeagullMods\ui`. / It only connects to GitHub (this repository and the library authors' pages); the
+  window art cache is in `%LOCALAPPDATA%\SeagullMods\ui`.
+- Exe не подписан, поэтому Windows может показать «Система Windows защитила ваш компьютер»: нажмите «Подробнее» →
+  «Выполнить в любом случае». Код лаунчера лежит в `TLDAssets`. / The exe is unsigned, so Windows SmartScreen may warn:
+  press "More info" → "Run anyway". The launcher's source is in `TLDAssets`.
+
 ## Установка / Install
 
-1. MelonLoader 0.7 в папке игры / MelonLoader 0.7 in the game folder.
+1. MelonLoader 0.7.3 в папке игры (https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3, `MelonLoader.x64.zip`) /
+   MelonLoader 0.7.3 in the game folder.
 2. Распакуйте нужные архивы из Releases в папку игры (в них папка `Mods`) / Extract the archives you want from Releases into the game folder (they contain `Mods`).
 3. Если ставили кооп, дробовик, стимулятор или фонарь, запустите `Mods\TLDAssets.exe` при закрытой игре. Он сам найдёт игру через Steam и соберёт файлы для установленных модов (около 30 с). Нужен скачанный эпизод 5 WINTERMUTE.
    If you installed the co-op, shotgun, stim or crank lamp, run `Mods\TLDAssets.exe` with the game closed. It finds the game through Steam and builds the files for the installed mods (about 30 s). WINTERMUTE episode 5 must be downloaded.
