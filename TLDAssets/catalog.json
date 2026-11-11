@@ -1,0 +1,269 @@
+{
+ "repo": "Saderto/TLDCoop",
+ "tag": "v1.0",
+ "melonloader": {
+  "repo": "LavaGang/MelonLoader",
+  "tag": "v0.7.3",
+  "asset": "MelonLoader.x64.zip"
+ },
+ "libs": {
+  "AfflictionComponent": {
+   "repo": "TLD-Mods/AfflictionComponent",
+   "asset": "AfflictionComponent.dll",
+   "path": "Mods/AfflictionComponent.dll"
+  },
+  "ModData": {
+   "repo": "dommrogers/ModData",
+   "asset": "ModData.dll",
+   "path": "Mods/ModData.dll"
+  },
+  "ModSettings": {
+   "repo": "DigitalzombieTLD/ModSettings",
+   "asset": "ModSettings.dll",
+   "path": "Mods/ModSettings.dll",
+   "manual": true
+  },
+  "ComplexLogger": {
+   "repo": "",
+   "asset": "ComplexLogger.dll",
+   "path": "Mods/ComplexLogger.dll",
+   "manual": true
+  }
+ },
+ "mods": [
+  {
+   "id": "TLDCoop",
+   "zip": "TLDCoop.zip",
+   "version": "0.19.66",
+   "size": 35435012,
+   "detect": "Mods/TLDCoop.dll",
+   "assets": true,
+   "title": {
+    "ru": "Кооператив",
+    "en": "Co-op"
+   },
+   "desc": {
+    "ru": "Игра вдвоём через Steam: общий мир хоста, звери, предметы, костры, погода, время. У обоих игроков должны стоять одни и те же моды.",
+    "en": "Play together over Steam: the host's shared world, animals, items, fires, weather, time. Both players need the same mods."
+   }
+  },
+  {
+   "id": "TLDShotgun",
+   "zip": "TLDShotgun.zip",
+   "version": "0.1.34",
+   "size": 35683381,
+   "detect": "Mods/TLDShotgun.dll",
+   "assets": true,
+   "title": {
+    "ru": "Дробовик",
+    "en": "Shotgun"
+   },
+   "desc": {
+    "ru": "Дробовик из WINTERMUTE в режиме выживания, с патронами и навыком.",
+    "en": "The WINTERMUTE shotgun in survival, with shells and a skill."
+   }
+  },
+  {
+   "id": "TLDMilitaryStim",
+   "zip": "TLDMilitaryStim.zip",
+   "version": "0.1.5",
+   "size": 34975503,
+   "detect": "Mods/TLDMilitaryStim.dll",
+   "assets": true,
+   "title": {
+    "ru": "Военный стимулятор",
+    "en": "Military stim"
+   },
+   "desc": {
+    "ru": "Военный стимулятор из WINTERMUTE в режиме выживания.",
+    "en": "The WINTERMUTE military stim in survival."
+   }
+  },
+  {
+   "id": "TLDCrankLamp",
+   "zip": "TLDCrankLamp.zip",
+   "version": "0.4.1",
+   "size": 34992777,
+   "detect": "Mods/TLDCrankLamp.dll",
+   "assets": true,
+   "title": {
+    "ru": "Фонарь с ручкой",
+    "en": "Crank lamp"
+   },
+   "desc": {
+    "ru": "Фонарь с динамо-ручкой из WINTERMUTE: заряжается вручную, изнашивается.",
+    "en": "The WINTERMUTE crank lamp: charged by hand, wears out."
+   }
+  },
+  {
+   "id": "SmokesBySeagull",
+   "zip": "SmokesBySeagull.zip",
+   "version": "0.1.124",
+   "size": 143994909,
+   "detect": "Mods/SmokesBySeagull.dll",
+   "needs": [
+    "AfflictionComponent",
+    "ModData",
+    "ComplexLogger"
+   ],
+   "title": {
+    "ru": "Сигареты и трубки",
+    "en": "Smokes"
+   },
+   "desc": {
+    "ru": "Сигареты, сигары, трубки, табак и зажигалки со своими звуками и эффектами. Плагин звука SmokesAudioOn входит в архив.",
+    "en": "Cigarettes, cigars, pipes, tobacco and lighters with their own sounds and effects. The SmokesAudioOn sound plugin is included."
+   }
+  },
+  {
+   "id": "SmokehouseBySeagull",
+   "zip": "SmokehouseBySeagull.zip",
+   "version": "0.2.6",
+   "size": 11963783,
+   "detect": "Mods/SmokehouseBySeagull.dll",
+   "title": {
+    "ru": "Коптильня",
+    "en": "Smokehouse"
+   },
+   "desc": {
+    "ru": "Бочка-коптильня: копчёное мясо и рыба, соль, дрова.",
+    "en": "A barrel smokehouse: smoked meat and fish, salt, firewood."
+   }
+  },
+  {
+   "id": "FeatsBySeagull",
+   "zip": "FeatsBySeagull.zip",
+   "version": "0.2.1",
+   "size": 2893856,
+   "detect": "Mods/FeatsBySeagull.dll",
+   "title": {
+    "ru": "Новые подвиги",
+    "en": "New feats"
+   },
+   "desc": {
+    "ru": "Новые подвиги со своими значками.",
+    "en": "New feats with their own badges."
+   }
+  },
+  {
+   "id": "FoodPackBySeagull",
+   "zip": "FoodPackBySeagull.zip",
+   "version": "1.1.0",
+   "size": 374158136,
+   "detect": "Mods/FoodPackBySeagull.dll",
+   "needs": [
+    "AfflictionComponent",
+    "ModData",
+    "ComplexLogger"
+   ],
+   "title": {
+    "ru": "Еда и напитки",
+    "en": "Food and drinks"
+   },
+   "desc": {
+    "ru": "Новая еда, напитки и блюда с эффектами; лежат на картах и в контейнерах. Если стоит AlcoholMod, напитки пьянят.",
+    "en": "New food, drinks and dishes with effects, found on maps and in containers. With AlcoholMod installed, drinks make you drunk."
+   }
+  },
+  {
+   "id": "FoodBalanceBySeagull",
+   "zip": "FoodBalanceBySeagull.zip",
+   "version": "1.0.0",
+   "size": 16766,
+   "detect": "Mods/FoodBalanceBySeagull.dll",
+   "needs": [
+    "ModSettings"
+   ],
+   "title": {
+    "ru": "Баланс еды",
+    "en": "Food balance"
+   },
+   "desc": {
+    "ru": "Ползунки в настройках: сколько еды разных модов лежит на картах и в контейнерах.",
+    "en": "Settings sliders: how much food of each food mod spawns on maps and in containers."
+   }
+  },
+  {
+   "id": "ContainerLabelsBySeagull",
+   "zip": "ContainerLabelsBySeagull.zip",
+   "version": "0.6.0",
+   "size": 7812,
+   "detect": "Mods/ContainerLabelsBySeagull.dll",
+   "needs": [
+    "ModData"
+   ],
+   "title": {
+    "ru": "Подписи контейнеров",
+    "en": "Container labels"
+   },
+   "desc": {
+    "ru": "Свои подписи и цвета на шкафах и ящиках.",
+    "en": "Your own labels and colours on lockers and boxes."
+   }
+  },
+  {
+   "id": "InventorySearchBySeagull",
+   "zip": "InventorySearchBySeagull.zip",
+   "version": "0.6.0",
+   "size": 6100,
+   "detect": "Mods/InventorySearchBySeagull.dll",
+   "title": {
+    "ru": "Поиск в инвентаре",
+    "en": "Inventory search"
+   },
+   "desc": {
+    "ru": "Строка поиска в рюкзаке и в контейнерах.",
+    "en": "A search box in the backpack and in containers."
+   }
+  },
+  {
+   "id": "MarkersBySeagull",
+   "zip": "MarkersBySeagull.zip",
+   "version": "0.4.5",
+   "size": 109429,
+   "detect": "Mods/MarkersBySeagull.dll",
+   "title": {
+    "ru": "Вешки",
+    "en": "Trail markers"
+   },
+   "desc": {
+    "ru": "Вешки-метки: ставьте их на тропах, чтобы не заблудиться; можно показать на карте.",
+    "en": "Trail markers you place so you don't get lost; can be shown on the map."
+   }
+  },
+  {
+   "id": "TLDTrainer",
+   "zip": "TLDTrainer.zip",
+   "version": "2.5.24",
+   "size": 66528638,
+   "detect": "Mods/TLDTrainer.dll",
+   "strip": "TLDTrainer_2.5.24/",
+   "other_to": "TLDTrainer/",
+   "exe": "TLDTrainer/TLDTrainer.exe",
+   "title": {
+    "ru": "Трейнер",
+    "en": "Trainer"
+   },
+   "desc": {
+    "ru": "Окно трейнера поверх игры: читы, предметы, карта, телепорт, задания. Программа ставится в папку игры TLDTrainer.",
+    "en": "Trainer window over the game: cheats, items, map, teleport, quests. The program goes to the TLDTrainer folder of the game."
+   }
+  },
+  {
+   "id": "TLDCompat258",
+   "zip": "TLDCompat258.zip",
+   "version": "1.0.0",
+   "size": 1958,
+   "detect": "UserLibs/TLDCompat258.dll",
+   "extra": true,
+   "title": {
+    "ru": "Прослойка TLDCompat258",
+    "en": "TLDCompat258 shim"
+   },
+   "desc": {
+    "ru": "Прослойка для старых чужих модов, исправленных трейнером под игру 2.58+ (ComplexLogger 1.0.8, FoodPackByTKG, Personality). Нужна, если у вас исправленный ComplexLogger.",
+    "en": "Shim for older third-party mods patched by the trainer for game 2.58+ (ComplexLogger 1.0.8, FoodPackByTKG, Personality). Needed with the patched ComplexLogger."
+   }
+  }
+ ]
+}

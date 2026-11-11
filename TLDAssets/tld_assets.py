@@ -24,9 +24,11 @@ except Exception:
     pass
 
 LOG = None
+SINK = None          # the launcher sets this to show the log in its window
 def P(*a):
     s = ' '.join(str(x) for x in a)
-    print(s, flush=True)
+    if SINK: SINK(s)
+    else: print(s, flush=True)
     if LOG: LOG.write(s + '\n'); LOG.flush()
 
 RU = None
@@ -176,8 +178,13 @@ def main():
         try: game = input(T('Вставьте путь к папке игры (где tld.exe): ', 'Paste the game folder (with tld.exe): ')).strip().strip('"')
         except EOFError: game = ''
         if not is_game(game): print(T('Это не папка игры.', 'Not a game folder.')); return 2
+    return build(game, out=a.out, all_=a.all, keep_temp=a.keep_temp)
+
+def build(game, out=None, all_=False, keep_temp=False, only=None):
+    """Builds the game-derived files for the installed mods (or `only`, a list of mod names). 0 ok, 1 errors, 3 no ep5."""
+    global LOG
     mods_dir = os.path.join(game, 'Mods')
-    out_root = os.path.join(a.out, 'Mods') if a.out else mods_dir
+    out_root = os.path.join(out, 'Mods') if out else mods_dir
     os.makedirs(out_root, exist_ok=True)
     LOG = open(os.path.join(out_root, 'TLDAssets.log'), 'w', encoding='utf-8')
     P(f'TLDAssets {VERSION}  {time.strftime("%Y-%m-%d %H:%M:%S")}')
@@ -193,7 +200,8 @@ def main():
     ok = True
     try:
         for name, dll, fn, files, (ru, en) in MODS:
-            if not a.all and not os.path.isfile(os.path.join(mods_dir, dll)):
+            if only is not None and name not in only: continue
+            if not all_ and not os.path.isfile(os.path.join(mods_dir, dll)):
                 P(f'- {T(ru, en)}: ' + T(f'мода {dll} нет, пропускаю', f'{dll} not installed, skipped')); continue
             have = [os.path.join(out_root, f) for f in files]
             if all(os.path.isfile(p) and md5(p) == EXPECTED[f] for p, f in zip(have, files)):
@@ -217,10 +225,11 @@ def main():
                    T('ОТЛИЧАЕТСЯ от проверенного (другая версия игры?)', 'DIFFERS from the checked build (other game version?)')))
             P(T(f'  готово за {time.time() - t0:.0f} с', f'  done in {time.time() - t0:.0f} s'))
     finally:
-        if a.keep_temp: P('temp: ' + tmp)
+        if keep_temp: P('temp: ' + tmp)
         else: shutil.rmtree(tmp, ignore_errors=True)
     P(T('Готово.' if ok else 'Готово, но с ошибками (см. выше и Mods\\TLDAssets.log).',
         'Done.' if ok else 'Done with errors (see above and Mods\\TLDAssets.log).'))
+    if LOG: LOG.close(); LOG = None
     return 0 if ok else 1
 
 if __name__ == '__main__':

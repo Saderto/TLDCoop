@@ -40,17 +40,17 @@ original sources were lost): it builds and works the same, but has no comments a
 
 | Мод / Mod | Нужно / Needs |
 |---|---|
-| `SmokesBySeagull` | AfflictionComponent; плагин `SmokesAudioOn.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOn.dll` plugin in `Plugins` (included in the archive) |
-| `FoodPackBySeagull` | AfflictionComponent, ModData. Если стоит AlcoholMod, напитки пьянят / With AlcoholMod installed, drinks make you drunk |
+| `SmokesBySeagull` | AfflictionComponent (+ ComplexLogger и ModData, они нужны самому AfflictionComponent / required by AfflictionComponent itself); плагин `SmokesAudioOn.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOn.dll` plugin in `Plugins` (included in the archive) |
+| `FoodPackBySeagull` | AfflictionComponent, ModData, ComplexLogger. Если стоит AlcoholMod, напитки пьянят / With AlcoholMod installed, drinks make you drunk |
 | `FoodBalanceBySeagull` | ModSettings |
 | `ContainerLabelsBySeagull` | ModData |
 | `TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp` | `TLDAssets.exe` (есть в их архивах, запустить один раз / included in their archives, run it once) |
 | остальные / the rest | ничего / nothing |
 
-`TLDCompat258.zip` (папка `UserLibs`, код в `TLDTrainer/Compat`) нашим модам не нужен. Это прослойка для старых чужих модов
-(ComplexLogger, FoodPackByTKG, Personality), которые трейнер исправил под игру 2.58+.
-`TLDCompat258.zip` (`UserLibs`, source in `TLDTrainer/Compat`) is not needed by these mods. It is a shim for older third-party
-mods (ComplexLogger, FoodPackByTKG, Personality) patched by the trainer for game 2.58+.
+`TLDCompat258.zip` (папка `UserLibs`, код в `TLDTrainer/Compat`): прослойка для старых чужих модов (ComplexLogger, FoodPackByTKG,
+Personality), исправленных трейнером под игру 2.58+. Нашим модам напрямую не нужна, но нужна исправленному ComplexLogger 1.0.8.
+`TLDCompat258.zip` (`UserLibs`, source in `TLDTrainer/Compat`): a shim for older third-party mods (ComplexLogger, FoodPackByTKG,
+Personality) patched by the trainer for game 2.58+. Not used by these mods directly, but the patched ComplexLogger 1.0.8 needs it.
 
 Плагин `SmokesAudioOn` (исходник в `SmokesBySeagull/audioon`): игра выключает встроенный звук Unity, а SmokesBySeagull играет
 свои звуки через него. Плагин перед запуском игры включает его (меняет один байт в `globalgamemanagers`, копию оригинала

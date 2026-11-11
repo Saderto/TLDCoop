@@ -1,0 +1,258 @@
+# Seagull's mods launcher: logic without the window (the window is launcher.py).
+# Finds the game, reads the mod list, downloads the chosen mods from the GitHub release of Saderto/TLDCoop,
+# installs/removes them, fetches the libraries they need from their authors' own GitHub releases,
+# and builds the game-derived files (tld_assets.build) for mods that need them.
+import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, subprocess, hashlib, time
+
+import tld_assets
+
+HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+LAUNCHER_VERSION = '1.0.0'
+CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
+MANIFEST = 'Mods/SeagullMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
+UA = 'SeagullModsLauncher/' + LAUNCHER_VERSION
+
+def http(url, timeout=30):
+    req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': '*/*'})
+    return urllib.request.urlopen(req, timeout=timeout)
+
+# ---------------- catalog ----------------
+def load_catalog(log=lambda s: None):
+    """The list from GitHub (so new versions show up without a new launcher); the built-in copy if offline."""
+    try:
+        with http(CATALOG_URL, 15) as r:
+            cat = json.loads(r.read().decode('utf-8'))
+        cat['_source'] = 'online'
+        return cat
+    except Exception as e:
+        log('catalog online: %s' % e)
+    with open(os.path.join(HERE, 'catalog.json'), encoding='utf-8') as f:
+        cat = json.load(f)
+    cat['_source'] = 'builtin'
+    return cat
+
+# ---------------- game state ----------------
+def find_game():
+    return tld_assets.find_game(None)
+
+def melonloader_version(game):
+    """'0.7.3' etc., '' if installed but unknown, None if not installed."""
+    ml = os.path.join(game, 'MelonLoader')
+    if not os.path.isdir(ml) or not os.path.isfile(os.path.join(game, 'version.dll')):
+        return None
+    for p in (os.path.join(ml, 'net6', 'MelonLoader.dll'), os.path.join(ml, 'MelonLoader.dll')):
+        if os.path.isfile(p):
+            v = file_version(p)
+            if v: return v
+    return ''
+
+def file_version(path):
+    """ProductVersion from the PE version resource (Windows); '' elsewhere."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        ver = ctypes.WinDLL('version')
+        size = ver.GetFileVersionInfoSizeW(path, None)
+        if not size: return ''
+        buf = ctypes.create_string_buffer(size)
+        ver.GetFileVersionInfoW(path, 0, size, buf)
+        p = ctypes.c_void_p(); n = wintypes.UINT()
+        if ver.VerQueryValueW(buf, '\\', ctypes.byref(p), ctypes.byref(n)) and n.value:
+            ffi = ctypes.cast(p, ctypes.POINTER(ctypes.c_uint32 * 13)).contents
+            ms, ls = ffi[2], ffi[3]
+            return '%d.%d.%d' % (ms >> 16, ms & 0xFFFF, ls >> 16)
+    except Exception:
+        pass
+    return ''
+
+def game_running():
+    """True if tld.exe runs. Checks only this process name."""
+    if os.name != 'nt': return False
+    try:
+        out = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq tld.exe', '/FO', 'CSV', '/NH'], capture_output=True,
+                             text=True, creationflags=0x08000000).stdout
+        return 'tld.exe' in out.lower()
+    except Exception:
+        return False
+
+def read_manifest(game):
+    try:
+        with open(os.path.join(game, MANIFEST), encoding='utf-8') as f: return json.load(f)
+    except Exception:
+        return {}
+
+def write_manifest(game, m):
+    p = os.path.join(game, MANIFEST)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    tmp = p + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f: json.dump(m, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, p)
+
+def mod_state(game, mod, manifest):
+    """('none'|'installed'|'update'|'unknown', installed_version)."""
+    present = os.path.isfile(os.path.join(game, mod['detect']))
+    rec = manifest.get(mod['id'])
+    if not present: return 'none', None
+    if not rec: return 'unknown', None
+    return ('installed' if rec.get('version') == mod['version'] else 'update'), rec.get('version')
+
+def lib_present(game, lib):
+    return os.path.isfile(os.path.join(game, lib['path']))
+
+# ---------------- downloading ----------------
+def download(url, dest, progress=None, cancel=None):
+    """progress(done, total). Writes to dest.part then renames."""
+    part = dest + '.part'
+    with http(url, 60) as r:
+        total = int(r.headers.get('Content-Length') or 0)
+        done = 0
+        with open(part, 'wb') as f:
+            while True:
+                if cancel and cancel(): raise RuntimeError('cancelled')
+                b = r.read(1 << 18)
+                if not b: break
+                f.write(b); done += len(b)
+                if progress: progress(done, total)
+    os.replace(part, dest)
+    return dest
+
+def release_asset_url(repo, asset, tag=None):
+    """Direct download URL of a release asset: the given tag, else the latest release (asked through the API)."""
+    if tag:
+        return 'https://github.com/%s/releases/download/%s/%s' % (repo, tag, asset)
+    try:
+        with http('https://api.github.com/repos/%s/releases/latest' % repo, 20) as r:
+            rel = json.loads(r.read().decode('utf-8'))
+        for a in rel.get('assets', []):
+            if a.get('name') == asset: return a['browser_download_url']
+    except Exception:
+        pass
+    return 'https://github.com/%s/releases/latest/download/%s' % (repo, asset)
+
+def mod_urls(cat, mod):
+    """The tag named in the catalog first, then the latest release."""
+    tag = mod.get('tag') or cat.get('tag')
+    urls = []
+    if tag: urls.append(release_asset_url(cat['repo'], mod['zip'], tag))
+    urls.append('https://github.com/%s/releases/latest/download/%s' % (cat['repo'], mod['zip']))
+    return urls
+
+def download_any(urls, dest, progress=None, cancel=None, log=lambda s: None):
+    last = None
+    for u in urls:
+        try:
+            return download(u, dest, progress, cancel)
+        except RuntimeError:
+            raise
+        except Exception as e:
+            last = e; log('  %s: %s' % (u, e))
+    raise RuntimeError('download failed: %s' % last)
+
+# ---------------- installing ----------------
+SKIP_PARTS = ('saves/', 'logs/')
+
+def target_of(mod, name):
+    """Where a zip entry goes, relative to the game folder (forward slashes), or None to skip it."""
+    n = name.replace('\\', '/')
+    if n.endswith('/'): return None
+    strip = mod.get('strip')
+    if strip:
+        if not n.startswith(strip): return None
+        n = n[len(strip):]
+        if not (n.startswith('Mods/') or n.startswith('Plugins/') or n.startswith('UserLibs/')):
+            n = mod.get('other_to', '') + n
+    if n.startswith('/') or '..' in n.split('/'): return None
+    if any(s in n for s in SKIP_PARTS): return None
+    return n
+
+def install_zip(game, mod, zpath, manifest, log=lambda s: None):
+    """Extracts the mod; keeps a list of its files for removal. Old files of the mod that the new version
+    no longer has are removed (player data such as saves is never in the list)."""
+    files = []
+    with zipfile.ZipFile(zpath) as z:
+        for info in z.infolist():
+            rel = target_of(mod, info.filename)
+            if not rel: continue
+            dst = os.path.join(game, *rel.split('/'))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            tmp = dst + '.new'
+            with z.open(info) as src, open(tmp, 'wb') as out: shutil.copyfileobj(src, out, 1 << 20)
+            os.replace(tmp, dst)
+            files.append(rel)
+    old = manifest.get(mod['id'], {}).get('files', [])
+    for rel in set(old) - set(files):
+        p = os.path.join(game, *rel.split('/'))
+        try:
+            if os.path.isfile(p): os.remove(p)
+        except OSError: pass
+    manifest[mod['id']] = {'version': mod['version'], 'files': sorted(files), 'time': time.strftime('%Y-%m-%d %H:%M')}
+    log('  %d files' % len(files))
+    return files
+
+def uninstall(game, mod, manifest, log=lambda s: None):
+    """Removes the files the launcher installed (or, for a mod installed by hand, only its dll).
+    Saves and settings the mod wrote itself stay."""
+    rec = manifest.get(mod['id'])
+    files = list(rec['files'] if rec else [mod['detect']])
+    # files built from the game by TLDAssets for this mod
+    for name, dll, fn, gen, _ in tld_assets.MODS:
+        if name == mod['id']: files += ['Mods/' + f for f in gen]
+    # a file another installed mod also brought (TLDAssets.exe) stays
+    shared = {f for k, r in manifest.items() if k != mod['id'] for f in r.get('files', [])}
+    files = [f for f in files if f not in shared]
+    removed = 0
+    dirs = set()
+    for rel in files:
+        p = os.path.join(game, *rel.split('/'))
+        try:
+            if os.path.isfile(p): os.remove(p); removed += 1
+        except OSError as e:
+            log('  %s: %s' % (rel, e))
+        d = os.path.dirname(p)
+        while d and os.path.normpath(d) != os.path.normpath(game) and os.path.basename(d) not in ('Mods', 'Plugins', 'UserLibs'):
+            dirs.add(d); d = os.path.dirname(d)
+    for d in sorted(dirs, key=len, reverse=True):
+        try: os.rmdir(d)          # only if empty
+        except OSError: pass
+    manifest.pop(mod['id'], None)
+    log('  %d files removed' % removed)
+
+def install_lib(game, name, lib, tmpdir, log=lambda s: None, progress=None):
+    url = release_asset_url(lib['repo'], lib['asset'])
+    dst = os.path.join(game, *lib['path'].split('/'))
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    tmp = os.path.join(tmpdir, lib['asset'])
+    download(url, tmp, progress)
+    shutil.move(tmp, dst)
+    log('  %s -> %s' % (url, lib['path']))
+
+def install_melonloader(game, ml, tmpdir, log=lambda s: None, progress=None):
+    url = release_asset_url(ml['repo'], ml['asset'], ml.get('tag'))
+    z = os.path.join(tmpdir, ml['asset'])
+    download(url, z, progress)
+    with zipfile.ZipFile(z) as zf:
+        for info in zf.infolist():
+            n = info.filename.replace('\\', '/')
+            if n.endswith('/') or n.startswith('/') or '..' in n.split('/'): continue
+            dst = os.path.join(game, *n.split('/'))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with zf.open(info) as s, open(dst, 'wb') as o: shutil.copyfileobj(s, o)
+    log('  MelonLoader %s' % ml.get('tag', ''))
+
+def needed_libs(cat, mods, game):
+    """Libraries the chosen mods need that are not in the game yet: [(name, lib)]."""
+    out = []
+    for m in mods:
+        for n in m.get('needs', []):
+            lib = cat['libs'].get(n)
+            if lib and not lib_present(game, lib) and n not in [x[0] for x in out]:
+                out.append((n, lib))
+    return out
+
+def build_assets(game, mod_ids, log):
+    tld_assets.RU = True if tld_assets.RU is None else tld_assets.RU
+    tld_assets.SINK = log
+    try:
+        return tld_assets.build(game, only=list(mod_ids))
+    finally:
+        tld_assets.SINK = None
