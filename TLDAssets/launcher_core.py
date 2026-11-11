@@ -217,7 +217,13 @@ def uninstall(game, mod, manifest, log=lambda s: None):
     manifest.pop(mod['id'], None)
     log('  %d files removed' % removed)
 
-def install_lib(game, name, lib, tmpdir, log=lambda s: None, progress=None):
+def install_lib(game, name, lib, tmpdir, log=lambda s: None, progress=None, cat=None, manifest=None):
+    if lib.get('zip'):          # a library we ship ourselves (MIT, authors kept in Licenses/)
+        z = os.path.join(tmpdir, lib['zip'])
+        download_any(mod_urls(cat, lib), z, progress, log=log)
+        m = {'id': name, 'version': lib.get('note', ''), 'zip': lib['zip']}
+        install_zip(game, m, z, manifest if manifest is not None else {}, log)
+        return
     url = release_asset_url(lib['repo'], lib['asset'])
     dst = os.path.join(game, *lib['path'].split('/'))
     os.makedirs(os.path.dirname(dst), exist_ok=True)

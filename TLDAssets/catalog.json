@@ -18,16 +18,18 @@
    "path": "Mods/ModData.dll"
   },
   "ModSettings": {
-   "repo": "DigitalzombieTLD/ModSettings",
-   "asset": "ModSettings.dll",
+   "zip": "ModSettings.zip",
    "path": "Mods/ModSettings.dll",
-   "manual": true
+   "note": "2.2.5 Digitalzombie, zeobviouslyfakeacc (MIT)"
   },
   "ComplexLogger": {
-   "repo": "",
-   "asset": "ComplexLogger.dll",
+   "zip": "ComplexLogger.zip",
    "path": "Mods/ComplexLogger.dll",
-   "manual": true
+   "note": "1.0.9 fixed by Seagull, original The Illusion (MIT)"
+  },
+  "TLDCompat258": {
+   "zip": "TLDCompat258.zip",
+   "path": "UserLibs/TLDCompat258.dll"
   }
  },
  "mods": [
@@ -104,7 +106,8 @@
    "needs": [
     "AfflictionComponent",
     "ModData",
-    "ComplexLogger"
+    "ComplexLogger",
+    "ModSettings"
    ],
    "title": {
     "ru": "Сигареты и трубки",
@@ -154,7 +157,8 @@
    "needs": [
     "AfflictionComponent",
     "ModData",
-    "ComplexLogger"
+    "ComplexLogger",
+    "ModSettings"
    ],
    "title": {
     "ru": "Еда и напитки",

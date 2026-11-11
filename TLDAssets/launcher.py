@@ -252,7 +252,8 @@ class App:
                                'Library %s is needed: install it yourself (%s) into Mods.') % (name, where))
                     continue
                 self.say(T('Скачиваю библиотеку %s…', 'Downloading library %s…') % name)
-                try: core.install_lib(g, name, lib, tmp, self.say, self.progress)
+                try:
+                    core.install_lib(g, name, lib, tmp, self.say, self.progress, cat, self.manifest); core.write_manifest(g, self.manifest)
                 except Exception as e: self.say(T('  не вышло: ', '  failed: ') + str(e))
             built = []
             for m in mods:

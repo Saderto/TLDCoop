@@ -40,8 +40,8 @@ original sources were lost): it builds and works the same, but has no comments a
 
 | Мод / Mod | Нужно / Needs |
 |---|---|
-| `SmokesBySeagull` | AfflictionComponent (+ ComplexLogger и ModData, они нужны самому AfflictionComponent / required by AfflictionComponent itself); плагин `SmokesAudioOn.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOn.dll` plugin in `Plugins` (included in the archive) |
-| `FoodPackBySeagull` | AfflictionComponent, ModData, ComplexLogger. Если стоит AlcoholMod, напитки пьянят / With AlcoholMod installed, drinks make you drunk |
+| `SmokesBySeagull` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself); плагин `SmokesAudioOn.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOn.dll` plugin in `Plugins` (included in the archive) |
+| `FoodPackBySeagull` | AfflictionComponent, ModData, ComplexLogger, ModSettings. Если стоит AlcoholMod, напитки пьянят / With AlcoholMod installed, drinks make you drunk |
 | `FoodBalanceBySeagull` | ModSettings |
 | `ContainerLabelsBySeagull` | ModData |
 | `TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp` | `TLDAssets.exe` (есть в их архивах, запустить один раз / included in their archives, run it once) |
