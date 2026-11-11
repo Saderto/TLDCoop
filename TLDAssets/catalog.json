@@ -20,16 +20,19 @@
   "ModSettings": {
    "zip": "ModSettings.zip",
    "path": "Mods/ModSettings.dll",
-   "note": "2.2.5 Digitalzombie, zeobviouslyfakeacc (MIT)"
+   "note": "2.2.5 Digitalzombie, zeobviouslyfakeacc (MIT)",
+   "version": "2.2.5"
   },
   "ComplexLogger": {
    "zip": "ComplexLogger.zip",
    "path": "Mods/ComplexLogger.dll",
-   "note": "1.0.9 fixed by Seagull, original The Illusion (MIT)"
+   "note": "1.0.9 fixed by Seagull, original The Illusion (MIT)",
+   "version": "1.0.9"
   },
   "TLDCompat258": {
    "zip": "TLDCompat258.zip",
-   "path": "UserLibs/TLDCompat258.dll"
+   "path": "UserLibs/TLDCompat258.dll",
+   "version": "1.0.0"
   },
   "ModComponent": {
    "repo": "dommrogers/ModComponent",
@@ -39,7 +42,8 @@
   "AlcoholMod": {
    "zip": "AlcoholMod.zip",
    "path": "Mods/AlcoholMod.dll",
-   "note": "3.0.1 No3371, original ds5678 (MIT)"
+   "note": "3.0.1 No3371, original ds5678 (MIT)",
+   "version": "3.0.1"
   }
  },
  "mods": [

@@ -37,7 +37,7 @@ class App:
         self.root = root
         self.q = queue.Queue()
         self.busy = False
-        self.game = None; self.cat = None; self.manifest = {}
+        self.game = None; self.cat = None; self.manifest = {}; self.libupd = []
         self.checked = set(); self.scroll = 0; self.hover = None; self.frac = 0.0
         self.logs = []; self.areas = []; self.skin_dir = None
         self.st = None; self.rows = {}; self.pending = False
@@ -104,7 +104,9 @@ class App:
 
     def done(self):
         self.busy = False; self.frac = 0
-        if self.game: self.manifest = core.read_manifest(self.game)
+        if self.game:
+            self.manifest = core.read_manifest(self.game)
+            if self.cat: self.libupd = [u for u in self.libupd if core.lib_state(self.game, u[0], u[1], self.manifest) == 'update']
         self.st = None; self.render()
 
     # ---------- data ----------
@@ -119,6 +121,10 @@ class App:
                        'Game not found. Press "Other folder…" and choose the game folder (with tld.exe).'))
             return
         self.manifest = core.read_manifest(self.game)
+        self.libupd = core.lib_updates(self.cat, self.game, self.manifest)
+        if self.libupd:
+            self.say(T('Есть новые версии библиотек: %s. Нажмите «Установить / обновить».',
+                       'New library versions: %s. Press "Install / update".') % ', '.join('%s %s' % (n, new) for n, _, _, new in self.libupd))
         self.say(T('Модов в списке: %d. Отметьте нужные и нажмите «Установить».',
                    'Mods in the list: %d. Tick the ones you want and press "Install".') % len(self.cat['mods']))
         self.q.put(('call', lambda: None))
@@ -139,7 +145,13 @@ class App:
         d = os.path.normpath(d)
         if not tld_assets.is_game(d):
             self.say(T('Это не папка игры: ', 'Not a game folder: ') + d); self.render(); return
-        self.game = d; self.manifest = core.read_manifest(d); self.st = None
+        self.game = d; self.manifest = core.read_manifest(d); self.st = None; self.libupd = []
+        if self.cat:
+            def chk():
+                u = core.lib_updates(self.cat, d, core.read_manifest(d))
+                if u: self.q.put(('call', lambda: (setattr(self, 'libupd', u), self.say(T('Есть новые версии библиотек: %s. Нажмите «Установить / обновить».',
+                    'New library versions: %s. Press "Install / update".') % ', '.join('%s %s' % (n, new) for n, _, _, new in u)), self.render())))
+            threading.Thread(target=chk, daemon=True).start()
         if not self.skin_dir: threading.Thread(target=self.load_skin, daemon=True).start()
         self.render()
 
@@ -227,6 +239,8 @@ class App:
         ch = self.chosen()
         if ch:
             p.text(T('Отмечено: %d, %s', 'Checked: %d, %s') % (len(ch), size_txt(sum(m.get('size', 0) for m in ch))), L + 330, y, 13, ui.DIM)
+        elif self.libupd:
+            p.text(T('Есть обновления библиотек: %d', 'Library updates: %d') % len(self.libupd), L + 330, y, 13, ui.AMBER)
         # list
         self.draw_list(p)
         # actions
@@ -359,7 +373,7 @@ class App:
 
     def do_install(self):
         mods = self.chosen()
-        if not mods: self.say(T('Отметьте моды галочками.', 'Check the mods first.')); self.render(); return
+        if not mods and not self.libupd: self.say(T('Отметьте моды галочками.', 'Check the mods first.')); self.render(); return
         if not self.check_closed(): self.render(); return
         self.run(self.install, mods)
 
@@ -370,7 +384,7 @@ class App:
             if core.melonloader_version(g) is None:
                 self.say(T('Сначала ставлю MelonLoader…', 'Installing MelonLoader first…'))
                 core.install_melonloader(g, cat['melonloader'], tmp, self.say, self.progress)
-            for name, lib in core.needed_libs(cat, mods, g):
+            for name, lib in core.needed_libs(cat, mods, g, self.manifest):
                 if lib.get('manual'):
                     where = ('https://github.com/' + lib['repo']) if lib.get('repo') else T('из сборки модов, откуда вы его брали', 'from the mod pack you got it from')
                     self.say(T('Нужна библиотека %s: поставьте её сами (%s) в папку Mods.',

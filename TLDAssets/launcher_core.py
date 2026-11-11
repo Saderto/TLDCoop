@@ -2,12 +2,12 @@
 # Finds the game, reads the mod list, downloads the chosen mods from the GitHub release of Saderto/TLDCoop,
 # installs/removes them, fetches the libraries they need from their authors' own GitHub releases,
 # and builds the game-derived files (tld_assets.build) for mods that need them.
-import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, subprocess, hashlib, time
+import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, urllib.parse, subprocess, hashlib, time
 
 import tld_assets
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.0'
+LAUNCHER_VERSION = '1.0.1'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
 MANIFEST = 'Mods/SeagullMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
 UA = 'SeagullModsLauncher/' + LAUNCHER_VERSION
@@ -98,6 +98,72 @@ def mod_state(game, mod, manifest):
 
 def lib_present(game, lib):
     return os.path.isfile(os.path.join(game, lib['path']))
+
+_LATEST = {}
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k): return None
+
+def _tag_by_redirect(repo, asset):
+    """github.com/<repo>/releases/latest/download/<asset> answers with a redirect that names the tag (no API limit)."""
+    url = 'https://github.com/%s/releases/latest/download/%s' % (repo, asset)
+    req = urllib.request.Request(url, headers={'User-Agent': UA}, method='HEAD')
+    try:
+        urllib.request.build_opener(_NoRedirect).open(req, timeout=20)
+    except urllib.error.HTTPError as e:
+        loc = e.headers.get('Location') or ''
+        mark = '/releases/download/'
+        if e.code in (301, 302, 303, 307, 308) and mark in loc:
+            tag = loc.split(mark, 1)[1].split('/', 1)[0]
+            return {'tag': urllib.parse.unquote(tag), 'assets': {asset: loc}}
+    except Exception:
+        pass
+    return None
+
+def latest_release(repo, asset=None):
+    """{'tag':.., 'assets': {name: url}} of the author's latest GitHub release, None if GitHub can't be reached."""
+    if repo not in _LATEST:
+        rel = None
+        try:
+            with http('https://api.github.com/repos/%s/releases/latest' % repo, 20) as r:
+                j = json.loads(r.read().decode('utf-8'))
+            rel = {'tag': j.get('tag_name') or '',
+                   'assets': {a.get('name'): a.get('browser_download_url') for a in j.get('assets', [])}}
+        except Exception:
+            pass
+        if rel is None and asset: rel = _tag_by_redirect(repo, asset)
+        _LATEST[repo] = rel
+    return _LATEST[repo]
+
+def lib_version(lib):
+    """The version the launcher would install now: ours from the catalog, an author's = their latest release tag."""
+    if lib.get('zip'): return lib.get('version') or lib.get('note', '')
+    rel = latest_release(lib['repo'], lib.get('asset'))
+    return rel['tag'] if rel else None
+
+def mine(manifest, name, lib):
+    """The manifest record if the launcher put this library there (zip libs from launcher 1.0 have no 'lib' mark yet)."""
+    rec = manifest.get(name)
+    if rec and (rec.get('lib') or (lib.get('zip') and rec.get('zip') == lib['zip'])): return rec
+    return None
+
+def lib_state(game, name, lib, manifest):
+    """'none' | 'ok' | 'update' | 'hand' (put there by hand: the launcher leaves it alone)."""
+    if not lib_present(game, lib): return 'none'
+    rec = mine(manifest, name, lib)
+    if not rec: return 'hand'
+    v = lib_version(lib)
+    if v is None: return 'ok'                  # offline: can't tell
+    return 'ok' if rec.get('version') == v else 'update'
+
+def lib_updates(cat, game, manifest):
+    """Libraries the launcher installed earlier that have a newer version now: [(name, lib, old, new)]."""
+    out = []
+    for n, lib in cat.get('libs', {}).items():
+        if lib.get('manual'): continue
+        rec = mine(manifest, n, lib)
+        if rec and lib_state(game, n, lib, manifest) == 'update':
+            out.append((n, lib, rec.get('version'), lib_version(lib)))
+    return out
 
 # ---------------- downloading ----------------
 def download(url, dest, progress=None, cancel=None):
@@ -218,18 +284,23 @@ def uninstall(game, mod, manifest, log=lambda s: None):
     log('  %d files removed' % removed)
 
 def install_lib(game, name, lib, tmpdir, log=lambda s: None, progress=None, cat=None, manifest=None):
+    man = manifest if manifest is not None else {}
     if lib.get('zip'):          # a library we ship ourselves (MIT, authors kept in Licenses/)
         z = os.path.join(tmpdir, lib['zip'])
         download_any(mod_urls(cat, lib), z, progress, log=log)
-        m = {'id': name, 'version': lib.get('note', ''), 'zip': lib['zip']}
-        install_zip(game, m, z, manifest if manifest is not None else {}, log)
+        m = {'id': name, 'version': lib_version(lib), 'zip': lib['zip']}
+        install_zip(game, m, z, man, log)
+        man[name]['lib'] = True
         return
-    url = release_asset_url(lib['repo'], lib['asset'])
+    rel = latest_release(lib['repo'], lib.get('asset'))
+    url = (rel or {}).get('assets', {}).get(lib['asset']) or release_asset_url(lib['repo'], lib['asset'])
     dst = os.path.join(game, *lib['path'].split('/'))
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     tmp = os.path.join(tmpdir, lib['asset'])
     download(url, tmp, progress)
-    shutil.move(tmp, dst)
+    os.replace(tmp, dst) if os.path.splitdrive(tmp)[0] == os.path.splitdrive(dst)[0] else shutil.move(tmp, dst)
+    man[name] = {'version': rel['tag'] if rel else '', 'files': [lib['path']], 'lib': True,
+                 'time': time.strftime('%Y-%m-%d %H:%M')}
     log('  %s -> %s' % (url, lib['path']))
 
 def install_melonloader(game, ml, tmpdir, log=lambda s: None, progress=None):
@@ -245,9 +316,9 @@ def install_melonloader(game, ml, tmpdir, log=lambda s: None, progress=None):
             with zf.open(info) as s, open(dst, 'wb') as o: shutil.copyfileobj(s, o)
     log('  MelonLoader %s' % ml.get('tag', ''))
 
-def needed_libs(cat, mods, game):
-    """Libraries the chosen mods need that are not in the game yet: [(name, lib)]."""
-    out = []
+def needed_libs(cat, mods, game, manifest=None):
+    """Libraries the chosen mods need that are not in the game yet, plus updates of ones the launcher put there: [(name, lib)]."""
+    out = [(n, lib) for n, lib, _, _ in lib_updates(cat, game, manifest)] if manifest is not None else []
     for m in mods:
         for n in m.get('needs', []):
             lib = cat['libs'].get(n)
