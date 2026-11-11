@@ -1,13 +1,16 @@
-# Seagull's mods launcher: a window to choose, install, update and remove the mods.
+# Seagull's mods launcher: a window in the game's own style to choose, install, update and remove the mods.
+# The window's frames, buttons and fonts are read from the player's own game (game_ui.py); until then it draws plain shapes.
 # Build: pyinstaller --onefile --windowed --name TLDModsLauncher --add-data "steps;steps" --add-data "own;own"
 #        --add-data "catalog.json;." --collect-all UnityPy --collect-all fmod_toolkit --collect-all archspec launcher.py
 # (without fmod_toolkit and archspec UnityPy cannot decode textures inside the exe)
 import os, sys, threading, queue, tempfile, shutil, locale, subprocess, traceback, time
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import filedialog
+from PIL import Image, ImageTk
 
 import launcher_core as core
 import tld_assets
+import game_ui as ui
 
 def system_ru():
     try:
@@ -20,104 +23,80 @@ def system_ru():
 RU = system_ru()
 def T(ru, en): return ru if RU else en
 
-def mb(n): return ('%.1f' % (n / 1048576)) if n >= 1048576 else ('%.0f' % max(1, n / 1024)) + T(' КБ', ' KB')
+W, H = 1060, 780
+PX, PY, PW, PH = 30, 18, 1000, 744          # the window panel
+L, R = PX + 40, PX + PW - 40                # content edges
+LIST_Y, LIST_H = 236, 340                   # the mod list viewport
+ROW_W = R - L
+
+def size_txt(n):
+    return ('%.1f ' % (n / 1048576) + T('МБ', 'MB')) if n >= 1048576 else ('%d ' % max(1, n // 1024) + T('КБ', 'KB'))
 
 class App:
     def __init__(self, root):
         self.root = root
         self.q = queue.Queue()
         self.busy = False
-        self.game = None
-        self.cat = None
-        self.manifest = {}
-        self.vars = {}
+        self.game = None; self.cat = None; self.manifest = {}
+        self.checked = set(); self.scroll = 0; self.hover = None; self.frac = 0.0
+        self.logs = []; self.areas = []; self.skin_dir = None
         root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
-        root.geometry('900x740'); root.minsize(700, 560)
-        try: root.iconbitmap(default='')
-        except Exception: pass
-        st = ttk.Style()
-        try: st.theme_use('vista' if os.name == 'nt' else 'clam')
-        except Exception: pass
-        st.configure('Title.TLabel', font=('Segoe UI', 11, 'bold'))
-        st.configure('Small.TLabel', font=('Segoe UI', 9), foreground='#555')
-        st.configure('Ok.TLabel', font=('Segoe UI', 9, 'bold'), foreground='#1f7a36')
-        st.configure('Upd.TLabel', font=('Segoe UI', 9, 'bold'), foreground='#b26a00')
-        st.configure('No.TLabel', font=('Segoe UI', 9), foreground='#777')
-
-        top = ttk.Frame(root, padding=(12, 10, 12, 4)); top.pack(fill='x')
-        self.lbl_game = ttk.Label(top, text='…', wraplength=640); self.lbl_game.grid(row=0, column=0, sticky='w')
-        ttk.Button(top, text=T('Другая папка…', 'Other folder…'), command=self.pick_game).grid(row=0, column=1, padx=6)
-        self.btn_lang = ttk.Button(top, text='EN' if RU else 'RU', width=4, command=self.toggle_lang)
-        self.btn_lang.grid(row=0, column=2)
-        self.lbl_ml = ttk.Label(top, text=''); self.lbl_ml.grid(row=1, column=0, sticky='w', pady=(4, 0))
-        self.btn_ml = ttk.Button(top, text=T('Установить MelonLoader', 'Install MelonLoader'), command=self.do_ml)
-        top.columnconfigure(0, weight=1)
-
-        mid = ttk.Frame(root, padding=(12, 4)); mid.pack(fill='both', expand=True)
-        self.canvas = tk.Canvas(mid, highlightthickness=0, background='white')
-        sb = ttk.Scrollbar(mid, orient='vertical', command=self.canvas.yview)
-        self.list = tk.Frame(self.canvas, background='white')
-        self.list.bind('<Configure>', lambda e: self.canvas.configure(scrollregion=self.canvas.bbox('all')))
-        self.win = self.canvas.create_window((0, 0), window=self.list, anchor='nw')
-        self.canvas.bind('<Configure>', lambda e: self.canvas.itemconfigure(self.win, width=e.width))
-        self.canvas.configure(yscrollcommand=sb.set)
-        self.canvas.pack(side='left', fill='both', expand=True); sb.pack(side='right', fill='y')
-        self.canvas.bind_all('<MouseWheel>', lambda e: self.canvas.yview_scroll(int(-e.delta / 120), 'units'))
-
-        bar = ttk.Frame(root, padding=(12, 6)); bar.pack(fill='x')
-        self.btn_install = ttk.Button(bar, text=T('Установить / обновить отмеченные', 'Install / update checked'), command=self.do_install)
-        self.btn_remove = ttk.Button(bar, text=T('Удалить отмеченные', 'Remove checked'), command=self.do_remove)
-        self.btn_assets = ttk.Button(bar, text=T('Собрать файлы из сюжета заново', 'Rebuild story files'), command=self.do_assets)
-        self.btn_open = ttk.Button(bar, text=T('Папка Mods', 'Mods folder'), command=self.open_mods)
-        for i, b in enumerate((self.btn_install, self.btn_remove, self.btn_assets, self.btn_open)): b.grid(row=0, column=i, padx=(0, 6))
-        sel = ttk.Frame(root, padding=(12, 0)); sel.pack(fill='x', before=mid)
-        ttk.Button(sel, text=T('Отметить все', 'Check all'), command=lambda: self.check_all(True)).pack(side='left')
-        ttk.Button(sel, text=T('Снять все', 'Uncheck all'), command=lambda: self.check_all(False)).pack(side='left', padx=6)
-        self.lbl_sel = ttk.Label(sel, text='', style='Small.TLabel'); self.lbl_sel.pack(side='left', padx=8)
-
-        bot = ttk.Frame(root, padding=(12, 0, 12, 10)); bot.pack(fill='x')
-        self.prog = ttk.Progressbar(bot, mode='determinate'); self.prog.pack(fill='x')
-        self.log = tk.Text(bot, height=9, wrap='word', font=('Consolas', 9), state='disabled', background='#f7f7f5')
-        self.log.pack(fill='x', pady=(6, 0))
-
-        self.root.after(100, self.poll)
+        root.geometry('%dx%d' % (W, H)); root.resizable(False, False)
+        self.cv = tk.Canvas(root, width=W, height=H, highlightthickness=0, background='#1b2024')
+        self.cv.pack()
+        self.img_id = self.cv.create_image(0, 0, anchor='nw')
+        self.cv.bind('<Motion>', self.on_move)
+        self.cv.bind('<Leave>', lambda e: self.set_hover(None))
+        self.cv.bind('<Button-1>', self.on_click)
+        self.cv.bind('<MouseWheel>', lambda e: self.on_wheel(-1 if e.delta > 0 else 1))
+        self.cv.bind('<Button-4>', lambda e: self.on_wheel(-1))
+        self.cv.bind('<Button-5>', lambda e: self.on_wheel(1))
+        self.make_skin()
+        self.root.after(80, self.poll)
         self.run(self.load)
+
+    # ---------- skin ----------
+    def make_skin(self):
+        self.skin = ui.Skin(self.skin_dir, RU)
+        bg = ui.scene(W, H)
+        p = ui.Painter(self.skin, bg)
+        p.spr('vignetteFullscreen', W / 2, H / 2, W + 6, H + 4, (0, 0, 0, 0.6))
+        ui.window(p, PX, PY, PW, PH)
+        self.base = bg
+        self.render()
 
     # ---------- plumbing ----------
     def say(self, s): self.q.put(('log', s))
-    def progress(self, done, total): self.q.put(('prog', (done, total)))
+    def progress(self, done, total): self.q.put(('prog', done / total if total else 0))
     def poll(self):
+        dirty = False
         try:
             while True:
                 k, v = self.q.get_nowait()
                 if k == 'log':
-                    self.log.configure(state='normal'); self.log.insert('end', v + '\n'); self.log.see('end'); self.log.configure(state='disabled')
-                elif k == 'prog':
-                    d, t = v
-                    if t: self.prog.configure(mode='determinate', maximum=t, value=d)
+                    for ln in str(v).splitlines() or ['']: self.logs.append(ln)
+                    self.logs = self.logs[-200:]
+                elif k == 'prog': self.frac = v
                 elif k == 'call': v()
+                dirty = True
         except queue.Empty:
             pass
+        if dirty: self.render()
         self.root.after(80, self.poll)
 
     def run(self, fn, *a):
         if self.busy: return
-        self.busy = True; self.set_buttons()
+        self.busy = True; self.render()
         def w():
             try: fn(*a)
-            except Exception:
-                self.say(traceback.format_exc())
-            finally:
-                self.q.put(('call', self.done))
+            except Exception: self.say(traceback.format_exc())
+            finally: self.q.put(('call', self.done))
         threading.Thread(target=w, daemon=True).start()
 
     def done(self):
-        self.busy = False; self.prog.configure(value=0)
-        self.refresh(); self.set_buttons()
-
-    def set_buttons(self):
-        s = 'disabled' if self.busy or not self.game else 'normal'
-        for b in (self.btn_install, self.btn_remove, self.btn_assets, self.btn_open, self.btn_ml): b.configure(state=s)
+        self.busy = False; self.frac = 0
+        if self.game: self.manifest = core.read_manifest(self.game)
+        self.render()
 
     # ---------- data ----------
     def load(self):
@@ -125,100 +104,188 @@ class App:
         self.cat = core.load_catalog(self.say)
         if self.cat['_source'] != 'online':
             self.say(T('Нет связи с GitHub, показываю встроенный список.', 'No connection to GitHub, showing the built-in list.'))
-        if not self.game:
-            self.game = core.find_game()
+        if not self.game: self.game = core.find_game()
         if not self.game:
             self.say(T('Игра не найдена. Нажмите «Другая папка…» и выберите папку игры (где tld.exe).',
                        'Game not found. Press "Other folder…" and choose the game folder (with tld.exe).'))
+            return
+        self.manifest = core.read_manifest(self.game)
+        self.say(T('Модов в списке: %d. Отметьте нужные и нажмите «Установить».',
+                   'Mods in the list: %d. Tick the ones you want and press "Install".') % len(self.cat['mods']))
+        self.q.put(('call', lambda: None))
+        self.load_skin()
+
+    def load_skin(self):
+        try:
+            d = ui.extract(self.game, lambda s: None)
+        except Exception as e:
+            d = None; self.say('ui: %s' % e)
+        if d:
+            self.skin_dir = d
+            self.q.put(('call', self.make_skin))
 
     def pick_game(self):
         d = filedialog.askdirectory(title=T('Папка The Long Dark (где tld.exe)', 'The Long Dark folder (with tld.exe)'))
         if not d: return
         d = os.path.normpath(d)
         if not tld_assets.is_game(d):
-            self.say(T('Это не папка игры: ', 'Not a game folder: ') + d); return
-        self.game = d; self.refresh(); self.set_buttons()
+            self.say(T('Это не папка игры: ', 'Not a game folder: ') + d); self.render(); return
+        self.game = d; self.manifest = core.read_manifest(d)
+        if not self.skin_dir: threading.Thread(target=self.load_skin, daemon=True).start()
+        self.render()
 
     def toggle_lang(self):
         global RU
-        RU = not RU
-        tld_assets.RU = RU
-        for w in self.root.winfo_children(): w.destroy()
-        game, cat = self.game, self.cat
-        self.__init__(self.root)
-        self.game, self.cat = game, cat
+        RU = not RU; tld_assets.RU = RU
+        self.root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
+        self.make_skin()
 
-    def refresh(self):
-        g = self.game
-        if g:
-            self.lbl_game.configure(text=T('Игра: ', 'Game: ') + g)
-            self.manifest = core.read_manifest(g)
-            v = core.melonloader_version(g)
+    def mods(self):
+        return [m for m in (self.cat or {}).get('mods', []) if not m.get('hidden')]
+
+    # ---------- drawing ----------
+    def area(self, key, x, y, w, h, fn):
+        self.areas.append((key, x, y, w, h, fn))
+
+    def btn(self, p, key, label, cx, cy, w, h, fn, enabled=True, size=15):
+        st = 'd' if not enabled else ('h' if self.hover == key else 'n')
+        ui.button(p, label, cx, cy, w, h, st, size)
+        if enabled: self.area(key, cx - w / 2, cy - h / 2, w, h, fn)
+
+    def row_layout(self, p, m):
+        desc = p.wrap(m['desc']['ru' if RU else 'en'], 13, ROW_W - 60)
+        extra = []
+        if m.get('needs'): extra.append(T('Нужно: ', 'Needs: ') + ', '.join(m['needs']))
+        if m.get('assets'): extra.append(T('файлы из сюжета (эпизод 5) соберутся сами', 'story files (episode 5) are built automatically'))
+        h = 14 + 22 + len(desc) * 18 + (17 if extra else 0) + 10
+        return desc, '   ·   '.join(extra), h
+
+    def render(self):
+        im = self.base.copy()
+        p = ui.Painter(self.skin, im)
+        self.areas = []
+        en = not self.busy and bool(self.game)
+        ui.title(p, T('МОДЫ SEAGULL', "SEAGULL'S MODS"), W / 2, PY + 46)
+        p.text('v' + core.LAUNCHER_VERSION, R, PY + 40, 12, ui.TEAL, al='r')
+        # game and loader
+        y = PY + 104
+        p.text(T('Игра', 'Game'), L, y, 13, ui.TEAL)
+        g = self.game or T('не найдена', 'not found')
+        maxw = (R - 170 - 75 - 16) - (L + 130)
+        while p.tw(g, 15) > maxw and len(g) > 10: g = '…' + g[2:]
+        p.text(g, L + 130, y, 15, ui.WHITE if self.game else ui.AMBER)
+        self.btn(p, 'game', T('Другая папка…', 'Other folder…'), R - 170, y, 150, 30, self.pick_game, not self.busy, 13)
+        self.btn(p, 'lang', 'EN' if RU else 'RU', R - 30, y, 52, 30, self.toggle_lang, not self.busy, 13)
+        y += 36
+        p.text('MelonLoader', L, y, 13, ui.TEAL)
+        if self.game:
+            v = core.melonloader_version(self.game)
             if v is None:
-                self.lbl_ml.configure(text=T('MelonLoader не установлен: без него моды не работают.', 'MelonLoader is not installed: mods need it.'),
-                                      style='Upd.TLabel')
-                self.btn_ml.grid(row=1, column=1, padx=6, pady=(4, 0))
+                p.text(T('не установлен: без него моды не работают', 'not installed: mods need it'), L + 130, y, 15, ui.AMBER)
+                self.btn(p, 'ml', T('Установить', 'Install'), R - 100, y, 170, 30, self.do_ml, en, 13)
             else:
-                self.lbl_ml.configure(text='MelonLoader ' + (v or T('установлен', 'installed')), style='Ok.TLabel')
-                self.btn_ml.grid_remove()
-        else:
-            self.lbl_game.configure(text=T('Игра не найдена', 'Game not found'))
-        self.draw_list()
+                p.text(v or T('установлен', 'installed'), L + 130, y, 15, ui.GREEN)
+        ui.line(p, L, y + 26, ROW_W)
+        # toolbar
+        y = LIST_Y - 22
+        self.btn(p, 'all', T('Отметить все', 'Check all'), L + 75, y, 150, 28, lambda: self.check_all(True), self.cat is not None, 13)
+        self.btn(p, 'none', T('Снять все', 'Uncheck all'), L + 235, y, 150, 28, lambda: self.check_all(False), self.cat is not None, 13)
+        ch = self.chosen()
+        if ch:
+            p.text(T('Отмечено: %d, %s', 'Checked: %d, %s') % (len(ch), size_txt(sum(m.get('size', 0) for m in ch))), L + 330, y, 13, ui.DIM)
+        # list
+        self.draw_list(p)
+        # actions
+        y = LIST_Y + LIST_H + 34
+        ui.line(p, L, y - 20, ROW_W)
+        bw = (ROW_W - 30) / 4
+        acts = [('inst', T('Установить / обновить', 'Install / update'), self.do_install),
+                ('rem', T('Удалить отмеченные', 'Remove checked'), self.do_remove),
+                ('assets', T('Собрать файлы из сюжета', 'Rebuild story files'), self.do_assets),
+                ('open', T('Папка Mods', 'Mods folder'), self.open_mods)]
+        for i, (k, t, fn) in enumerate(acts):
+            self.btn(p, k, t, L + bw / 2 + i * (bw + 10), y + 6, bw, 36, fn, en and self.cat is not None, 14)
+        ui.progress(p, L, y + 36, ROW_W, self.frac if self.busy else 0)
+        # log
+        ly = y + 58
+        lines = []
+        for s in self.logs[-6:]:
+            lines += p.wrap(s, 12, ROW_W) or ['']
+        for s in lines[-5:]:
+            p.text(s, L, ly, 12, ui.GREY, shadow=False); ly += 16
+        self.photo = ImageTk.PhotoImage(im.convert('RGB'))
+        self.cv.itemconfigure(self.img_id, image=self.photo)
 
-    def draw_list(self):
-        for w in self.list.winfo_children(): w.destroy()
-        if not self.cat: return
-        old = {k: v.get() for k, v in self.vars.items()}
-        self.vars = {}
-        bg = 'white'
-        for i, m in enumerate(self.cat['mods']):
-            if m.get('hidden'): continue
+    def draw_list(self, p):
+        mods = self.mods()
+        if not mods:
+            p.text(T('Загружаю…', 'Loading…'), W / 2, LIST_Y + LIST_H / 2, 15, ui.DIM, al='c'); return
+        lay = []; total = 0
+        for m in mods:
+            d, e, h = self.row_layout(p, m); lay.append((m, d, e, h, total)); total += h
+        self.scroll = max(0, min(self.scroll, max(0, total - LIST_H)))
+        sub = Image.new('RGBA', (ROW_W, LIST_H))
+        sp = ui.Painter(self.skin, sub)
+        sp.spr('inv_slotBack', ROW_W / 2, LIST_H / 2, ROW_W, LIST_H, (0.17, 0.21, 0.21, 0.44), True,
+               fallback=lambda pp, cx, cy, w, h, c: pp.rect(0, 0, w, h, (0.1, 0.12, 0.12, 0.45)))
+        for m, desc, extra, h, top in lay:
+            y0 = top - self.scroll
+            if y0 + h < 0 or y0 > LIST_H: continue
+            key = 'row:' + m['id']
+            if self.hover == key: sp.rect(0, max(0, y0), ROW_W, h, (0.43, 0.51, 0.49, 0.14))
             st, iv = core.mod_state(self.game, m, self.manifest) if self.game else ('none', None)
-            row = tk.Frame(self.list, background=bg, padx=6, pady=6)
-            row.pack(fill='x')
-            if i: ttk.Separator(self.list).pack(fill='x', before=row)
-            var = tk.BooleanVar(value=old.get(m['id'], st == 'update'))
-            var.trace_add('write', lambda *a: self.update_sel())
-            self.vars[m['id']] = var
-            tk.Checkbutton(row, variable=var, background=bg, activebackground=bg).grid(row=0, column=0, rowspan=3, sticky='n')
+            ui.check(sp, 22, y0 + 24, m['id'] in self.checked)
             title = m['title']['ru' if RU else 'en']
-            tk.Label(row, text=title, font=('Segoe UI', 11, 'bold'), background=bg).grid(row=0, column=1, sticky='w')
-            txt, colr = {
-                'none': (T('не установлен', 'not installed'), '#777'),
-                'installed': (T('установлен ', 'installed ') + m['version'], '#1f7a36'),
-                'update': (T('есть обновление: ', 'update: ') + (iv or '?') + ' → ' + m['version'], '#b26a00'),
-                'unknown': (T('установлен (не через лаунчер), новая ', 'installed (not by the launcher), latest ') + m['version'], '#1f5fa8'),
+            tw = sp.text(title, 44, y0 + 24, 17, ui.WHITE)
+            txt, col = {
+                'none': (T('не установлен', 'not installed'), ui.DIM),
+                'installed': (T('установлен ', 'installed ') + m['version'], ui.GREEN),
+                'update': (T('есть обновление: ', 'update: ') + (iv or '?') + ' → ' + m['version'], ui.AMBER),
+                'unknown': (T('установлен не через лаунчер, новая ', 'installed by hand, latest ') + m['version'], ui.BLUE),
             }[st]
-            tk.Label(row, text=txt, font=('Segoe UI', 9, 'bold'), foreground=colr, background=bg).grid(row=0, column=2, sticky='w', padx=10)
-            tk.Label(row, text=mb(m.get('size', 0)) + (T(' МБ', ' MB') if m.get('size', 0) >= 1048576 else ''), font=('Segoe UI', 9),
-                     foreground='#777', background=bg).grid(row=0, column=3, sticky='e')
-            desc = m['desc']['ru' if RU else 'en']
-            tk.Label(row, text=desc, wraplength=700, justify='left', background=bg, font=('Segoe UI', 9)).grid(row=1, column=1, columnspan=3, sticky='w')
-            extra = []
-            if m.get('needs'): extra.append(T('Нужно: ', 'Needs: ') + ', '.join(m['needs']))
-            if m.get('assets'): extra.append(T('Файлы из сюжета (эпизод 5) соберутся сами', 'Story files (episode 5) are built automatically'))
-            if extra:
-                tk.Label(row, text='   ·   '.join(extra), background=bg, foreground='#555', font=('Segoe UI', 8)).grid(row=2, column=1, columnspan=3, sticky='w')
-            row.columnconfigure(1, weight=0); row.columnconfigure(3, weight=1)
-        self.update_sel()
+            sp.text(txt, 44 + tw + 14, y0 + 25, 13, col)
+            sp.text(size_txt(m.get('size', 0)), ROW_W - 14, y0 + 24, 13, ui.DIM, al='r')
+            yy = y0 + 46
+            for ln in desc:
+                sp.text(ln, 44, yy, 13, ui.GREY); yy += 18
+            if extra: sp.text(extra, 44, yy, 11, ui.TEAL)
+            ui.line(sp, 10, y0 + h - 1, ROW_W - 20, 0.35)
+            vy0, vy1 = max(0, y0), min(LIST_H, y0 + h)
+            if vy1 > vy0:
+                self.area(key, L, LIST_Y + vy0, ROW_W, vy1 - vy0, (lambda mid=m['id']: self.toggle(mid)))
+        if total > LIST_H:     # scroll bar
+            bh = max(30, LIST_H * LIST_H / total); by = (LIST_H - bh) * self.scroll / (total - LIST_H)
+            sp.rect(ROW_W - 5, by, 3, bh, (1, 1, 1, 0.35))
+        p.im.alpha_composite(sub, (L, LIST_Y))
 
+    # ---------- input ----------
+    def hit(self, x, y):
+        for k, ax, ay, aw, ah, fn in reversed(self.areas):
+            if ax <= x <= ax + aw and ay <= y <= ay + ah: return k, fn
+        return None, None
+    def set_hover(self, k):
+        if k != self.hover: self.hover = k; self.render()
+    def on_move(self, e):
+        k, _ = self.hit(e.x, e.y); self.set_hover(k)
+        self.cv.configure(cursor='hand2' if k else '')
+    def on_click(self, e):
+        k, fn = self.hit(e.x, e.y)
+        if fn: fn()
+    def on_wheel(self, d):
+        self.scroll += d * 60; self.render()
+    def toggle(self, mid):
+        if self.busy: return
+        self.checked ^= {mid}; self.render()
     def check_all(self, on):
-        for m in self.cat['mods'] if self.cat else []:
-            if m['id'] in self.vars: self.vars[m['id']].set(on and not m.get('extra'))
-
+        if self.busy: return
+        self.checked = {m['id'] for m in self.mods() if not m.get('extra')} if on else set(); self.render()
     def chosen(self):
-        return [m for m in self.cat['mods'] if self.vars.get(m['id']) and self.vars[m['id']].get()]
-
-    def update_sel(self):
-        ch = self.chosen() if self.cat else []
-        size = sum(m.get('size', 0) for m in ch)
-        self.lbl_sel.configure(text=(T('Отмечено: %d, %s МБ', 'Checked: %d, %s MB') % (len(ch), '%.0f' % (size / 1048576))) if ch else '')
+        return [m for m in self.mods() if m['id'] in self.checked]
 
     # ---------- actions ----------
     def check_closed(self):
         if core.game_running():
-            self.say(T('Закройте игру и повторите.', 'Close the game and try again.'))
-            return False
+            self.say(T('Закройте игру и повторите.', 'Close the game and try again.')); return False
         return True
 
     def do_ml(self):
@@ -235,8 +302,8 @@ class App:
 
     def do_install(self):
         mods = self.chosen()
-        if not mods: self.say(T('Отметьте моды галочками.', 'Check the mods first.')); return
-        if not self.check_closed(): return
+        if not mods: self.say(T('Отметьте моды галочками.', 'Check the mods first.')); self.render(); return
+        if not self.check_closed(): self.render(); return
         self.run(self.install, mods)
 
     def install(self, mods):
@@ -259,7 +326,7 @@ class App:
             built = []
             for m in mods:
                 title = m['title']['ru' if RU else 'en']
-                self.say(T('Скачиваю «%s» (%s МБ)…', 'Downloading "%s" (%s MB)…') % (title, '%.1f' % (m.get('size', 0) / 1048576)))
+                self.say(T('Скачиваю «%s» (%s)…', 'Downloading "%s" (%s)…') % (title, size_txt(m.get('size', 0))))
                 z = os.path.join(tmp, m['zip'])
                 try:
                     core.download_any(core.mod_urls(cat, m), z, self.progress, log=self.say)
@@ -276,11 +343,11 @@ class App:
                     except OSError: pass
                 if m.get('assets'): built.append(m['id'])
             if built:
-                self.say(T('Собираю файлы из сюжета…', 'Building the story files…'))
-                self.q.put(('prog', (0, 0)))
+                self.say(T('Собираю файлы из сюжета (около минуты)…', 'Building the story files (about a minute)…'))
+                self.q.put(('prog', 0))
                 code = core.build_assets(g, built, self.say)
                 if code == 3:
-                    self.say(T('Чтобы эти моды заработали, скачайте эпизод 5 WINTERMUTE (запустите его один раз в игре) и нажмите «Собрать файлы из сюжета заново».',
+                    self.say(T('Чтобы эти моды заработали, скачайте эпизод 5 WINTERMUTE (запустите его один раз в игре) и нажмите «Собрать файлы из сюжета».',
                                'For these mods, download WINTERMUTE episode 5 (start it once in the game), then press "Rebuild story files".'))
             self.say(T('Готово.', 'Done.'))
         finally:
@@ -288,20 +355,20 @@ class App:
 
     def do_remove(self):
         mods = [m for m in self.chosen() if core.mod_state(self.game, m, self.manifest)[0] != 'none']
-        if not mods: self.say(T('Отметьте установленные моды, которые удалить.', 'Check the installed mods to remove.')); return
-        if not self.check_closed(): return
+        if not mods: self.say(T('Отметьте установленные моды, которые удалить.', 'Check the installed mods to remove.')); self.render(); return
+        if not self.check_closed(): self.render(); return
         def w():
             for m in mods:
                 self.say(T('Удаляю «%s»…', 'Removing "%s"…') % m['title']['ru' if RU else 'en'])
                 core.uninstall(self.game, m, self.manifest, self.say)
             core.write_manifest(self.game, self.manifest)
             self.say(T('Готово. Сохранения модов не тронуты.', 'Done. The mods\' saves were kept.'))
-            self.q.put(('call', lambda: [v.set(False) for v in self.vars.values()]))
+            self.q.put(('call', lambda: self.checked.clear()))
         self.run(w)
 
     def do_assets(self):
-        if not self.check_closed(): return
-        ids = [m['id'] for m in self.cat['mods'] if m.get('assets')]
+        if not self.check_closed(): self.render(); return
+        ids = [m['id'] for m in self.mods() if m.get('assets')]
         self.run(lambda: core.build_assets(self.game, ids, self.say))
 
     def open_mods(self):
