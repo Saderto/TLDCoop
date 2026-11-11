@@ -463,6 +463,9 @@ namespace TLDCoop.UI
             if (c == Game.Challenges.State.Done || c == Game.Challenges.State.Failed)
                 Widgets.Text(lx + 10f, ref cy, cw - 10f, (c == Game.Challenges.State.Done ? L.T("Выполнено: ", "Done: ") : L.T("Не удалось: ", "Failed: ")) + Game.Challenges.Title + " — " + Game.Challenges.Progress,
                     2f, 14f, c == Game.Challenges.State.Done ? Theme.Good : Theme.Warn);
+            if (host && c != Game.Challenges.State.Active)
+                Widgets.Text(lx + 10f, ref cy, cw - 10f, L.T("Общая цель на всех: выбери одну, ход видят все игроки в этом окне. Одновременно идёт только одно испытание.",
+                    "A shared goal for everyone: pick one, and every player sees the progress in this window. Only one challenge runs at a time."), 2f, 12f, Theme.Dim);
             if (host)
             {
                 if (c == Game.Challenges.State.Active)

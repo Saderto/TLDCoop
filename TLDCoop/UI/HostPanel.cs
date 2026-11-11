@@ -139,14 +139,16 @@ namespace TLDCoop.UI
             var r = Rules.Host;
             Header(lx, ref cy, cw, L.T("Правила", "Rules"));
 
-            r.Downed = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.Downed, L.T("Сначала «ранен»", "“Downed” first"));
+            r.Downed = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.Downed, L.T("Упавшего друга можно поднять", "A fallen friend can be revived"));
             cy += 24f;
-            Note(lx + 27f, ref cy, cw - 27f, L.T("Друг рядом может поднять за 15 секунд.", "A friend nearby can pick you up within 15 seconds."));
+            Note(lx + 27f, ref cy, cw - 27f, L.T("Если в локации есть другой игрок, ты не умираешь сразу, а падаешь раненым на 15 секунд. Друг подходит вплотную и держит клавишу метки (колёсико) 4 секунды, пока он лечит, время стоит. Не успел или рядом никого нет — обычная смерть.",
+                "If another player is in the location, you don't die at once: you go down for 15 seconds. A friend comes up close and holds the marker key (mouse wheel) for 4 seconds; the timer stops while they treat you. Too late, or nobody around, and it is a normal death."));
             if (r.Downed)
             {
-                r.ReviveItems = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.ReviveItems, L.T("Чтобы поднять, нужен лут по причине", "Picking up needs items for the cause"));
+                r.ReviveItems = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.ReviveItems, L.T("Чтобы поднять, нужны лекарства", "Reviving needs medical supplies"));
                 cy += 24f;
-                Note(lx + 27f, ref cy, cw - 27f, L.T("Бинты, лекарства и т. п. — смотря от чего ранен.", "Bandages, medicine and so on, depending on the cause."));
+                Note(lx + 27f, ref cy, cw - 27f, L.T("У того, кто поднимает, в рюкзаке должно быть нужное, смотря от чего упал друг: после падения два бинта, после зверя бинт и антисептик, от холода горячий чай или кофе. Что нужно, раненый видит у себя на экране. Вещи тратятся. Выключи, и поднять можно с пустыми руками.",
+                    "Whoever revives must carry what fits the cause: two bandages after a fall, a bandage and antiseptic after an animal, hot tea or coffee after cold. The downed player sees the list on screen. The items are used up. Turn it off to revive with empty hands."));
             }
             r.FriendlyFire = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.FriendlyFire, L.T("Урон по своим: пули и стрелы ранят друзей", "Friendly fire: bullets and arrows hurt friends"));
             cy += 28f;
@@ -158,8 +160,8 @@ namespace TLDCoop.UI
             Note(lx + 27f, ref cy, cw - 27f, L.T("Зарисовал местность углём — она открылась на карте у всех.", "Map an area with charcoal and it opens on everyone's map."));
             r.QuestWait = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.QuestWait, L.T("Задания вместе", "Quests together"));
             cy += 24f;
-            Note(lx + 27f, ref cy, cw - 27f, L.T("Пункт задания у ушедшего вперёд не закроется, пока его не сделают остальные.",
-                "A quest step does not close for whoever is ahead until the others finish it too."));
+            Note(lx + 27f, ref cy, cw - 27f, L.T("Сюжет идёт в одном темпе: если ты сделал пункт задания раньше друга, он у тебя закроется, только когда друг тоже его сделает. Задания, которых у друга ещё нет в журнале, не ждут.",
+                "The story moves at one pace: if you finish a quest step before your friend, it closes for you only once they finish it too. Quests your friend does not have in their journal yet do not wait."));
 
             Header(lx, ref cy, cw, L.T("Смерть: с чем игрок воскреснет", "Death: what the player comes back with"));
             r.Loot = (LootMode)Cycle(lx, ref cy, cw, L.T("Вещи умершего", "Player's items"), (int)r.Loot,
@@ -175,8 +177,8 @@ namespace TLDCoop.UI
             Header(lx, ref cy, cw, L.T("Звери", "Animals"));
             r.AnimalsSeeAll = Widgets.Toggle(new Rect(lx, cy, cw, 24f), r.AnimalsSeeAll, L.T("Звери видят всех игроков", "Animals see every player"));
             cy += 24f;
-            Note(lx + 27f, ref cy, cw - 27f, L.T("Зверь идёт на ближайшего из вас и переезжает к другу только в момент броска. Выключи, если что-то дёргается: тогда как в 0.12.",
-                "An animal goes for the nearest of you and switches to a friend only when it lunges. Turn it off if something jitters: then it works as in 0.12."));
+            Note(lx + 27f, ref cy, cw - 27f, L.T("Зверь замечает, слышит и чует каждого из вас и идёт на того, кто ближе. Выключено — зверь реагирует только на игрока, который первым пришёл в локацию, а на остальных, пока тот рядом, может не обращать внимания. Выключи, если звери дёргаются или скачут.",
+                "An animal sees, hears and smells each of you and goes for whoever is closest. Off: an animal reacts only to the player who came to the location first and may ignore the others while that player is around. Turn it off if animals jitter or jump."));
             Header(lx, ref cy, cw, L.T("Звери: запас здоровья", "Animals: health"));
             var steps = new byte[] { 4, 5, 6, 8, 10, 12 };
             var names = new[] { "×1", L.T("×1,25", "×1.25"), L.T("×1,5", "×1.5"), "×2", L.T("×2,5", "×2.5"), "×3" };
