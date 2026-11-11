@@ -78,22 +78,26 @@ class Skin:
     """Atlas sprites + fonts; without the game files everything is drawn as plain shapes."""
     def __init__(self, d=None, ru=True):
         self.atlas = None; self.sp = {}
-        self.font_path = sysfont()
+        self.font_path = sysfont(); self.cyr_path = None   # the EN game font has no Cyrillic
         if d:
             try:
                 self.atlas = Image.open(os.path.join(d, 'atlas.png')).convert('RGBA')
                 self.sp = {s['name']: s for s in json.load(open(os.path.join(d, 'sprites.json')))}
                 f = os.path.join(d, 'ru.ttf' if ru else 'en.ttf')
                 if os.path.isfile(f): self.font_path = f
+                f = os.path.join(d, 'ru.ttf')
+                if not ru and os.path.isfile(f): self.cyr_path = f
             except Exception:
                 self.atlas = None; self.sp = {}
         self._fonts = {}; self._crops = {}
-    def font(self, size):
+    def font(self, size, t=''):
         size = max(6, int(size))
-        if size not in self._fonts:
-            try: self._fonts[size] = ImageFont.truetype(self.font_path, size) if self.font_path else ImageFont.load_default()
-            except Exception: self._fonts[size] = ImageFont.load_default()
-        return self._fonts[size]
+        path = self.cyr_path if self.cyr_path and any('\u0400' <= ch <= '\u04ff' for ch in t) else self.font_path
+        k = (size, path)
+        if k not in self._fonts:
+            try: self._fonts[k] = ImageFont.truetype(path, size) if path else ImageFont.load_default()
+            except Exception: self._fonts[k] = ImageFont.load_default()
+        return self._fonts[k]
     def has(self, n): return self.atlas is not None and n in self.sp
     def crop(self, n):
         if n not in self._crops:
@@ -163,7 +167,7 @@ class Painter:
         k = (t, size)
         if k not in _TW:
             if len(_TW) > 5000: _TW.clear()
-            b = self.s.font(size).getbbox(t); _TW[k] = b[2] - b[0]
+            b = self.s.font(size, t).getbbox(t); _TW[k] = b[2] - b[0]
         return _TW[k]
     def text(self, t, x, y, size, c=(1, 1, 1, 1), al='l', shadow=True):
         """y is the vertical centre of the line."""
@@ -174,7 +178,7 @@ class Painter:
         k = (t, size, tuple(c), shadow)
         lay = _TXT.get(k)
         if lay is None:
-            f = self.s.font(size); b = f.getbbox(t)
+            f = self.s.font(size, t); b = f.getbbox(t)
             lay = Image.new('RGBA', (max(1, b[2] + 4), max(1, b[3] + 4)))
             d = ImageDraw.Draw(lay)
             if shadow: d.text((2, 2), t, font=f, fill=(0, 0, 0, int(140 * c[3])))

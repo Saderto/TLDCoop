@@ -147,6 +147,9 @@ class App:
         global RU
         RU = not RU; tld_assets.RU = RU
         self.root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
+        if not self.busy and self.cat:      # the status lines in the new language
+            self.logs = [T('Модов в списке: %d. Отметьте нужные и нажмите «Установить».',
+                           'Mods in the list: %d. Tick the ones you want and press "Install".') % len(self.cat['mods'])]
         self.make_skin()
 
     def mods(self):
