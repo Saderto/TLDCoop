@@ -67,7 +67,7 @@ namespace TLDCoop.Game
             _inStruggle = false;
             try { var st = GameManager.GetPlayerStruggleComponent(); _inStruggle = st != null && (st.m_Active || st.InStruggle()); } catch { }
             MelonLogger.Msg($"[смерть] {why}, место {_deathScene} {_deathPos}" + (_inStruggle ? " (в схватке)" : ""));
-            if (_rules.Downed && FriendHere()) { EnterDowned(); return true; }
+            // «Ранен — друг поднимет» убрано по просьбе (0.19.67): сразу экран смерти.
             EnterChoosing();
             return true;
         }
