@@ -674,8 +674,15 @@ def jar():
             P.append((r * math.cos(a), r * math.sin(a), z)); UV.append((j / (ribs * 2), .58 + .34 * i))
     lid.merge(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False))
     lid.merge(two_sided(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .54))))
-    lid.merge(two_sided(lathe(np.array([.0465, .0468, .045, .040, .030, .015]), np.array([.1775, .1790, .1805, .1815, .1822, .1826]), 72, lambda f, a: (.5 + .22 * (1 - f) * math.cos(a), .25 + .22 * (1 - f) * math.sin(a)))))
-    lid.merge(disc(.015, .1826, 72, True, (.5, .25), .22 * .015 / .0465 * 3))
+    # the top: flat discs built like the centre cap, which the game draws (a lathe-built dome came out see-through in the game, 0.2.1-0.2.2)
+    lid.merge(disc(.0468, .1790, 72, True, (.5, .25), .22))
+    lid.merge(disc(.040, .1800, 72, True, (.5, .25), .22 * .040 / .0468))
+    rimP = []; rimUV = []
+    for i, (rr, z) in enumerate(((.0458, .1775), (.0468, .1790))):
+        for j in range(72):
+            a_ = 2 * math.pi * j / 72
+            rimP.append((rr * math.cos(a_), rr * math.sin(a_), z)); rimUV.append((j / 72, .93 + .03 * i))
+    lid.merge(surface(np.array(rimP), np.array(rimUV), 2, 72, True, flip=False))
     lid.merge(disc(.0458, .1615, 72, False, (.5, .25), .22))
     return glass, water, lid
 
