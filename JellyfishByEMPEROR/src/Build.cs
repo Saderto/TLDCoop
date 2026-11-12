@@ -81,47 +81,49 @@ public static partial class Items
     }
 }
 
-/// <summary>The owner (11-12): in the inspect view the jar stood right of the middle, close to the text: moved left along the camera's right.
-/// The game turns the item from where it stands, outside the methods patched here: a shift left in place was turned with it and added up
-/// (0.2.6, 0.2.7: the jar flew off to the left). So before each of the game's own steps the item is put back exactly where the game last had it,
-/// and only after the step is it moved left again.</summary>
+/// <summary>The owner (11-12): in the inspect view the jar stood right of the middle and, when turned, went off to the side and nearer/further.
+/// The game turns an item about its own point, and a jar's point is at its bottom: the jar swung round it. While a jar is looked at, everything
+/// it is made of is lowered by half its height, so it turns about its middle and stays in the middle of the view (0.2.6–0.2.9 moved the item
+/// itself, which the game's turning undid or added up).</summary>
 [HarmonyPatch]
-internal static class InspectShift
+internal static class InspectCenter
 {
-    static GearItem? shifted;
-    static Vector3 gamePos;
+    const float Half = .09f;
+    static GearItem? cur;
+    static readonly List<(Transform t, Vector3 lp)> moved = new();
 
-    static void Undo()
+    public static float Drop(GearItem g)
     {
-        try { if (shifted != null && shifted.transform != null) shifted.transform.position = gamePos; } catch { }
-        shifted = null;
+        try { return cur != null && g != null && cur.Pointer == g.Pointer ? -Half : 0f; } catch { return 0f; }
     }
 
-    static void Apply(PlayerManager pm)
+    static void Restore()
+    {
+        foreach (var (t, lp) in moved) try { if (t != null) t.localPosition = lp; } catch { }
+        moved.Clear();
+        cur = null;
+    }
+
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
+    static void Set(PlayerManager __instance)
     {
         try
         {
-            var g = pm.GearItemBeingInspected();
+            Restore();
+            var g = __instance.GearItemBeingInspected();
             if (g == null || !Defs.Is(g, out var d) || d.Kind == Kind.Aquarium) return;
-            var cam = GameManager.GetMainCamera();
-            if (cam == null) return;
-            gamePos = g.transform.position;
-            g.transform.position = gamePos + cam.transform.right * Tune.InspectLeft;
-            shifted = g;
+            var t = g.transform;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                var c = t.GetChild(i);
+                moved.Add((c, c.localPosition));
+                c.localPosition += new Vector3(0f, -Half, 0f);
+            }
+            cur = g;
         }
-        catch (Exception e) { Safe.Log("Inspect shift", e); }
+        catch (Exception e) { Safe.Log("Inspect centre", e); }
     }
 
-    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
-    static void SetBefore() => Undo();
-    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
-    static void SetAfter(PlayerManager __instance) => Apply(__instance);
-
-    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateInspectGear))]
-    static void UpdateBefore() => Undo();
-    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateInspectGear))]
-    static void UpdateAfter(PlayerManager __instance) => Apply(__instance);
-
     [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.ExitInspectGearMode))]
-    static void Exit() => Undo();
+    static void Exit() => Restore();
 }

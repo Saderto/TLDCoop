@@ -696,7 +696,8 @@ def jar():
             P.append((r * math.cos(a), r * math.sin(a), z)); UV.append((j / (ribs * 2), .58 + .34 * i))
     # two-sided: the game's material culls back faces and this side came out see-through in 0.2.3 (seen from the front, only the far inside)
     lid.merge(two_sided(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False)))
-    lid.merge(two_sided(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .54))))
+    # the rolled bottom edge, painted red like the rest (the owner, 11-12: it was a white ring)
+    lid.merge(two_sided(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .70))))
     # the top: flat discs built like the centre cap, which the game draws (a lathe-built dome came out see-through in the game, 0.2.1-0.2.2)
     lid.merge(disc(.0468, .1790, 72, True, (.5, .25), .22))
     lid.merge(disc(.040, .1800, 72, True, (.5, .25), .22 * .040 / .0468))
@@ -706,7 +707,10 @@ def jar():
             a_ = 2 * math.pi * j / 72
             rimP.append((rr * math.cos(a_), rr * math.sin(a_), z)); rimUV.append((j / 72, .93 + .03 * i))
     lid.merge(two_sided(surface(np.array(rimP), np.array(rimUV), 2, 72, True, flip=False)))
-    # no bottom disc: seen through the glass it read as a second lid plane (the owner, 11-12)
+    # a closed plate under the top, wider than the ribs' peaks: no slits at the joins seen from above (0.2.9)
+    lid.merge(two_sided(disc(.0470, .1778, 72, True, (.5, .25), .22)))
+    # the underside, seen from below through the glass: without it the lid was see-through from the bottom (0.2.6-0.2.9)
+    lid.merge(disc(.0458, .1612, 72, False, (.5, .25), .22))
     return glass, water, lid
 
 
