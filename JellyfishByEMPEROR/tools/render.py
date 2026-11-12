@@ -101,7 +101,7 @@ def put(ob, m, loc=(0, 0, 0), scale=1.0, rot=0.0):
 def jar_at(sp, col, x, y, n=0, glass_a=None):
     T = os.path.join(OUT, 'textures')
     put(mesh(f'g{n}', 'JarGlass'), mat_glass_tex(os.path.join(T, 'JarGlass.png'), 1.0), (x, y, 0))
-    put(mesh(f'w{n}', 'JarWater'), mat_glass_tex(os.path.join(T, 'JarWater.png'), .9, gloss=False), (x, y, 0))
+    if sp: put(mesh(f'w{n}', 'JarWater'), mat_glass_tex(os.path.join(T, 'JarWater.png'), .9, gloss=False), (x, y, 0))
     put(mesh(f'l{n}', 'JarLid'), mat_solid(os.path.join(T, 'JarLid.png'), .5, .15), (x, y, 0))
     if sp:
         k, z = FIT[sp]

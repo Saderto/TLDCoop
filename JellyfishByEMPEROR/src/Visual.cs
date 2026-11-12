@@ -82,8 +82,9 @@ public static class Visual
             }
             glass ??= See("JarGlass", 3003); water ??= See("JarWater", 3002);
             Part(t, "JF_Glass", "JarGlass", glass, layer);
-            Part(t, "JF_Water", "JarWater", water, layer);
+            // an empty jar is just glass; the water comes with the jellyfish
             if (def.Kind != Kind.Live || def.Species == null || def.Colour == null) return;
+            Part(t, "JF_Water", "JarWater", water, layer);
             var jr = Part(t, "JF_Jelly", "Jelly_" + def.Species.Id, Mat("Jelly_" + def.Species.Id + "_" + def.Colour.Id, 3000), layer);
             if (jr == null) return;
             jr.transform.localPosition = new Vector3(0f, def.Species.Y, 0f);
