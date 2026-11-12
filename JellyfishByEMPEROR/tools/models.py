@@ -679,10 +679,12 @@ def disc(r, z, n=48, up=True, uvc=(.5, .5), uvr=.5):
 
 def jar():
     # glass: two walls (outer and inner) so the edges read denser, like real glass seen edge-on; a thick bottom
-    prof = [(0, .0015), (.046, .0012), (.053, .004), (.0555, .012), (.0555, .135), (.0525, .148), (.0445, .156), (.0425, .158), (.0425, .1665)]
+    prof = [(0, .0015), (.046, .0012), (.053, .004), (.0555, .012), (.0555, .135), (.0525, .148), (.0450, .156), (.0450, .1665)]
     glass = lathe(np.array([p[0] for p in prof]), np.array([p[1] for p in prof]), 64, lambda f, a: (a / 6.283, f))
     inner = [(p[0] - .0022 if p[0] > .01 else p[0], p[1] + (.004 if p[1] < .01 else 0)) for p in prof]
     glass.merge(lathe(np.array([p[0] for p in inner]), np.array([p[1] for p in inner]), 64, lambda f, a: (a / 6.283, f), flip=True))
+    # the rim: the two walls joined at the top (the owner, 11-12: seen from below the glass doubled there, with a gap); the neck fills the lid
+    glass.merge(lathe(np.array([.0450, .0428]), np.array([.1665, .1665]), 64, lambda f, a: (a / 6.283, .99)))
     # sea water up to the shoulder; its surface has its own place on the texture (upper half)
     water = lathe(np.array([0, .0505, .0528, .0528]), np.array([.0058, .0058, .012, .128]), 48, lambda f, a: (a / 6.283, f * .5))
     water.merge(disc(.0528, .128, 48, True, (.5, .75), .24))
