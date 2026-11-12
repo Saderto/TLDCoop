@@ -120,6 +120,8 @@ GitHub records which commit and which run produced each file.
 2. Происхождение / provenance: `gh attestation verify TLDModsLauncher.exe --repo Saderto/TLDCoop` (GitHub CLI) — должно
    ответить, что файл собран в этом репозитории / must say the file was built in this repository.
 3. Антивирусы / antivirus: https://www.virustotal.com — загрузите файл или вставьте его SHA-256 / upload the file or paste its SHA-256.
+   Отчёт для лаунчера 1.0.7 / report for launcher 1.0.7:
+   https://www.virustotal.com/gui/file/7e3d96ea74e97acec20ca5a3b44159d593c6bee5277f16cc5937cef765e6d6c9
 4. Без лаунчера / without the launcher: всё ставится и вручную, см. «Установка» ниже / everything can be installed by hand, see "Install" below.
 
 ## Установка / Install
