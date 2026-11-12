@@ -11,7 +11,7 @@ FONT_RU, FONT_EN = 'Nazhdak-Regular', 'PiS - PiS Creatinin Pro'
 
 def cache_dir():
     base = os.environ.get('LOCALAPPDATA') or os.path.expanduser('~/.cache')
-    d = os.path.join(base, 'SeagullMods', 'ui'); os.makedirs(d, exist_ok=True); return d
+    d = os.path.join(base, 'EMPERORMods', 'ui'); os.makedirs(d, exist_ok=True); return d
 
 def _bundles_dir(game):
     return os.path.join(game, 'tld_Data', 'StreamingAssets', 'aa', 'StandaloneWindows64')

@@ -1,10 +1,12 @@
-# TLD Assets by Seagull: builds the game-derived files of the Seagull mods on the player's own PC, from the player's
+# TLD Assets by EMPEROR: builds the game-derived files of the EMPEROR mods on the player's own PC, from the player's
 # own copy of The Long Dark (WINTERMUTE episode 5 files). Nothing from the game is shipped with the mods.
 #
-#   TLDCoop          Mods/TLDCoop/characters.bin              player figures (ep5 characters + clips)
-#   TLDShotgun       Mods/TLDShotgun/tldshotgun.bundle        the shotgun, its ammo and hands
-#   TLDMilitaryStim  Mods/TLDMilitaryStim/tldmilitarystim.bundle
-#   TLDCrankLamp     Mods/TLDCrankLamp/tldcranklamp.bundle + audio/*.bnk
+#   CoopByEMPEROR          Mods/CoopByEMPEROR/characters.bin                       player figures (ep5 characters + clips)
+#   ShotgunByEMPEROR       Mods/ShotgunByEMPEROR/shotgunbyemperor.bundle           the shotgun, its ammo and hands
+#   MilitaryStimByEMPEROR  Mods/MilitaryStimByEMPEROR/militarystimbyemperor.bundle
+#   CrankLampByEMPEROR     Mods/CrankLampByEMPEROR/cranklampbyemperor.bundle + audio/*.bnk
+# (The mods were called TLDCoop, TLDShotgun, TLDMilitaryStim and TLDCrankLamp before 11.2026: those names stay as the
+#  launcher's ids, in MODS below, and inside the built files, so the results are byte-identical to the old ones.)
 #
 # Usage: TLDAssets.exe [--game "<The Long Dark folder>"] [--all] [--out <folder>] [--keep-temp]
 #   Without --game the folder is found next to the program, then through Steam.
@@ -16,7 +18,7 @@ HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 STEPS = os.path.join(HERE, 'steps')
 OWN = os.path.join(HERE, 'own')
 sys.path.insert(0, STEPS)
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 try:
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -37,14 +39,14 @@ def T(ru, en): return ru if RU else en
 # Known-good results (built from game 2.60 and checked in game). A different hash is not an error by itself:
 # after a game update the episode files may change, the result is then written and reported.
 EXPECTED = {
-    'TLDCoop/characters.bin': '012400562a2da92c465174d970ac7e1d',
-    'TLDShotgun/tldshotgun.bundle': 'daac572eb2df67229af7418d176f6250',
-    'TLDMilitaryStim/tldmilitarystim.bundle': 'd6cf257032ed32bfb744cb294e02dd4d',
-    'TLDCrankLamp/tldcranklamp.bundle': '222aa23cfd0590339c8c27e4ec85e9d6',
-    'TLDCrankLamp/audio/FlashlighCrankLamp.bnk': '6c5d3ea9aa2b423349234eb1800854db',
-    'TLDCrankLamp/audio/_StoryEvents.bnk': '0a7422023a74f4e67c99783a344ea957',
-    'TLDCrankLamp/audio/_StoryStructures.bnk': 'eb8c07791bfda6ae51abe5c433303245',
-    'TLDCrankLamp/audio/TLDCrankLamp_Events.bnk': '706db7409f9b58d7c95d0c8591e21672',
+    'CoopByEMPEROR/characters.bin': '012400562a2da92c465174d970ac7e1d',
+    'ShotgunByEMPEROR/shotgunbyemperor.bundle': 'daac572eb2df67229af7418d176f6250',
+    'MilitaryStimByEMPEROR/militarystimbyemperor.bundle': 'd6cf257032ed32bfb744cb294e02dd4d',
+    'CrankLampByEMPEROR/cranklampbyemperor.bundle': '222aa23cfd0590339c8c27e4ec85e9d6',
+    'CrankLampByEMPEROR/audio/FlashlighCrankLamp.bnk': '6c5d3ea9aa2b423349234eb1800854db',
+    'CrankLampByEMPEROR/audio/_StoryEvents.bnk': '0a7422023a74f4e67c99783a344ea957',
+    'CrankLampByEMPEROR/audio/_StoryStructures.bnk': 'eb8c07791bfda6ae51abe5c433303245',
+    'CrankLampByEMPEROR/audio/TLDCrankLamp_Events.bnk': '706db7409f9b58d7c95d0c8591e21672',
 }
 
 def md5(path):
@@ -108,7 +110,7 @@ def build_coop(g, tmp, out):
     # our own clips (crouch walk/idle/side, retargeted from Quaternius CC0 animations)
     import coop_clips
     data = coop_clips.append(open(b, 'rb').read(), open(os.path.join(OWN, 'coop_own_clips.bin'), 'rb').read())
-    open(os.path.join(out, 'TLDCoop', 'characters.bin'), 'wb').write(data)
+    open(os.path.join(out, 'CoopByEMPEROR', 'characters.bin'), 'wb').write(data)
 
 def bundles(g, names): return [os.path.join(g['ep5'], n) for n in names]
 
@@ -119,7 +121,7 @@ def build_shotgun(g, tmp, out):
                 {"CAB-71edd1c7bb1ddeb20c4ae08cfa2797c8": [-4090140187055288879, 6989890098493347211, -499929211162636386,
                                                          -1353090822767189807, 6596921083635724480, 3719040124481894599]}, ext, P)
     run_script('shotgun_build.py', env={'TLD_EP5': g['ep5'], 'TLD_SURV': g['surv'], 'TLD_EXT': ext,
-                                        'TLD_OUT': os.path.join(out, 'TLDShotgun', 'tldshotgun.bundle')})
+                                        'TLD_OUT': os.path.join(out, 'ShotgunByEMPEROR', 'shotgunbyemperor.bundle')})
 
 def build_syringe(g, tmp, out):
     import extract
@@ -127,7 +129,7 @@ def build_syringe(g, tmp, out):
     extract.run(bundles(g, ['06fe64a087041e406a76f4539374d751.bundle']),
                 {"CAB-71edd1c7bb1ddeb20c4ae08cfa2797c8": [8747020503677287537]}, ext, P)
     run_script('syringe_build.py', env={'TLD_EP5': g['ep5'], 'TLD_SURV': g['surv'], 'TLD_EXT': ext,
-                                        'TLD_OUT': os.path.join(out, 'TLDMilitaryStim', 'tldmilitarystim.bundle')})
+                                        'TLD_OUT': os.path.join(out, 'MilitaryStimByEMPEROR', 'militarystimbyemperor.bundle')})
 
 ARM_CLIPS = [959415812501684677, 1756922127720572571, -3401301520838556575]
 
@@ -147,8 +149,8 @@ def build_cranklamp(g, tmp, out):
             want.discard(o.path_id)
     if want: raise RuntimeError('arm clips not found: %s' % sorted(want))
     run_script('cranklamp_build.py', env={'TLD_EP5': g['ep5'], 'TLD_SURV': g['surv'], 'TLD_EXT': ext, 'TLD_ANIMS': anims,
-                                          'TLD_OUT': os.path.join(out, 'TLDCrankLamp', 'tldcranklamp.bundle')})
-    wb = g['banks']; ad = os.path.join(out, 'TLDCrankLamp', 'audio'); os.makedirs(ad, exist_ok=True)
+                                          'TLD_OUT': os.path.join(out, 'CrankLampByEMPEROR', 'cranklampbyemperor.bundle')})
+    wb = g['banks']; ad = os.path.join(out, 'CrankLampByEMPEROR', 'audio'); os.makedirs(ad, exist_ok=True)
     st, ev = os.path.join(wb, 'English(US)', '_StoryStructures.bnk'), os.path.join(wb, '_StoryEvents.bnk')
     shutil.copyfile(os.path.join(wb, 'FlashlighCrankLamp.bnk'), os.path.join(ad, 'FlashlighCrankLamp.bnk'))
     shutil.copyfile(ev, os.path.join(ad, '_StoryEvents.bnk'))
@@ -156,12 +158,13 @@ def build_cranklamp(g, tmp, out):
     open(os.path.join(ad, 'TLDCrankLamp_Events.bnk'), 'wb').write(crank_banks.events_bank(st, ev))
 
 MODS = [
-    ('TLDCoop', 'TLDCoop.dll', build_coop, ['TLDCoop/characters.bin'], ('персонажи для коопа', 'co-op player figures')),
-    ('TLDShotgun', 'TLDShotgun.dll', build_shotgun, ['TLDShotgun/tldshotgun.bundle'], ('дробовик', 'shotgun')),
-    ('TLDMilitaryStim', 'TLDMilitaryStim.dll', build_syringe, ['TLDMilitaryStim/tldmilitarystim.bundle'], ('военный стимулятор', 'military stim')),
-    ('TLDCrankLamp', 'TLDCrankLamp.dll', build_cranklamp,
-     ['TLDCrankLamp/tldcranklamp.bundle', 'TLDCrankLamp/audio/FlashlighCrankLamp.bnk', 'TLDCrankLamp/audio/_StoryEvents.bnk',
-      'TLDCrankLamp/audio/_StoryStructures.bnk', 'TLDCrankLamp/audio/TLDCrankLamp_Events.bnk'], ('фонарь с ручкой', 'crank lamp')),
+    # (launcher id = the mod's old name, dll, builder, files under Mods, title)
+    ('TLDCoop', 'CoopByEMPEROR.dll', build_coop, ['CoopByEMPEROR/characters.bin'], ('персонажи для коопа', 'co-op player figures')),
+    ('TLDShotgun', 'ShotgunByEMPEROR.dll', build_shotgun, ['ShotgunByEMPEROR/shotgunbyemperor.bundle'], ('дробовик', 'shotgun')),
+    ('TLDMilitaryStim', 'MilitaryStimByEMPEROR.dll', build_syringe, ['MilitaryStimByEMPEROR/militarystimbyemperor.bundle'], ('военный стимулятор', 'military stim')),
+    ('TLDCrankLamp', 'CrankLampByEMPEROR.dll', build_cranklamp,
+     ['CrankLampByEMPEROR/cranklampbyemperor.bundle', 'CrankLampByEMPEROR/audio/FlashlighCrankLamp.bnk', 'CrankLampByEMPEROR/audio/_StoryEvents.bnk',
+      'CrankLampByEMPEROR/audio/_StoryStructures.bnk', 'CrankLampByEMPEROR/audio/TLDCrankLamp_Events.bnk'], ('фонарь с ручкой', 'crank lamp')),
 ]
 
 def main():

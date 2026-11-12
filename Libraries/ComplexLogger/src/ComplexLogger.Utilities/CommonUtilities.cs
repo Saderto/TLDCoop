@@ -10,7 +10,7 @@ namespace ComplexLogger.Utilities;
 public class CommonUtilities
 {
 	// GearItem.LoadGearItemPrefab was removed from the game in 2.58: the prefab is loaded through Addressables instead
-	// (fix by Seagull; this used to come from the TLDCompat258 shim).
+	// (fix by EMPEROR; this used to come from the TLDCompat258 shim).
 	private static GearItem LoadGearItemPrefab(string name)
 	{
 		if (string.IsNullOrEmpty(name)) return null;

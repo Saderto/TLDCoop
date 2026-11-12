@@ -5,4 +5,4 @@
 dll взята из релиза автора 3.0.1 без изменений (md5 c9d35798…) / the dll is the author's 3.0.1 release, unchanged.
 
 Нужны / requires: ModComponent (https://github.com/dommrogers/ModComponent, MIT) и / and ModData.
-С ним напитки FoodPackBySeagull пьянят / with it, FoodPackBySeagull drinks make you drunk.
+С ним напитки FoodPackByEMPEROR пьянят / with it, FoodPackByEMPEROR drinks make you drunk.

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>TrainerByEMPEROR</AssemblyName>
+    <RootNamespace>TrainerByEMPEROR.App</RootNamespace>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Version>2.5.26</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Features.cs" Link="Shared\Features.cs" />
+    <!-- Встроенная часть трейнера: окно само кладёт её в папку Mods игры. -->
+    <EmbeddedResource Include="..\Mod\bin\Release\net6.0\TrainerByEMPEROR.dll" LogicalName="TrainerByEMPEROR.Mod.dll" />
+  </ItemGroup>
+
+</Project>

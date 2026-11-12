@@ -1,4 +1,4 @@
-# Builds TLDCoop characters.bin from the game's Episode 5 (WINTERMUTE) bundles.
+# Builds CoopByEMPEROR characters.bin from the game's Episode 5 (WINTERMUTE) bundles.
 # usage: python3 -I ep5pack.py <dir with bundles> <out file>
 import sys, struct, zlib, math, bisect
 import UnityPy

@@ -3,7 +3,7 @@
 Оригинал: ComplexLogger 1.0.8, автор The Illusion, https://github.com/Arkhorse/Complex-Logger (MIT).
 Original: ComplexLogger 1.0.8 by The Illusion, https://github.com/Arkhorse/Complex-Logger (MIT).
 
-Исправления Seagull для игры 2.58+ и MelonLoader 0.7 / Seagull's fixes for game 2.58+ and MelonLoader 0.7:
+Исправления EMPEROR для игры 2.58+ и MelonLoader 0.7 / EMPEROR's fixes for game 2.58+ and MelonLoader 0.7:
 - `GearItem.LoadGearItemPrefab` убрали из игры в 2.58; предмет теперь грузится через Addressables прямо в библиотеке
   (раньше для этого нужна была прослойка TLDCompat258) / removed from the game in 2.58; the prefab is now loaded through
   Addressables inside the library (the TLDCompat258 shim is no longer needed for it).

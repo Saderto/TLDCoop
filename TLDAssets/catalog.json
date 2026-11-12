@@ -27,8 +27,8 @@
   "ComplexLogger": {
    "zip": "ComplexLogger.zip",
    "path": "Mods/ComplexLogger.dll",
-   "note": "1.0.9 fixed by Seagull, original The Illusion (MIT)",
-   "version": "1.0.9"
+   "note": "1.0.10 fixed by EMPEROR, original The Illusion (MIT)",
+   "version": "1.0.10"
   },
   "TLDCompat258": {
    "zip": "TLDCompat258.zip",
@@ -50,10 +50,15 @@
  "mods": [
   {
    "id": "TLDCoop",
-   "zip": "TLDCoop.zip",
-   "version": "0.19.67",
-   "size": 35434668,
-   "detect": "Mods/TLDCoop.dll",
+   "zip": "CoopByEMPEROR.zip",
+   "version": "0.19.68",
+   "size": 0,
+   "detect": "Mods/CoopByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/TLDCoop.dll",
+    "dir": "TLDCoop",
+    "dir_to": "CoopByEMPEROR"
+   },
    "assets": true,
    "title": {
     "ru": "Кооператив",
@@ -66,10 +71,20 @@
   },
   {
    "id": "TLDShotgun",
-   "zip": "TLDShotgun.zip",
-   "version": "0.1.34",
-   "size": 35683381,
-   "detect": "Mods/TLDShotgun.dll",
+   "zip": "ShotgunByEMPEROR.zip",
+   "version": "0.1.35",
+   "size": 0,
+   "detect": "Mods/ShotgunByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/TLDShotgun.dll",
+    "dir": "TLDShotgun",
+    "dir_to": "ShotgunByEMPEROR",
+    "files": {
+     "tldshotgun.bundle": "shotgunbyemperor.bundle",
+     "places.txt": "",
+     "spots.txt": ""
+    }
+   },
    "assets": true,
    "title": {
     "ru": "Дробовик",
@@ -82,10 +97,18 @@
   },
   {
    "id": "TLDMilitaryStim",
-   "zip": "TLDMilitaryStim.zip",
-   "version": "0.1.5",
-   "size": 34975503,
-   "detect": "Mods/TLDMilitaryStim.dll",
+   "zip": "MilitaryStimByEMPEROR.zip",
+   "version": "0.1.6",
+   "size": 0,
+   "detect": "Mods/MilitaryStimByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/TLDMilitaryStim.dll",
+    "dir": "TLDMilitaryStim",
+    "dir_to": "MilitaryStimByEMPEROR",
+    "files": {
+     "tldmilitarystim.bundle": "militarystimbyemperor.bundle"
+    }
+   },
    "assets": true,
    "title": {
     "ru": "Военный стимулятор",
@@ -98,10 +121,18 @@
   },
   {
    "id": "TLDCrankLamp",
-   "zip": "TLDCrankLamp.zip",
-   "version": "0.4.1",
-   "size": 34992777,
-   "detect": "Mods/TLDCrankLamp.dll",
+   "zip": "CrankLampByEMPEROR.zip",
+   "version": "0.4.2",
+   "size": 0,
+   "detect": "Mods/CrankLampByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/TLDCrankLamp.dll",
+    "dir": "TLDCrankLamp",
+    "dir_to": "CrankLampByEMPEROR",
+    "files": {
+     "tldcranklamp.bundle": "cranklampbyemperor.bundle"
+    }
+   },
    "assets": true,
    "title": {
     "ru": "Фонарь с ручкой",
@@ -114,10 +145,18 @@
   },
   {
    "id": "SmokesBySeagull",
-   "zip": "SmokesBySeagull.zip",
-   "version": "0.1.124",
-   "size": 143994909,
-   "detect": "Mods/SmokesBySeagull.dll",
+   "zip": "SmokesByEMPEROR.zip",
+   "version": "0.1.125",
+   "size": 0,
+   "detect": "Mods/SmokesByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/SmokesBySeagull.dll",
+    "dir": "SmokesBySeagull",
+    "dir_to": "SmokesByEMPEROR",
+    "remove": [
+     "Plugins/SmokesAudioOn.dll"
+    ]
+   },
    "needs": [
     "AfflictionComponent",
     "ModData",
@@ -129,16 +168,21 @@
     "en": "Smokes"
    },
    "desc": {
-    "ru": "Сигареты, сигары, трубки, табак и зажигалки со своими звуками и эффектами. Плагин звука SmokesAudioOn входит в архив.",
-    "en": "Cigarettes, cigars, pipes, tobacco and lighters with their own sounds and effects. The SmokesAudioOn sound plugin is included."
+    "ru": "Сигареты, сигары, трубки, табак и зажигалки со своими звуками и эффектами. Плагин звука SmokesAudioOnByEMPEROR входит в архив.",
+    "en": "Cigarettes, cigars, pipes, tobacco and lighters with their own sounds and effects. The SmokesAudioOnByEMPEROR sound plugin is included."
    }
   },
   {
    "id": "SmokehouseBySeagull",
-   "zip": "SmokehouseBySeagull.zip",
-   "version": "0.2.6",
-   "size": 11963783,
-   "detect": "Mods/SmokehouseBySeagull.dll",
+   "zip": "SmokehouseByEMPEROR.zip",
+   "version": "0.2.7",
+   "size": 0,
+   "detect": "Mods/SmokehouseByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/SmokehouseBySeagull.dll",
+    "dir": "SmokehouseBySeagull",
+    "dir_to": "SmokehouseByEMPEROR"
+   },
    "title": {
     "ru": "Коптильня",
     "en": "Smokehouse"
@@ -150,10 +194,18 @@
   },
   {
    "id": "FeatsBySeagull",
-   "zip": "FeatsBySeagull.zip",
-   "version": "0.2.1",
-   "size": 2893856,
-   "detect": "Mods/FeatsBySeagull.dll",
+   "zip": "FeatsByEMPEROR.zip",
+   "version": "0.2.2",
+   "size": 0,
+   "detect": "Mods/FeatsByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/FeatsBySeagull.dll",
+    "dir": "FeatsBySeagull",
+    "dir_to": "FeatsByEMPEROR",
+    "files": {
+     "featsbyseagull.bundle": ""
+    }
+   },
    "title": {
     "ru": "Новые подвиги",
     "en": "New feats"
@@ -165,10 +217,18 @@
   },
   {
    "id": "FoodPackBySeagull",
-   "zip": "FoodPackBySeagull.zip",
-   "version": "1.1.0",
-   "size": 374158136,
-   "detect": "Mods/FoodPackBySeagull.dll",
+   "zip": "FoodPackByEMPEROR.zip",
+   "version": "1.1.1",
+   "size": 0,
+   "detect": "Mods/FoodPackByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/FoodPackBySeagull.dll",
+    "dir": "FoodPackBySeagull",
+    "dir_to": "FoodPackByEMPEROR",
+    "moves": {
+     "Mods/FoodPackBySeagull.installed.txt": "Mods/FoodPackByEMPEROR.installed.txt"
+    }
+   },
    "needs": [
     "AfflictionComponent",
     "ModData",
@@ -188,10 +248,18 @@
   },
   {
    "id": "FoodBalanceBySeagull",
-   "zip": "FoodBalanceBySeagull.zip",
-   "version": "1.0.0",
-   "size": 16766,
-   "detect": "Mods/FoodBalanceBySeagull.dll",
+   "zip": "FoodBalanceByEMPEROR.zip",
+   "version": "1.0.1",
+   "size": 0,
+   "detect": "Mods/FoodBalanceByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/FoodBalanceBySeagull.dll",
+    "dir": "FoodBalanceBySeagull",
+    "dir_to": "FoodBalanceByEMPEROR",
+    "moves": {
+     "Mods/FoodBalanceBySeagull.json": "Mods/FoodBalanceByEMPEROR.json"
+    }
+   },
    "needs": [
     "ModSettings"
    ],
@@ -202,14 +270,22 @@
    "desc": {
     "ru": "Ползунки в настройках: сколько еды разных модов лежит на картах и в контейнерах.",
     "en": "Settings sliders: how much food of each food mod spawns on maps and in containers."
-   }
+   },
+   "keep": [
+    "Mods/FoodBalanceByEMPEROR.json"
+   ]
   },
   {
    "id": "ContainerLabelsBySeagull",
-   "zip": "ContainerLabelsBySeagull.zip",
-   "version": "0.6.0",
-   "size": 7812,
-   "detect": "Mods/ContainerLabelsBySeagull.dll",
+   "zip": "ContainerLabelsByEMPEROR.zip",
+   "version": "0.6.1",
+   "size": 0,
+   "detect": "Mods/ContainerLabelsByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/ContainerLabelsBySeagull.dll",
+    "dir": "ContainerLabelsBySeagull",
+    "dir_to": "ContainerLabelsByEMPEROR"
+   },
    "needs": [
     "ModData"
    ],
@@ -224,10 +300,15 @@
   },
   {
    "id": "InventorySearchBySeagull",
-   "zip": "InventorySearchBySeagull.zip",
-   "version": "0.6.0",
-   "size": 6100,
-   "detect": "Mods/InventorySearchBySeagull.dll",
+   "zip": "InventorySearchByEMPEROR.zip",
+   "version": "0.6.1",
+   "size": 0,
+   "detect": "Mods/InventorySearchByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/InventorySearchBySeagull.dll",
+    "dir": "InventorySearchBySeagull",
+    "dir_to": "InventorySearchByEMPEROR"
+   },
    "title": {
     "ru": "Поиск в инвентаре",
     "en": "Inventory search"
@@ -239,10 +320,15 @@
   },
   {
    "id": "MarkersBySeagull",
-   "zip": "MarkersBySeagull.zip",
-   "version": "0.4.5",
-   "size": 109429,
-   "detect": "Mods/MarkersBySeagull.dll",
+   "zip": "MarkersByEMPEROR.zip",
+   "version": "0.4.6",
+   "size": 0,
+   "detect": "Mods/MarkersByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/MarkersBySeagull.dll",
+    "dir": "MarkersBySeagull",
+    "dir_to": "MarkersByEMPEROR"
+   },
    "title": {
     "ru": "Вешки",
     "en": "Trail markers"
@@ -254,11 +340,22 @@
   },
   {
    "id": "TLDTrainer",
-   "zip": "TLDTrainer.zip",
-   "version": "2.5.25",
-   "size": 66530369,
-   "detect": "Mods/TLDTrainer.dll",
-   "exe": "Mods/TLDTrainer/TLDTrainer.exe",
+   "zip": "TrainerByEMPEROR.zip",
+   "version": "2.5.26",
+   "size": 0,
+   "detect": "Mods/TrainerByEMPEROR.dll",
+   "legacy": {
+    "dll": "Mods/TLDTrainer.dll",
+    "dir": "TLDTrainer",
+    "dir_to": "TrainerByEMPEROR",
+    "files": {
+     "TLDTrainer.exe": ""
+    },
+    "moves": {
+     "Mods/TLDTrainer.app.txt": ""
+    }
+   },
+   "exe": "Mods/TrainerByEMPEROR/TrainerByEMPEROR.exe",
    "title": {
     "ru": "Трейнер",
     "en": "Trainer"

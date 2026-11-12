@@ -1,4 +1,4 @@
-# Builds Mods/TLDMilitaryStim/tldmilitarystim.bundle from the WINTERMUTE ep5 bundles.
+# Builds Mods/MilitaryStimByEMPEROR/militarystimbyemperor.bundle (the file name; inside it is still tldmilitarystim.bundle) from the WINTERMUTE ep5 bundles.
 # Keeps only the military stim objects (world item, FP hands, FPS weapon/item), gives the file a new CAB name,
 # points references at survival bundles holding the same objects, and embeds the ep5-only objects:
 # military texture (extracted on the PC), GearItemData_MilitaryStim (ep5 4940df3f), inventory icon (ep5 ddba3fd7).

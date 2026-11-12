@@ -1,4 +1,4 @@
-# Seagull's mods launcher: logic without the window (the window is launcher.py).
+# EMPEROR's mods launcher: logic without the window (the window is launcher.py).
 # Finds the game, reads the mod list, downloads the chosen mods from the GitHub release of Saderto/TLDCoop,
 # installs/removes them, fetches the libraries they need from their authors' own GitHub releases,
 # and builds the game-derived files (tld_assets.build) for mods that need them.
@@ -7,11 +7,12 @@ import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, u
 import tld_assets
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.5'
+LAUNCHER_VERSION = '1.0.6'
 DISCORD_URL = 'https://discord.gg/ezT7PRZmuS'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
-MANIFEST = 'Mods/SeagullMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
-UA = 'SeagullModsLauncher/' + LAUNCHER_VERSION
+MANIFEST = 'Mods/EMPERORMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
+OLD_MANIFEST = 'Mods/SeagullMods.json'   # its name before 1.0.6 (the mods were renamed ...BySeagull/TLD... -> ...ByEMPEROR)
+UA = 'EMPERORModsLauncher/' + LAUNCHER_VERSION
 
 def http(url, timeout=30):
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': '*/*'})
@@ -77,10 +78,12 @@ def game_running():
         return False
 
 def read_manifest(game):
-    try:
-        with open(os.path.join(game, MANIFEST), encoding='utf-8') as f: return json.load(f)
-    except Exception:
-        return {}
+    for name in (MANIFEST, OLD_MANIFEST):
+        try:
+            with open(os.path.join(game, name), encoding='utf-8') as f: return json.load(f)
+        except Exception:
+            pass
+    return {}
 
 def write_manifest(game, m):
     p = os.path.join(game, MANIFEST)
@@ -88,13 +91,25 @@ def write_manifest(game, m):
     tmp = p + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f: json.dump(m, f, ensure_ascii=False, indent=1)
     os.replace(tmp, p)
+    try:
+        old = os.path.join(game, OLD_MANIFEST)
+        if os.path.isfile(old): os.remove(old)
+    except OSError:
+        pass
+
+def old_dll(mod):
+    """The mod's dll under its name before the rename (catalog 'legacy': {'dll': ..}), or None."""
+    return (mod.get('legacy') or {}).get('dll')
 
 def mod_state(game, mod, manifest):
     """('none'|'installed'|'update'|'unknown', installed_version)."""
     present = os.path.isfile(os.path.join(game, mod['detect']))
+    old = old_dll(mod)
+    renamed = bool(old) and os.path.isfile(os.path.join(game, old))   # still the version with the old name
     rec = manifest.get(mod['id'])
-    if not present: return 'none', None
+    if not present and not renamed: return 'none', None
     if not rec: return 'unknown', None
+    if renamed and not present: return 'update', rec.get('version')
     return ('installed' if rec.get('version') == mod['version'] else 'update'), rec.get('version')
 
 def lib_present(game, lib):
@@ -218,6 +233,60 @@ def download_any(urls, dest, progress=None, cancel=None, log=lambda s: None):
 # ---------------- installing ----------------
 SKIP_PARTS = ('saves/', 'logs/')
 
+def _move(src, dst, overwrite):
+    """Moves a file; if dst exists: overwrite=True replaces it, False drops src (the new copy wins)."""
+    if os.path.exists(dst):
+        if not overwrite:
+            os.remove(src); return
+        os.remove(dst)
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    try:
+        os.replace(src, dst)
+    except OSError:
+        shutil.move(src, dst)
+
+def migrate_legacy(game, mod, log=lambda s: None):
+    """The mods were renamed (11.2026): ...BySeagull / TLD... -> ...ByEMPEROR. Before installing the new version, the
+    player's files are carried over from the old folder (saves, settings, built story files), files that changed name
+    are renamed, and the old dll is removed so the mod is not loaded twice. Catalog 'legacy':
+      dir     old folder in Mods, moved into the new one (= 'dir_to'), files already there stay
+      files   {old relative name: new name, '' = delete} inside that folder
+      moves   {old path: new path} from the game folder, the old file wins (settings the player made)
+      remove  old files to delete (the old dll and its plugins)
+    The new dll does the same on its first start (mods installed by hand); here it runs first so the story files are
+    found by their new names and are not built again."""
+    lg = mod.get('legacy')
+    if not lg: return
+    n = 0
+    try:
+        od = os.path.join(game, 'Mods', lg['dir']) if lg.get('dir') else None
+        if od and os.path.isdir(od):
+            nd = os.path.join(game, 'Mods', lg['dir_to'])
+            ren = lg.get('files', {})
+            for root, dirs, files in os.walk(od):
+                for f in files:
+                    src = os.path.join(root, f)
+                    rel = os.path.relpath(src, od).replace('\\', '/')
+                    to = ren.get(rel, rel)
+                    if to == '':
+                        os.remove(src); n += 1; continue
+                    _move(src, os.path.join(nd, *to.split('/')), overwrite=False); n += 1
+            for root, dirs, files in sorted(os.walk(od), key=lambda x: len(x[0]), reverse=True):
+                try: os.rmdir(root)
+                except OSError: pass
+        for o, to in lg.get('moves', {}).items():
+            src = os.path.join(game, *o.split('/'))
+            if not os.path.isfile(src): continue
+            if to == '': os.remove(src)
+            else: _move(src, os.path.join(game, *to.split('/')), overwrite=True)
+            n += 1
+        for o in ([lg['dll']] if lg.get('dll') else []) + lg.get('remove', []):
+            p = os.path.join(game, *o.split('/'))
+            if os.path.isfile(p): os.remove(p); n += 1
+    except Exception as e:
+        log('  %s: %s' % ('old name', e))
+    if n: log('  ' + ('перенёс со старого имени: %d файлов' if tld_assets.RU else 'carried over from the old name: %d files') % n)
+
 def target_of(mod, name):
     """Where a zip entry goes, relative to the game folder (forward slashes), or None to skip it."""
     n = name.replace('\\', '/')
@@ -235,17 +304,20 @@ def target_of(mod, name):
 def install_zip(game, mod, zpath, manifest, log=lambda s: None):
     """Extracts the mod; keeps a list of its files for removal. Old files of the mod that the new version
     no longer has are removed (player data such as saves is never in the list)."""
+    migrate_legacy(game, mod, log)
     files = []
+    keep = set(mod.get('keep', []))     # the player's own settings: only written when missing
     with zipfile.ZipFile(zpath) as z:
         for info in z.infolist():
             rel = target_of(mod, info.filename)
             if not rel: continue
             dst = os.path.join(game, *rel.split('/'))
+            if rel in keep and os.path.isfile(dst): continue
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             tmp = dst + '.new'
             with z.open(info) as src, open(tmp, 'wb') as out: shutil.copyfileobj(src, out, 1 << 20)
             os.replace(tmp, dst)
-            files.append(rel)
+            if rel not in keep: files.append(rel)      # kept files are not in the list: removing the mod leaves them
     old = manifest.get(mod['id'], {}).get('files', [])
     for rel in set(old) - set(files):
         p = os.path.join(game, *rel.split('/'))
@@ -261,6 +333,7 @@ def uninstall(game, mod, manifest, log=lambda s: None):
     Saves and settings the mod wrote itself stay."""
     rec = manifest.get(mod['id'])
     files = list(rec['files'] if rec else [mod['detect']])
+    if old_dll(mod): files.append(old_dll(mod))
     # files built from the game by TLDAssets for this mod
     for name, dll, fn, gen, _ in tld_assets.MODS:
         if name == mod['id']: files += ['Mods/' + f for f in gen]

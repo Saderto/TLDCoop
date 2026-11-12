@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>MilitaryStimByEMPEROR</AssemblyName>
+    <RootNamespace>MilitaryStimByEMPEROR</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <RefsDir Condition="'$(RefsDir)' == ''">..\..\shotgun\refs-2.59</RefsDir>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(RefsDir)\*.dll" Private="false" />
+  </ItemGroup>
+</Project>

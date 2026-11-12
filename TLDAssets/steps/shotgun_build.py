@@ -1,4 +1,4 @@
-# Builds Mods/TLDShotgun/shotgun.bundle from the WINTERMUTE ep5 bundle.
+# Builds Mods/ShotgunByEMPEROR/shotgunbyemperor.bundle (the file name; inside it is still tldshotgun.bundle) from the WINTERMUTE ep5 bundle.
 # Keeps only the shotgun objects, gives the file a new CAB name (no clash with survival bundles),
 # points references at survival bundles that hold the same objects, and embeds the few
 # ep5-only textures/materials/meshes (extracted on the PC by ep5_extract.py).

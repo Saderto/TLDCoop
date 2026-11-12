@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>CoopByEMPEROR</AssemblyName>
+    <RootNamespace>CoopByEMPEROR</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <!-- Папка с обёртками игры 2.58 (их создал MelonLoader на ПК игрока). -->
+    <RefsDir Condition="'$(RefsDir)' == ''">..\refs-2.58</RefsDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.1" />
+    <PackageReference Include="HarmonyX" Version="2.10.2" />
+    <PackageReference Include="Il2CppInterop.Runtime" Version="1.5.1" />
+    <Reference Include="$(RefsDir)\*.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-# Seagull's mods launcher: a window in the game's own style to choose, install, update and remove the mods.
+# EMPEROR's mods launcher: a window in the game's own style to choose, install, update and remove the mods.
 # The window's frames, buttons and fonts are read from the player's own game (game_ui.py); until then it draws plain shapes.
 # Build: pyinstaller --onefile --windowed --name TLDModsLauncher --add-data "steps;steps" --add-data "own;own"
 #        --add-data "catalog.json;." --collect-all UnityPy --collect-all fmod_toolkit --collect-all archspec launcher.py
@@ -54,7 +54,7 @@ class App:
         self.checked = set(); self.scroll = 0; self.hover = None; self.frac = 0.0
         self.logs = []; self.areas = []; self.skin_dir = None
         self.st = None; self.rows = {}; self.pending = False
-        root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
+        root.title(T('Моды EMPEROR для The Long Dark', "EMPEROR's mods for The Long Dark"))
         root.geometry('%dx%d' % (SW, SH)); root.resizable(False, False)
         try:   # own icon (icon.ico/png next to the script or inside the exe)
             if os.name == 'nt': root.iconbitmap(default=os.path.join(core.HERE, 'icon.ico'))
@@ -176,7 +176,7 @@ class App:
     def toggle_lang(self):
         global RU
         RU = not RU; tld_assets.RU = RU
-        self.root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
+        self.root.title(T('Моды EMPEROR для The Long Dark', "EMPEROR's mods for The Long Dark"))
         if not self.busy and self.cat:      # the status lines in the new language
             self.logs = [T('Модов в списке: %d. Отметьте нужные и нажмите «Установить».',
                            'Mods in the list: %d. Tick the ones you want and press "Install".') % len(self.cat['mods'])]
@@ -229,7 +229,7 @@ class App:
         p = ui.Painter(self.skin, im)
         self.areas = []
         en = not self.busy and bool(self.game)
-        ui.title(p, T('МОДЫ SEAGULL', "SEAGULL'S MODS"), W / 2, PY + 46)
+        ui.title(p, T('МОДЫ EMPEROR', "EMPEROR'S MODS"), W / 2, PY + 46)
         p.text('v' + core.LAUNCHER_VERSION, R, PY + 40, 12, ui.TEAL, al='r')
         self.btn(p, 'discord', 'Discord', L + 55, PY + 46, 110, 28, self.open_discord, True, 13)
         # game and loader
@@ -469,7 +469,7 @@ def main():
     tld_assets.RU = RU
     try:   # own taskbar entry, so Windows shows our icon and not python's
         import ctypes
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('Seagull.TLDModsLauncher')
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('EMPEROR.TLDModsLauncher')
     except Exception: pass
     global SW, SH
     ui.K = dpi_scale(); SW, SH = int(W * ui.K), int(H * ui.K)

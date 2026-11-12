@@ -12,7 +12,7 @@ using MelonLoader;
 [assembly: AssemblyCopyright("Copyright © 2024")]
 [assembly: AssemblyTrademark(null)]
 [assembly: AssemblyFileVersion("1.0.9")]
-[assembly: MelonInfo(typeof(ComplexLogger.Main), "ComplexLogger", "1.0.9", "The Illusion (Arkhorse); 2.58+ fix: Seagull", null)]
+[assembly: MelonInfo(typeof(ComplexLogger.Main), "ComplexLogger", "1.0.10", "The Illusion (Arkhorse); 2.58+ fix: EMPEROR", null)]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: VerifyLoaderVersion("0.6.1", true)]
 [assembly: MelonPriority(0)]

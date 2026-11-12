@@ -1,4 +1,4 @@
-# Builds Mods/TLDCrankLamp/tldcranklamp.bundle from the WINTERMUTE ep5 bundles.
+# Builds Mods/CrankLampByEMPEROR/cranklampbyemperor.bundle (the file name; inside it is still tldcranklamp.bundle) from the WINTERMUTE ep5 bundles.
 # The ep5 crank lamp runs on ep5-only scripts (CrankLampItem, FirstPersonCrankLamp) that survival does not have,
 # so they are replaced with survival scripts: FlashlightItem on the world item (+ a copy of the flashlight's
 # AuroraField child) and FirstPersonFlashlight on the first-person hands. Charging by crank is done in mod code.

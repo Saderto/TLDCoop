@@ -1,4 +1,4 @@
-# Seagull's mods icon: own drawing (no game art). Writes icon.ico + icon.png next to the given path.
+# EMPEROR's mods icon: own drawing (no game art). Writes icon.ico + icon.png next to the given path.
 import sys, os, math
 from PIL import Image, ImageDraw, ImageFilter
 N = 1024

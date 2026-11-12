@@ -1,0 +1,151 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>FoodPackByEMPEROR</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>net6.0</TargetFramework>
+    <RefsDir Condition="'$(RefsDir)' == ''">..\refs</RefsDir>
+    <Nullable>disable</Nullable>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>11.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Aged_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Bloat_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Breathless_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_CedarSpirit_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Chill_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Clarity_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_ClearBreath_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_ClearHead_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_CoffeeCharge_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Dash_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_DeepRest_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Deworm_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Diligence_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Distracted_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Drowsy_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_FastHealing_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_FireBlood_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Flawless_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Focus_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_FrostResist_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_GentleFood_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_GinjoAroma_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_GripHands_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Hardening_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_HeartyMeal_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_HeavyBelly_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_HotSip_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Immunity_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_IrishLuck_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_IrishSpirit_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Nausea_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Nimble_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_PainDull_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_PolarHardening_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_RestlessSleep_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_RicePower_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_RiceWarmth_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Salty_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_SecondWind_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_slowHunger_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Sobering_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Soured_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Spicy_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_SteadyHand_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Stealth_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Stillness_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Stink_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_StrongBack_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_StrongBones_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_StrongHealth_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_StrongStomach_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_SugarRush_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_SureStep_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Sweating_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_ThickBlood_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Tireless_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_Tremor_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_WarmingBrew_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_WarmInside_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_WarmSleep_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_WideVessels_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_WindProof_128.png" />
+    <None Remove="FoodPackByEMPEROR.Icons.ico_buff_WobblyLegs_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Aged_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Aged_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Bloat_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Bloat_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Breathless_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Breathless_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_CedarSpirit_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_CedarSpirit_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Chill_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Chill_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Clarity_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Clarity_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_ClearBreath_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_ClearBreath_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_ClearHead_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_ClearHead_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_CoffeeCharge_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_CoffeeCharge_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Dash_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Dash_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_DeepRest_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_DeepRest_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Deworm_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Deworm_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Diligence_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Diligence_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Distracted_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Distracted_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Drowsy_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Drowsy_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_FastHealing_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_FastHealing_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_FireBlood_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_FireBlood_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Flawless_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Flawless_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Focus_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Focus_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_FrostResist_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_FrostResist_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_GentleFood_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_GentleFood_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_GinjoAroma_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_GinjoAroma_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_GripHands_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_GripHands_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Hardening_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Hardening_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_HeartyMeal_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_HeartyMeal_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_HeavyBelly_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_HeavyBelly_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_HotSip_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_HotSip_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Immunity_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Immunity_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_IrishLuck_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_IrishLuck_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_IrishSpirit_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_IrishSpirit_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Nausea_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Nausea_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Nimble_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Nimble_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_PainDull_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_PainDull_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_PolarHardening_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_PolarHardening_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_RestlessSleep_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_RestlessSleep_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_RicePower_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_RicePower_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_RiceWarmth_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_RiceWarmth_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Salty_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Salty_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_SecondWind_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_SecondWind_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_slowHunger_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_slowHunger_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Sobering_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Sobering_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Soured_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Soured_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Spicy_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Spicy_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_SteadyHand_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_SteadyHand_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Stealth_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Stealth_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Stillness_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Stillness_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Stink_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Stink_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_StrongBack_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_StrongBack_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_StrongBones_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_StrongBones_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_StrongHealth_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_StrongHealth_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_StrongStomach_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_StrongStomach_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_SugarRush_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_SugarRush_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_SureStep_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_SureStep_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Sweating_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Sweating_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_ThickBlood_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_ThickBlood_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Tireless_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Tireless_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_Tremor_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_Tremor_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_WarmingBrew_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_WarmingBrew_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_WarmInside_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_WarmInside_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_WarmSleep_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_WarmSleep_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_WideVessels_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_WideVessels_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_WindProof_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_WindProof_128.png" />
+    <EmbeddedResource Include="FoodPackByEMPEROR.Icons.ico_buff_WobblyLegs_128.png" LogicalName="FoodPackByEMPEROR.Icons.ico_buff_WobblyLegs_128.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="$(RefsDir)\*.dll" Private="false" />
+  </ItemGroup>
+</Project>
