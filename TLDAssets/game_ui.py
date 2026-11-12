@@ -78,7 +78,8 @@ class Skin:
     """Atlas sprites + fonts; without the game files everything is drawn as plain shapes."""
     def __init__(self, d=None, ru=True):
         self.atlas = None; self.sp = {}
-        self.font_path = sysfont(); self.cyr_path = None   # the EN game font has no Cyrillic
+        self.body_path = sysfont()   # plain Windows font for running text: the game fonts are hard to read small
+        self.font_path = self.body_path; self.cyr_path = None   # the EN game font has no Cyrillic
         if d:
             try:
                 self.atlas = Image.open(os.path.join(d, 'atlas.png')).convert('RGBA')
@@ -90,9 +91,10 @@ class Skin:
             except Exception:
                 self.atlas = None; self.sp = {}
         self._fonts = {}; self._crops = {}
-    def font(self, size, t=''):
+    def font(self, size, t='', display=False):
         size = max(6, int(size))
-        path = self.cyr_path if self.cyr_path and any('\u0400' <= ch <= '\u04ff' for ch in t) else self.font_path
+        if not display and self.body_path: path = self.body_path
+        else: path = self.cyr_path if self.cyr_path and any('\u0400' <= ch <= '\u04ff' for ch in t) else self.font_path
         k = (size, path)
         if k not in self._fonts:
             try: self._fonts[k] = ImageFont.truetype(path, size) if path else ImageFont.load_default()
@@ -163,22 +165,22 @@ class Painter:
                 ImageDraw.Draw(lay).rectangle((0, 0, k[1] - 1, k[2] - 1), outline=tuple(int(v * 255) for v in outline))
             _SPR[k] = lay
         _comp(self.im, lay, int(x), int(y))
-    def tw(self, t, size):
-        k = (t, size)
+    def tw(self, t, size, display=False):
+        k = (t, size, display)
         if k not in _TW:
             if len(_TW) > 5000: _TW.clear()
-            b = self.s.font(size, t).getbbox(t); _TW[k] = b[2] - b[0]
+            b = self.s.font(size, t, display).getbbox(t); _TW[k] = b[2] - b[0]
         return _TW[k]
-    def text(self, t, x, y, size, c=(1, 1, 1, 1), al='l', shadow=True):
-        """y is the vertical centre of the line."""
-        w = self.tw(t, size)
+    def text(self, t, x, y, size, c=(1, 1, 1, 1), al='l', shadow=True, display=False):
+        """y is the vertical centre of the line. display=True: the game's own font (titles)."""
+        w = self.tw(t, size, display)
         if al == 'c': x -= w / 2
         elif al == 'r': x -= w
         yy = y - size * 0.62
-        k = (t, size, tuple(c), shadow)
+        k = (t, size, tuple(c), shadow, display)
         lay = _TXT.get(k)
         if lay is None:
-            f = self.s.font(size, t); b = f.getbbox(t)
+            f = self.s.font(size, t, display); b = f.getbbox(t)
             lay = Image.new('RGBA', (max(1, b[2] + 4), max(1, b[3] + 4)))
             d = ImageDraw.Draw(lay)
             if shadow: d.text((2, 2), t, font=f, fill=(0, 0, 0, int(140 * c[3])))
@@ -213,8 +215,8 @@ def window(p, x, y, w, h):
     p.spr('bg_texture1', cx, cy - 10, m * 0.76, m, (0.98, 0.98, 0.98, 0.07))
 
 def title(p, t, cx, cy, size=26):
-    p.spr('backHeader', cx, cy + 4, max(240, p.tw(t, size) + 120), 90, (0.98, 0.98, 0.98, 0.45))
-    p.text(t, cx, cy, size, WHITE, al='c')
+    p.spr('backHeader', cx, cy + 4, max(240, p.tw(t, size, True) + 120), 90, (0.98, 0.98, 0.98, 0.45))
+    p.text(t, cx, cy, size, WHITE, al='c', display=True)
 
 def line(p, x, y, w, a=0.59):
     if p.s.has('linebreak_description'):
