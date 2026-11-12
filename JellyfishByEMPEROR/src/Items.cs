@@ -225,6 +225,18 @@ internal static class AddToInventoryPatch
         if (template == null) return false;
         __result = __instance.InstantiateItemInPlayerInventoryFromPrefab(template, 1, normalizedCondition, flags);
         UnityEngine.Object.Destroy(template.gameObject);
+        // the game copies the template: the copy has our parts but nobody animates it, lights it or keeps its jellyfish alive
+        // (0.2.1 in game: a jar from the pack did not freeze and an aquarium showed nothing poured into it)
+        if (__result != null)
+        {
+            try
+            {
+                __result.gameObject.name = Defs.Prefix + def.Id;
+                Visual.Attach(__result, def);
+                Items.RefreshRenderers(__result);
+            }
+            catch (Exception e) { Safe.Log("Pack copy " + def.Id, e); }
+        }
         return false;
     }
 }

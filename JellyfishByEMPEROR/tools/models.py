@@ -673,8 +673,8 @@ def jar():
             a = 2 * math.pi * j / (ribs * 2); r = .0458 + (.0007 if j % 2 == 0 else 0)
             P.append((r * math.cos(a), r * math.sin(a), z)); UV.append((j / (ribs * 2), .58 + .34 * i))
     lid.merge(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False))
-    lid.merge(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .54)))
-    lid.merge(lathe(np.array([.0465, .0468, .045, .040, .030, .015]), np.array([.1775, .1790, .1805, .1815, .1822, .1826]), 72, lambda f, a: (.5 + .22 * (1 - f) * math.cos(a), .25 + .22 * (1 - f) * math.sin(a))))
+    lid.merge(two_sided(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .54))))
+    lid.merge(two_sided(lathe(np.array([.0465, .0468, .045, .040, .030, .015]), np.array([.1775, .1790, .1805, .1815, .1822, .1826]), 72, lambda f, a: (.5 + .22 * (1 - f) * math.cos(a), .25 + .22 * (1 - f) * math.sin(a)))))
     lid.merge(disc(.015, .1826, 72, True, (.5, .25), .22 * .015 / .0465 * 3))
     lid.merge(disc(.0458, .1615, 72, False, (.5, .25), .22))
     return glass, water, lid
@@ -796,7 +796,7 @@ def aquarium():
             vv[:, 0] *= lob[j] * 1.25; vv[:, 1] *= lob[j]
             vv[:, 2] = vv[:, 2] * .8 + base + .010
             vv[:, 0] += x; vv[:, 1] += y
-        frame.merge(st)
+        frame.merge(two_sided(st))
     # kelp: wavy blades from the sand, seen from both sides
     for k, (x, y, h) in enumerate([(-.22, .10, .27), (-.20, .12, .21), (-.17, .11, .30), (.19, .11, .24), (.23, .08, .19), (.02, .13, .17)]):
         pts = [(x + .012 * math.sin(t * 9 + k), y + .006 * math.cos(t * 7 + k), base + .014 + t * h) for t in np.linspace(0, 1, 18)]

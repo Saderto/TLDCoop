@@ -29,6 +29,7 @@ public static class Visual
     static readonly Dictionary<string, Material> mats = new();
     static Material? glass, water, tankGlass, tankWater;
     static float light = 1f, nextLook;
+    static MaterialPropertyBlock? block;
     static readonly System.Random rnd = new();
 
     static Shader? Sh() => Shader.Find("Sprites/Default") ?? Shader.Find("Legacy Shaders/Particles/Alpha Blended");
@@ -120,7 +121,7 @@ public static class Visual
         bool indoors = false, night = false;
         try { indoors = GameManager.GetWeatherComponent().IsIndoorEnvironment(); } catch { }
         try { night = GameManager.GetTimeOfDayComponent().IsNight(); } catch { }
-        light = indoors ? (night ? .3f : .55f) : night ? .25f : 1f;
+        light = indoors ? (night ? .22f : .55f) : night ? .15f : 1f;
         foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, 1f);
         float j = Math.Max(.75f, light);
         foreach (var m in mats.Values) if (m != null) m.color = new Color(j, j, j, 1f);
@@ -133,6 +134,19 @@ public static class Visual
             if (t.Light != null && Standing(t.G) && (Tanks.Of(t.G)?.Fish.Any(f => !f.Dead) ?? false)) lit.Add(((t.G.transform.position - me).sqrMagnitude, t.Light, 1.6f));
         var on = new HashSet<Light>(lit.OrderBy(x => x.d).Take(6).Select(x => x.l));
         foreach (var x in lit) x.l.intensity = glow * x.k;
+        // the water of a lit jar takes the colour of its jellyfish's glow
+        foreach (var l in Lives)
+        {
+            if (l.Water == null || l.Def.Colour == null) continue;
+            try
+            {
+                var c = glow > 0f ? Color.Lerp(new Color(light, light, light, 1f), l.Def.Colour.Glow, .45f) : new Color(light, light, light, 1f);
+                block ??= new MaterialPropertyBlock();
+                block.SetColor("_Color", c);
+                l.Water.SetPropertyBlock(block);
+            }
+            catch (Exception e) { Safe.Log("Water tint", e); }
+        }
         foreach (var l in Lives) if (l.Light != null) l.Light.enabled = glow > 0f && on.Contains(l.Light);
         foreach (var t in tanks) if (t.Light != null) t.Light.enabled = glow > 0f && on.Contains(t.Light);
     }
