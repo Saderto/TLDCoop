@@ -75,7 +75,7 @@ public static class Texts
         Add("TANK_WAIT", "Жду ответа хоста…", "Waiting for the host…");
         Add("HOVER_TANK", "Медуз: {0} из {1}", "Jellyfish: {0} of {1}");
         Add("ACT_PLACE", "Поставить", "Place");
-        Add("HOVER_COLD", "Вода стынет!", "The water is freezing!");
+        Add("HOVER_COLD", "Вода замерзает!", "The water is freezing!");
         Add("HOVER_COND", "Состояние {0}%", "Condition {0}%");
     }
 
