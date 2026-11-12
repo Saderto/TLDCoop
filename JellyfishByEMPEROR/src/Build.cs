@@ -92,9 +92,27 @@ internal static class InspectCenter
     static GearItem? cur;
     static readonly List<(Transform t, Vector3 lp)> moved = new();
 
-    public static float Drop(GearItem g)
+    static Vector3 off;
+
+    public static Vector3 Drop(GearItem g)
     {
-        try { return cur != null && g != null && cur.Pointer == g.Pointer ? -Half : 0f; } catch { return 0f; }
+        try { return cur != null && g != null && cur.Pointer == g.Pointer ? off : Vector3.zero; } catch { return Vector3.zero; }
+    }
+
+    /// <summary>Every frame while a jar is looked at: its parts sit half its height lower (it turns about its middle) and a little left and up
+    /// on the screen (the owner, 11-12), worked out in the jar's own space so the game's turning cannot add it up.</summary>
+    public static void Tick()
+    {
+        if (cur == null) return;
+        try
+        {
+            var cam = GameManager.GetMainCamera();
+            var t = cur.transform;
+            off = new Vector3(0f, -Half, 0f);
+            if (cam != null) off += t.InverseTransformVector(cam.transform.right * Tune.InspectLeft + cam.transform.up * Tune.InspectUp);
+            foreach (var (c, lp) in moved) if (c != null) c.localPosition = lp + off;
+        }
+        catch (Exception e) { Safe.Log("Inspect centre tick", e); cur = null; }
     }
 
     static void Restore()
@@ -117,9 +135,9 @@ internal static class InspectCenter
             {
                 var c = t.GetChild(i);
                 moved.Add((c, c.localPosition));
-                c.localPosition += new Vector3(0f, -Half, 0f);
             }
             cur = g;
+            Tick();
         }
         catch (Exception e) { Safe.Log("Inspect centre", e); }
     }

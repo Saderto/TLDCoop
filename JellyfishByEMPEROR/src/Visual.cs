@@ -223,7 +223,7 @@ public static class Visual
             if (dead) continue;
             float t = time * .9f + l.Phase;
             float s = Mathf.Sin(t * 2.9f);
-            j.localPosition = new Vector3(0f, sp.Y + InspectCenter.Drop(l.G) + Mathf.Sin(t * .7f) * .004f, 0f);
+            j.localPosition = new Vector3(0f, sp.Y + Mathf.Sin(t * .7f) * .004f, 0f) + InspectCenter.Drop(l.G);
             j.localRotation = Quaternion.Euler(0f, t * 7f, 0f);
             j.localScale = new Vector3(k * (1f + .06f * s), k * (1f - .05f * s), k * (1f + .06f * s));
         }

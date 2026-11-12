@@ -8,7 +8,7 @@ namespace JellyfishByEMPEROR;
 /// an aquarium to swim free, and caught back out with a jar. Decoration only (the owner, 11-12). Six species, 20 colours. Coop: CoopApi.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.2.10";
+    public const string VersionText = "0.2.11";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "JellyfishByEMPEROR");
 
@@ -40,6 +40,7 @@ public class Mod : MelonMod
         try { TankWindow.Update(); } catch (Exception e) { Safe.Log("Aquarium window", e); }
         try { Place.Tick(); } catch (Exception e) { Safe.Log("Place tick", e); }
         try { Items.Tick(); } catch (Exception e) { Safe.Log("Items tick", e); }
+        try { InspectCenter.Tick(); } catch (Exception e) { Safe.Log("Inspect", e); }
         try { Visual.Frame(); } catch (Exception e) { Safe.Log("Visual", e); }
         try { Life.Tick(); } catch (Exception e) { Safe.Log("Life tick", e); }
         if (!testKeys.Value || !Input.GetKey(KeyCode.LeftControl) || !Input.GetKey(KeyCode.LeftShift)) return;
