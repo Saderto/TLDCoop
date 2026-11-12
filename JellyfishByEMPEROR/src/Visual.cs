@@ -11,6 +11,7 @@ public static class Visual
         public GearItem G = null!;
         public Def Def = null!;
         public Transform? Jelly;
+        public Renderer? Water;
         public Light? Light;
         public float Phase;
     }
@@ -84,14 +85,14 @@ public static class Visual
             Part(t, "JF_Glass", "JarGlass", glass, layer);
             // an empty jar is just glass; the water comes with the jellyfish
             if (def.Kind != Kind.Live || def.Species == null || def.Colour == null) return;
-            Part(t, "JF_Water", "JarWater", water, layer);
+            var wr = Part(t, "JF_Water", "JarWater", water, layer);
             var jr = Part(t, "JF_Jelly", "Jelly_" + def.Species.Id, Mat("Jelly_" + def.Species.Id + "_" + def.Colour.Id, 3000), layer);
             if (jr == null) return;
             jr.transform.localPosition = new Vector3(0f, def.Species.Y, 0f);
             jr.transform.localScale = Vector3.one * def.Species.JarK;
             var l = Glow(jr.transform, def.Colour.Glow, .8f);
             Lives.RemoveAll(x => x.G == null || x.G.Pointer == g.Pointer);
-            Lives.Add(new Live { G = g, Def = def, Jelly = jr.transform, Light = l, Phase = (float)rnd.NextDouble() * 20f });
+            Lives.Add(new Live { G = g, Def = def, Jelly = jr.transform, Water = wr, Light = l, Phase = (float)rnd.NextDouble() * 20f });
         }
         catch (Exception e) { Safe.Log("Visual " + def.Id, e); }
     }
@@ -149,12 +150,11 @@ public static class Visual
             var j = l.Jelly!;
             var sp = l.Def.Species!;
             float k = sp.JarK;
-            if (Dead(l.G))
-            {
-                j.localPosition = new Vector3(0f, .012f, 0f);
-                j.localScale = new Vector3(k * 1.1f, k * .4f, k * 1.1f);
-                continue;
-            }
+            // the owner (11-12): a dead jellyfish is simply gone, the jar stands empty
+            bool dead = Dead(l.G);
+            if (j.gameObject.activeSelf == dead) j.gameObject.SetActive(!dead);
+            if (l.Water != null && l.Water.enabled == dead) l.Water.enabled = !dead;
+            if (dead) continue;
             float t = time * .9f + l.Phase;
             float s = Mathf.Sin(t * 2.9f);
             j.localPosition = new Vector3(0f, sp.Y + Mathf.Sin(t * .7f) * .004f, 0f);

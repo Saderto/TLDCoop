@@ -60,7 +60,7 @@ public static class Life
                 if (pct <= 0.001f)
                 {
                     g.CurrentHP = 0f;
-                    Catch.Say("MSG_DIED");
+                    Catch.Say("MSG_DIED", Texts.Name(l.Def.Species!, l.Def.Colour!));
                     Safe.Info($"{l.Def.Id} died at {t:0.0} C");
                     if (g.m_InPlayerInventory) Die(g);
                 }
@@ -73,22 +73,27 @@ public static class Life
             string scene = Tanks.SceneName;
             foreach (var t in Tanks.State.Tanks.ToArray())
             {
-                if (t.Scene != scene || t.Fish.All(f => f.Dead)) continue;
+                if (t.Scene != scene) continue;
                 float temp = TempAt(t.Pos);
                 bool died = false;
-                foreach (var f in t.Fish)
+                for (int i = t.Fish.Count - 1; i >= 0; i--)
                 {
-                    if (f.Dead) continue;
-                    f.Hp = Step(f.Hp, temp, dh);
-                    if (f.Dead) { f.Hp = 0f; died = true; Safe.Info($"{f.Sp} died in the aquarium at {temp:0.0} C"); }
+                    var f = t.Fish[i];
+                    if (!f.Dead) f.Hp = Step(f.Hp, temp, dh);
+                    if (!f.Dead) continue;
+                    // the owner (11-12): a dead one simply disappears, with a word that it died
+                    t.Fish.RemoveAt(i);
+                    died = true;
+                    Safe.Info($"{f.Sp} died in the aquarium at {temp:0.0} C");
+                    if (f.Species is { } s && f.Colour is { } c) Catch.Say("MSG_DIED_TANK", Texts.Name(s, c));
                 }
-                if (died) { Catch.Say("MSG_DIED_TANK"); Tanks.Changed(t); }
+                if (died) Tanks.Changed(t);
             }
         }
         catch (Exception e) { Safe.Log("Aquarium life", e); }
     }
 
-    /// <summary>In the pack: only the empty jar is left.</summary>
+    /// <summary>In the pack (or picked up dead): only the empty jar is left, quietly (the death was told when it happened).</summary>
     static void Die(GearItem g)
     {
         Visual.Lives.RemoveAll(x => x.G == null || x.G.Pointer == g.Pointer);
@@ -110,7 +115,7 @@ public static class Life
         if (def.Kind != Kind.Live) return text;
         float max = Items.MaxHP(g);
         int pct = (int)Math.Round(g.CurrentHP / max * 100f);
-        if (pct <= 0) return text + "\n" + Texts.Get("DEAD");
+        if (pct <= 0) return Texts.Get("Jar_NAME");
         string s = text + "\n" + Texts.Get("HOVER_COND", pct);
         try { if (TempAt(g) < Tune.FreezeAt) s += "  " + Texts.Get("HOVER_COLD"); } catch { }
         return s;

@@ -52,8 +52,8 @@ public static class Texts
         Add("MSG_SANK", "Медуза ушла под воду", "The jellyfish sank out of sight");
         Add("MSG_JAR", "Медуза в банке: {0}", "Jellyfish in the jar: {0}");
         Add("MSG_GONE", "Медузу уже забрали", "Someone already took the jellyfish");
-        Add("MSG_DIED", "Вода в банке замёрзла: медуза погибла", "The water froze: the jellyfish died");
-        Add("MSG_DIED_TANK", "Вода в аквариуме замёрзла: медуза погибла", "The tank froze: a jellyfish died");
+        Add("MSG_DIED", "Медуза погибла: {0}", "The jellyfish died: {0}");
+        Add("MSG_DIED_TANK", "Медуза в аквариуме погибла: {0}", "A jellyfish in the aquarium died: {0}");
         Add("MSG_NO_HOST", "Хост не ответил, попробуй ещё раз", "The host did not answer, try again");
         Add("MSG_OTHER", "Не вышло: аквариум уже изменился", "Didn't work: the aquarium has changed");
         Add("MSG_FULL", "В аквариуме уже три медузы", "The aquarium already holds three");
