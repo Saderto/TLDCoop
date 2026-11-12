@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -13,7 +14,7 @@ namespace TrainerByEMPEROR
         {
             var done = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
             Queue.Enqueue((work, done));
-            if (!done.Task.Wait(timeoutMs)) throw new TimeoutException("Игра не отвечает");
+            if (!done.Task.Wait(timeoutMs)) throw new TimeoutException(L.T("Игра не отвечает", "The game does not answer"));
             return done.Task.Result;
         }
 

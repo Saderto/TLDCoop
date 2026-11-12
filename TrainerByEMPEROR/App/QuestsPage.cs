@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -23,7 +24,7 @@ namespace TrainerByEMPEROR.App
             RowDefinitions.Add(new RowDefinition());
 
             var top = new DockPanel { Margin = new Thickness(0, 0, 0, 12) };
-            var refresh = Theme.Button("Обновить");
+            var refresh = Theme.Button(L.T("Обновить", "Refresh"));
             refresh.Margin = new Thickness(10, 0, 0, 0);
             refresh.Click += async (_, _) => await Load();
             DockPanel.SetDock(refresh, Dock.Right);
@@ -49,7 +50,7 @@ namespace TrainerByEMPEROR.App
             if (!_ctx.InGame)
             {
                 _list.Children.Clear();
-                _status.Text = "Загрузите сохранение в игре, чтобы увидеть задания.";
+                _status.Text = L.T("Загрузите сохранение в игре, чтобы увидеть задания.", "Load a save in the game to see the quests.");
                 return;
             }
 
@@ -68,8 +69,8 @@ namespace TrainerByEMPEROR.App
             _list.Children.Clear();
             var missions = r.GetProperty("missions").EnumerateArray().ToList();
             _status.Text = missions.Count == 0
-                ? "Активных заданий нет."
-                : $"Активных заданий: {missions.Count}. Перед завершением задач лучше сделать копию сохранения.";
+                ? L.T("Активных заданий нет.", "No active quests.")
+                : L.T($"Активных заданий: {missions.Count}. Перед завершением задач лучше сделать копию сохранения.", $"Active quests: {missions.Count}. Back up your save before completing tasks.");
             foreach (var m in missions) _list.Children.Add(MissionCard(m));
         }
 
@@ -82,23 +83,23 @@ namespace TrainerByEMPEROR.App
 
             var card = new StackPanel();
             var head = new DockPanel();
-            var finish = Theme.Button("Завершить задание целиком");
+            var finish = Theme.Button(L.T("Завершить задание целиком", "Complete the whole quest"));
             finish.Click += async (_, _) =>
             {
-                if (MessageBox.Show($"Завершить задание «{name}» целиком?", "TrainerByEMPEROR", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-                if (await _ctx.Request(new { cmd = "completemission", id }, $"Задание завершено: {name}") != null) await Load();
+                if (MessageBox.Show(L.T($"Завершить задание «{name}» целиком?", $"Complete the whole quest “{name}”?"), "TrainerByEMPEROR", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+                if (await _ctx.Request(new { cmd = "completemission", id }, L.T($"Задание завершено: {name}", $"Quest completed: {name}")) != null) await Load();
             };
             DockPanel.SetDock(finish, Dock.Right);
             head.Children.Add(finish);
             var title = new StackPanel();
             title.Children.Add(Theme.Label(name, 16, Theme.Text, bold: true));
-            string sub = (side ? "Побочное задание" : "Основное задание") + (string.IsNullOrWhiteSpace(chapter) ? "" : " · " + chapter);
+            string sub = (side ? L.T("Побочное задание", "Side quest") : L.T("Основное задание", "Main quest")) + (string.IsNullOrWhiteSpace(chapter) ? "" : " · " + chapter);
             title.Children.Add(Theme.Label(sub, 12, Theme.Muted));
             head.Children.Add(title);
             card.Children.Add(head);
 
             var objectives = m.GetProperty("Objectives").EnumerateArray().ToList();
-            if (objectives.Count == 0) card.Children.Add(Pad(Theme.Label("Задачи пока не открыты.", 12, Theme.Muted)));
+            if (objectives.Count == 0) card.Children.Add(Pad(Theme.Label(L.T("Задачи пока не открыты.", "No tasks unlocked yet."), 12, Theme.Muted)));
             foreach (var o in objectives) card.Children.Add(ObjectiveRow(o));
             return Theme.CardBorder(card);
         }
@@ -123,13 +124,13 @@ namespace TrainerByEMPEROR.App
             SetColumn(text, 1);
             g.Children.Add(text);
 
-            var b = Theme.Button(done ? "Выполнено" : "Завершить", done ? null : Theme.Accent);
+            var b = Theme.Button(done ? L.T("Выполнено", "Done") : L.T("Завершить", "Complete"), done ? null : Theme.Accent);
             b.IsEnabled = !done;
             if (!done) b.Foreground = Brushes.White;
             b.Margin = new Thickness(10, 0, 0, 0);
             b.Click += async (_, _) =>
             {
-                if (await _ctx.Request(new { cmd = "completeobjective", id }, $"Задача завершена: {name}") != null) await Load();
+                if (await _ctx.Request(new { cmd = "completeobjective", id }, L.T($"Задача завершена: {name}", $"Task completed: {name}")) != null) await Load();
             };
             SetColumn(b, 2);
             g.Children.Add(b);

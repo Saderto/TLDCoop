@@ -58,6 +58,8 @@ namespace TrainerByEMPEROR.App
         public bool MiniMapOn => _mini.Enabled;
         public void SetMiniMap(bool on) => _mini.Enabled = on;
 
+        public void ApplyLanguage() => _mini.ApplyLanguage();
+
         private void Tick()
         {
             if (_openWhenReady && Native.GameWindow() != IntPtr.Zero && Native.GameRect(out _))

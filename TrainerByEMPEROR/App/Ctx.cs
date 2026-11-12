@@ -30,6 +30,13 @@ namespace TrainerByEMPEROR.App
         public event Action EnteredGame;
         private bool _lastInGame;
 
+        // Язык сменили: разделы окна строятся заново, старые больше не слушают игру.
+        public void ClearPageEvents()
+        {
+            StateChanged = null;
+            EnteredGame = null;
+        }
+
         public void RaiseStateChanged()
         {
             StateChanged?.Invoke();
@@ -93,7 +100,7 @@ namespace TrainerByEMPEROR.App
             if (e is AggregateException ae && ae.InnerException != null) e = ae.InnerException;
             if (e is GameException) return e.Message;
             if (e is IOException || e is SocketException)
-                return "Нет связи с игрой. Запустите игру кнопкой «Играть» (трейнер должен быть установлен).";
+                return L.T("Нет связи с игрой. Запустите игру кнопкой «Играть» (трейнер должен быть установлен).", "No connection to the game. Start the game with “Play” (the trainer must be installed).");
             return e.Message;
         }
 
@@ -104,7 +111,7 @@ namespace TrainerByEMPEROR.App
             if (!Connected) _bindsPushed = false;
             try
             {
-                var r = Client.Send(new { cmd = "state" });
+                var r = Client.Send(new { cmd = "state", lang = L.Code });
                 Connected = true;
                 InGame = r.GetProperty("inGame").GetBoolean();
                 lock (Values)

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -29,21 +30,21 @@ namespace TrainerByEMPEROR.App
             RowDefinitions.Add(new RowDefinition());
 
             var top = new DockPanel { Margin = new Thickness(0, 0, 0, 10) };
-            var all = Theme.Button("Открыть все", Theme.Accent);
+            var all = Theme.Button(L.T("Открыть все", "Unlock all"), Theme.Accent);
             all.Foreground = Brushes.White;
             all.Margin = new Thickness(10, 0, 0, 0);
             all.Click += async (_, _) =>
             {
-                if (await _ctx.Request(new { cmd = "unlockallbp" }, "Все чертежи открыты") != null) await Load();
+                if (await _ctx.Request(new { cmd = "unlockallbp" }, L.T("Все чертежи открыты", "All blueprints unlocked")) != null) await Load();
             };
             DockPanel.SetDock(all, Dock.Right);
             top.Children.Add(all);
-            var refresh = Theme.Button("Обновить");
+            var refresh = Theme.Button(L.T("Обновить", "Refresh"));
             refresh.Margin = new Thickness(10, 0, 0, 0);
             refresh.Click += async (_, _) => await Load();
             DockPanel.SetDock(refresh, Dock.Right);
             top.Children.Add(refresh);
-            _search = new TextBox { ToolTip = "Поиск чертежа" };
+            _search = new TextBox { ToolTip = L.T("Поиск чертежа", "Search blueprints") };
             _search.TextChanged += (_, _) => Render();
             top.Children.Add(_search);
             Children.Add(top);
@@ -65,7 +66,7 @@ namespace TrainerByEMPEROR.App
         {
             if (!_ctx.InGame)
             {
-                _status.Text = "Загрузите сохранение в игре, чтобы увидеть чертежи.";
+                _status.Text = L.T("Загрузите сохранение в игре, чтобы увидеть чертежи.", "Load a save in the game to see the blueprints.");
                 _items.Clear();
                 Render();
                 return;
@@ -93,7 +94,7 @@ namespace TrainerByEMPEROR.App
             string q = _search.Text.Trim();
             var found = _items.Where(b => q.Length == 0 || b.Name.Contains(q, StringComparison.CurrentCultureIgnoreCase)).ToList();
             if (_items.Count > 0)
-                _status.Text = $"Чертежей: {_items.Count}, закрыто: {_items.Count(b => !b.Unlocked)}. Показано: {found.Count}.";
+                _status.Text = L.T($"Чертежей: {_items.Count}, закрыто: {_items.Count(b => !b.Unlocked)}. Показано: {found.Count}.", $"Blueprints: {_items.Count}, locked: {_items.Count(b => !b.Unlocked)}. Shown: {found.Count}.");
             foreach (var bp in found) _list.Children.Add(Row(bp));
         }
 
@@ -113,16 +114,16 @@ namespace TrainerByEMPEROR.App
                 Padding = new Thickness(8, 2, 8, 2),
                 Margin = new Thickness(10, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = Theme.Label(bp.Unlocked ? "открыт" : "закрыт", 11, bp.Unlocked ? Theme.Good : Theme.Warn),
+                Child = Theme.Label(bp.Unlocked ? L.T("открыт", "unlocked") : L.T("закрыт", "locked"), 11, bp.Unlocked ? Theme.Good : Theme.Warn),
             };
             Grid.SetColumn(chip, 1);
             g.Children.Add(chip);
 
-            var open = Theme.Button("Открыть");
+            var open = Theme.Button(L.T("Открыть", "Unlock"));
             open.IsEnabled = !bp.Unlocked;
             open.Click += async (_, _) =>
             {
-                if (await _ctx.Request(new { cmd = "unlockbp", index = bp.Index }, $"Чертёж открыт: {bp.Name}") != null) await Load();
+                if (await _ctx.Request(new { cmd = "unlockbp", index = bp.Index }, L.T($"Чертёж открыт: {bp.Name}", $"Blueprint unlocked: {bp.Name}")) != null) await Load();
             };
             Grid.SetColumn(open, 2);
             g.Children.Add(open);

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -25,7 +26,7 @@ namespace TrainerByEMPEROR.App
             RowDefinitions.Add(new RowDefinition());
 
             var top = new DockPanel { Margin = new Thickness(0, 0, 0, 10) };
-            var refresh = Theme.Button("Обновить");
+            var refresh = Theme.Button(L.T("Обновить", "Refresh"));
             refresh.Margin = new Thickness(10, 0, 0, 0);
             refresh.Click += async (_, _) => await Load();
             DockPanel.SetDock(refresh, Dock.Right);
@@ -49,7 +50,7 @@ namespace TrainerByEMPEROR.App
             if (!_ctx.Connected)
             {
                 _list.Children.Clear();
-                _status.Text = "Запустите игру: значки выдаются прямо в ней (можно из главного меню).";
+                _status.Text = L.T("Запустите игру: значки выдаются прямо в ней (можно из главного меню).", "Start the game: badges are given inside it (the main menu works too).");
                 return;
             }
             JsonElement r;
@@ -66,15 +67,15 @@ namespace TrainerByEMPEROR.App
             var badges = Parse(r, "items");
             var feats = Parse(r, "feats");
             _list.Children.Clear();
-            _status.Text = "Значки и подвиги сохраняются в профиль игры, забрать их обратно трейнер не может.";
+            _status.Text = L.T("Значки и подвиги сохраняются в профиль игры, забрать их обратно трейнер не может.", "Badges and feats are saved to the game profile; the trainer cannot take them back.");
 
-            _list.Children.Add(Header($"Испытания — получено {badges.Count(b => b.Unlocked)} из {badges.Count}", "unlockallbadges", "Все значки испытаний выданы"));
-            foreach (var b in badges) _list.Children.Add(Row(b, "unlockbadge", "Значок выдан"));
+            _list.Children.Add(Header(L.T($"Испытания — получено {badges.Count(b => b.Unlocked)} из {badges.Count}", $"Challenges: {badges.Count(b => b.Unlocked)} of {badges.Count} earned"), "unlockallbadges", L.T("Все значки испытаний выданы", "All challenge badges given")));
+            foreach (var b in badges) _list.Children.Add(Row(b, "unlockbadge", L.T("Значок выдан", "Badge given")));
 
-            _list.Children.Add(Header($"Подвиги — открыто {feats.Count(b => b.Unlocked)} из {feats.Count}", "unlockallfeats", "Все подвиги открыты"));
+            _list.Children.Add(Header(L.T($"Подвиги — открыто {feats.Count(b => b.Unlocked)} из {feats.Count}", $"Feats: {feats.Count(b => b.Unlocked)} of {feats.Count} unlocked"), "unlockallfeats", L.T("Все подвиги открыты", "All feats unlocked")));
             if (feats.Count == 0)
-                _list.Children.Add(Theme.Label("Игра ещё не загрузила подвиги. Откройте главное меню или загрузите сохранение и нажмите «Обновить».", 12, Theme.Muted));
-            foreach (var b in feats) _list.Children.Add(Row(b, "unlockfeat", "Подвиг открыт"));
+                _list.Children.Add(Theme.Label(L.T("Игра ещё не загрузила подвиги. Откройте главное меню или загрузите сохранение и нажмите «Обновить».", "The game has not loaded the feats yet. Open the main menu or load a save and press “Refresh”."), 12, Theme.Muted));
+            foreach (var b in feats) _list.Children.Add(Row(b, "unlockfeat", L.T("Подвиг открыт", "Feat unlocked")));
         }
 
         private static List<Badge> Parse(JsonElement r, string prop) =>
@@ -88,7 +89,7 @@ namespace TrainerByEMPEROR.App
         private FrameworkElement Header(string title, string allCmd, string doneText)
         {
             var d = new DockPanel { Margin = new Thickness(0, 10, 0, 8) };
-            var all = Theme.Button("Выдать все", Theme.Accent);
+            var all = Theme.Button(L.T("Выдать все", "Give all"), Theme.Accent);
             all.Foreground = Brushes.White;
             all.Click += async (_, _) =>
             {
@@ -126,12 +127,12 @@ namespace TrainerByEMPEROR.App
                 Padding = new Thickness(8, 2, 8, 2),
                 Margin = new Thickness(10, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = Theme.Label(b.Unlocked ? "получен" : "нет", 11, b.Unlocked ? Theme.Good : Theme.Warn),
+                Child = Theme.Label(b.Unlocked ? L.T("получен", "earned") : L.T("нет", "no"), 11, b.Unlocked ? Theme.Good : Theme.Warn),
             };
             Grid.SetColumn(chip, 1);
             g.Children.Add(chip);
 
-            var give = Theme.Button("Выдать");
+            var give = Theme.Button(L.T("Выдать", "Give"));
             give.IsEnabled = !b.Unlocked;
             give.VerticalAlignment = VerticalAlignment.Center;
             give.Click += async (_, _) =>

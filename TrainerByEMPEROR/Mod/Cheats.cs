@@ -4,6 +4,7 @@ using Il2CppTLD.Gear;
 using Il2CppTLD.IntBackedUnit;
 using MelonLoader;
 using UnityEngine;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -385,10 +386,10 @@ namespace TrainerByEMPEROR
                 case "maxskills": MaxSkills(); break;
                 case "addweapons": AddWeapons(); break;
                 case "quicksave": GameManager.SaveGameAndDisplayHUDMessage(); break;
-                default: throw new ArgumentException("Неизвестное действие " + id);
+                default: throw new ArgumentException(L.T("Неизвестное действие ", "Unknown action ") + id);
             }
             var def = Shared.Features.Find(id);
-            if (def != null) Toast.Show(def.Name + ": готово");
+            if (def != null) Toast.Show(L.T(def.Name + ": готово", def.Name + ": done"));
         }
 
         private static void Heal()
@@ -455,17 +456,17 @@ namespace TrainerByEMPEROR
         public static void Spawn(string gearName, int count)
         {
             var pm = GameManager.GetPlayerManagerComponent();
-            if (pm == null) throw new InvalidOperationException("Загрузите сохранение");
+            if (pm == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
             // Предметы FoodPack мод создаёт сам, консольная выдача их не знает — выдаём так же, как сам мод.
             if (gearName.StartsWith("GEAR_Seagull_", StringComparison.OrdinalIgnoreCase) || gearName.StartsWith(Smokes.Prefix, StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 0; i < Math.Max(1, count); i++)
                     if (pm.InstantiateItemInPlayerInventory(gearName, 1, 1f, PlayerManager.InventoryInstantiateFlags.None) == null)
-                        throw new InvalidOperationException($"Предмет {gearName} не найден — загрузите сохранение с установленным модом (FoodPack или SmokesByEMPEROR)");
+                        throw new InvalidOperationException(L.T($"Предмет {gearName} не найден — загрузите сохранение с установленным модом (FoodPack или SmokesByEMPEROR)", $"Item {gearName} not found: load a save with the mod installed (FoodPack or SmokesByEMPEROR)"));
                 return;
             }
             var gi = pm.AddItemCONSOLE(gearName, Math.Max(1, count), 1f);
-            if (gi == null) throw new InvalidOperationException($"Предмет {gearName} не найден");
+            if (gi == null) throw new InvalidOperationException(L.T($"Предмет {gearName} не найден", $"Item {gearName} not found"));
         }
 
         public static void SetTime(int hour)

@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -112,37 +113,37 @@ namespace TrainerByEMPEROR.App
 
         public static async Task Install(string dir, Action<string> log)
         {
-            if (IsGameRunning()) throw new InvalidOperationException("Закройте игру перед установкой.");
+            if (IsGameRunning()) throw new InvalidOperationException(L.T("Закройте игру перед установкой.", "Close the game before installing."));
 
             if (!MelonLoaderInstalled(dir))
             {
-                log("Скачиваю MelonLoader 0.7.1…");
+                log(L.T("Скачиваю MelonLoader 0.7.1…", "Downloading MelonLoader 0.7.1…"));
                 string zip = Path.Combine(Path.GetTempPath(), "MelonLoader.x64.zip");
                 using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
                 {
                     var bytes = await http.GetByteArrayAsync(MelonLoaderUrl);
                     await File.WriteAllBytesAsync(zip, bytes);
                 }
-                log("Распаковываю MelonLoader в папку игры…");
+                log(L.T("Распаковываю MelonLoader в папку игры…", "Unpacking MelonLoader into the game folder…"));
                 await Task.Run(() => ZipFile.ExtractToDirectory(zip, dir, true));
                 File.Delete(zip);
             }
             else
             {
-                log("MelonLoader уже установлен.");
+                log(L.T("MelonLoader уже установлен.", "MelonLoader is already installed."));
             }
 
             string mods = Path.Combine(dir, "Mods");
             Directory.CreateDirectory(mods);
             await File.WriteAllBytesAsync(Path.Combine(mods, ModFileName), EmbeddedMod());
             RemoveOld(mods, log);
-            log("Встроенная часть трейнера установлена в папку Mods.");
-            log("Готово. Первый запуск игры после установки MelonLoader идёт дольше обычного (1–3 минуты).");
+            log(L.T("Встроенная часть трейнера установлена в папку Mods.", "The in-game part of the trainer is installed into Mods."));
+            log(L.T("Готово. Первый запуск игры после установки MelonLoader идёт дольше обычного (1–3 минуты).", "Done. The first game start after installing MelonLoader takes longer than usual (1–3 minutes)."));
         }
 
         public static void RemoveMod(string dir)
         {
-            if (IsGameRunning()) throw new InvalidOperationException("Закройте игру перед удалением.");
+            if (IsGameRunning()) throw new InvalidOperationException(L.T("Закройте игру перед удалением.", "Close the game before removing."));
             string path = Path.Combine(dir, "Mods", ModFileName);
             if (File.Exists(path)) File.Delete(path);
             RemoveOld(Path.Combine(dir, "Mods"), null);
@@ -157,9 +158,9 @@ namespace TrainerByEMPEROR.App
                 {
                     if (!File.Exists(p)) continue;
                     File.Delete(p);
-                    log?.Invoke("Удалён старый файл трейнера: Mods\\" + f);
+                    log?.Invoke(L.T("Удалён старый файл трейнера: Mods\\", "Removed an old trainer file: Mods\\") + f);
                 }
-                catch (Exception e) { log?.Invoke("Не удалось удалить Mods\\" + f + ": " + e.Message); }
+                catch (Exception e) { log?.Invoke(L.T("Не удалось удалить Mods\\", "Could not delete Mods\\") + f + ": " + e.Message); }
             }
         }
 
@@ -181,7 +182,7 @@ namespace TrainerByEMPEROR.App
         private static byte[] EmbeddedMod()
         {
             using var s = typeof(GameInstaller).Assembly.GetManifestResourceStream("TrainerByEMPEROR.Mod.dll")
-                          ?? throw new InvalidOperationException("Внутри трейнера нет файла модуля");
+                          ?? throw new InvalidOperationException(L.T("Внутри трейнера нет файла модуля", "The module file is missing inside the trainer"));
             using var ms = new MemoryStream();
             s.CopyTo(ms);
             return ms.ToArray();

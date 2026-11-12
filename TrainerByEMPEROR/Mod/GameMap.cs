@@ -8,6 +8,7 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -75,7 +76,7 @@ namespace TrainerByEMPEROR
                 }
                 else
                 {
-                    _unavailable = "не удалось сжать картинку карты";
+                    _unavailable = L.T("не удалось сжать картинку карты", "could not compress the map picture");
                     MelonLogger.Warning("Карта игры: " + _finish.Exception?.GetBaseException().Message);
                 }
                 _finish = null;
@@ -138,7 +139,7 @@ namespace TrainerByEMPEROR
             catch (Exception e)
             {
                 _job = null;
-                _unavailable = "ошибка: " + e.Message;
+                _unavailable = L.T("ошибка: ", "error: ") + e.Message;
                 MelonLogger.Warning("Карта игры: " + e);
             }
         }
@@ -148,12 +149,12 @@ namespace TrainerByEMPEROR
             why = null;
             if (!MapService.Outdoors())
             {
-                why = "в помещении у игры нет карты";
+                why = L.T("в помещении у игры нет карты", "the game has no map indoors");
                 return null;
             }
             if (!InterfaceManager.TryGetPanel<Panel_Map>(out var panel) || panel == null)
             {
-                why = "окно карты игры ещё не загружено — откройте карту в игре один раз";
+                why = L.T("окно карты игры ещё не загружено — откройте карту в игре один раз", "the game map window is not loaded yet: open the map in the game once");
                 return null;
             }
             RegionMap region = null;
@@ -182,7 +183,7 @@ namespace TrainerByEMPEROR
             }
             if (region == null || region.m_RegionMapObject == null)
             {
-                why = $"у локации «{scene}» нет карты в игре";
+                why = L.T($"у локации «{scene}» нет карты в игре", $"region “{scene}” has no map in the game");
                 return null;
             }
 
@@ -248,7 +249,7 @@ namespace TrainerByEMPEROR
                     MelonLogger.Msg($"Карта игры: картинка по центру и радиусу, x {fx0:0.0}…{fx1:0.0}, y {fy0:0.0}…{fy1:0.0}");
                     if (fx1 - fx0 < 1f || fy1 - fy0 < 1f)
                     {
-                        why = "не нашлось места под картинку карты игры";
+                        why = L.T("не нашлось места под картинку карты игры", "no place found for the game map picture");
                         return null;
                     }
                     biggest = new Layer { X0 = fx0, Y0 = fy0, X1 = fx1, Y1 = fy1 };
@@ -256,7 +257,7 @@ namespace TrainerByEMPEROR
                 var keys = TextureKeys(region.m_RegionName);
                 if (keys.Count == 0)
                 {
-                    why = $"не нашлось картинок карты для «{region.m_RegionName}»";
+                    why = L.T($"не нашлось картинок карты для «{region.m_RegionName}»", $"no map pictures found for “{region.m_RegionName}”");
                     return null;
                 }
                 int depth = 0;
@@ -317,7 +318,7 @@ namespace TrainerByEMPEROR
             };
             if (Math.Abs(job.Dxx * job.Dyz - job.Dxz * job.Dyx) < 1e-9)
             {
-                why = "не удалось привязать карту игры к координатам";
+                why = L.T("не удалось привязать карту игры к координатам", "could not match the game map to coordinates");
                 ReleaseAll(job);
                 return null;
             }
@@ -447,7 +448,7 @@ namespace TrainerByEMPEROR
                 {
                     ReleaseAll(j);
                     _job = null;
-                    _unavailable = j.Layers.Count == 0 ? "картинки карты игры не загрузились" : "координаты карты игры не совпали с локацией";
+                    _unavailable = j.Layers.Count == 0 ? L.T("картинки карты игры не загрузились", "the game map pictures did not load") : L.T("координаты карты игры не совпали с локацией", "the game map coordinates did not match the region");
                     MelonLogger.Msg("Карта игры: " + _unavailable);
                 }
                 return;
@@ -471,7 +472,7 @@ namespace TrainerByEMPEROR
             var ready = j.Layers.FindAll(l => l.Rgba != null);
             if (ready.Count == 0)
             {
-                _unavailable = "не удалось прочитать картинки карты игры";
+                _unavailable = L.T("не удалось прочитать картинки карты игры", "could not read the game map pictures");
                 return;
             }
             _finish = Task.Run<object>(() => Build(j, ready));

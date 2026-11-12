@@ -10,6 +10,7 @@ using MelonLoader.Utils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -98,14 +99,14 @@ namespace TrainerByEMPEROR
             _keysTask = null;
             if (!t.IsCompletedSuccessfully)
             {
-                _error = "Не удалось прочитать каталог игры: " + t.Exception?.GetBaseException().Message;
+                _error = L.T("Не удалось прочитать каталог игры: ", "Could not read the game catalog: ") + t.Exception?.GetBaseException().Message;
                 return;
             }
             var keys = t.Result.Where(k => k.StartsWith(DataPrefix, StringComparison.Ordinal) && k.IndexOfAny(new[] { '/', '.', ' ' }) < 0).ToList();
             MelonLogger.Msg($"Предметы: найдено {keys.Count}");
             if (keys.Count == 0)
             {
-                _error = "В каталоге игры не нашлось описаний предметов.";
+                _error = L.T("В каталоге игры не нашлось описаний предметов.", "No item descriptions found in the game catalog.");
                 return;
             }
             if (TryLoadCache(keys.Count + GameCatalog.ModGear.Count)) return;
@@ -298,8 +299,8 @@ namespace TrainerByEMPEROR
         public static List<BlueprintInfo> Blueprints()
         {
             var mgr = BlueprintManager.Instance;
-            if (mgr == null) throw new InvalidOperationException("Загрузите сохранение");
-            if (!mgr.m_IsInitialized) throw new InvalidOperationException("Игра ещё загружает чертежи, попробуйте через пару секунд");
+            if (mgr == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
+            if (!mgr.m_IsInitialized) throw new InvalidOperationException(L.T("Игра ещё загружает чертежи, попробуйте через пару секунд", "The game is still loading blueprints, try again in a few seconds"));
             var all = mgr.GetAllBlueprints();
             // При первом запросе пишем в журнал каждый чертёж: если игра упадёт, будет видно, на каком.
             bool log = !_blueprintsLogged;
@@ -339,7 +340,7 @@ namespace TrainerByEMPEROR
         public static void UnlockBlueprint(int index)
         {
             var mgr = BlueprintManager.Instance;
-            if (mgr == null) throw new InvalidOperationException("Загрузите сохранение");
+            if (mgr == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
             var all = mgr.GetAllBlueprints();
             if (index < 0 || index >= all.Count) throw new ArgumentOutOfRangeException(nameof(index));
             mgr.UnlockWithNotification(all[index]);
@@ -348,7 +349,7 @@ namespace TrainerByEMPEROR
         public static void UnlockAllBlueprints()
         {
             var mgr = BlueprintManager.Instance;
-            if (mgr == null) throw new InvalidOperationException("Загрузите сохранение");
+            if (mgr == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
             var all = mgr.GetAllBlueprints();
             for (int i = 0; i < all.Count; i++)
                 if (all[i] != null && all[i].IsLocked(false)) mgr.UnlockSilent(all[i]);

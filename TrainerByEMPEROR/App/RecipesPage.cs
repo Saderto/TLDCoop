@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -30,21 +31,21 @@ namespace TrainerByEMPEROR.App
             RowDefinitions.Add(new RowDefinition());
 
             var top = new DockPanel { Margin = new Thickness(0, 0, 0, 10) };
-            var all = Theme.Button("Открыть все", Theme.Accent);
+            var all = Theme.Button(L.T("Открыть все", "Unlock all"), Theme.Accent);
             all.Foreground = Brushes.White;
             all.Margin = new Thickness(10, 0, 0, 0);
             all.Click += async (_, _) =>
             {
-                if (await _ctx.Request(new { cmd = "unlockallrecipes" }, "Все рецепты открыты") != null) await Load();
+                if (await _ctx.Request(new { cmd = "unlockallrecipes" }, L.T("Все рецепты открыты", "All recipes unlocked")) != null) await Load();
             };
             DockPanel.SetDock(all, Dock.Right);
             top.Children.Add(all);
-            var refresh = Theme.Button("Обновить");
+            var refresh = Theme.Button(L.T("Обновить", "Refresh"));
             refresh.Margin = new Thickness(10, 0, 0, 0);
             refresh.Click += async (_, _) => await Load();
             DockPanel.SetDock(refresh, Dock.Right);
             top.Children.Add(refresh);
-            _search = new TextBox { ToolTip = "Поиск рецепта или ингредиента" };
+            _search = new TextBox { ToolTip = L.T("Поиск рецепта или ингредиента", "Search recipes or ingredients") };
             _search.TextChanged += (_, _) => Render();
             top.Children.Add(_search);
             Children.Add(top);
@@ -67,7 +68,7 @@ namespace TrainerByEMPEROR.App
             int id = ++_loadId;
             if (!_ctx.InGame)
             {
-                _status.Text = "Загрузите сохранение в игре, чтобы увидеть рецепты.";
+                _status.Text = L.T("Загрузите сохранение в игре, чтобы увидеть рецепты.", "Load a save in the game to see the recipes.");
                 _items.Clear();
                 Render();
                 return;
@@ -99,7 +100,7 @@ namespace TrainerByEMPEROR.App
             var found = _items.Where(b => q.Length == 0 || b.Name.Contains(q, StringComparison.CurrentCultureIgnoreCase)
                                                         || b.Ingredients.Contains(q, StringComparison.CurrentCultureIgnoreCase)).ToList();
             if (_items.Count > 0)
-                _status.Text = $"Рецептов: {_items.Count}, открыто: {_items.Count(b => b.Unlocked)}. Показано: {found.Count}. Открытые рецепты сохраняются вместе с игрой.";
+                _status.Text = L.T($"Рецептов: {_items.Count}, открыто: {_items.Count(b => b.Unlocked)}. Показано: {found.Count}. Открытые рецепты сохраняются вместе с игрой.", $"Recipes: {_items.Count}, unlocked: {_items.Count(b => b.Unlocked)}. Shown: {found.Count}. Unlocked recipes are saved with the game.");
             foreach (var b in found) _list.Children.Add(Row(b));
         }
 
@@ -113,9 +114,9 @@ namespace TrainerByEMPEROR.App
 
             var text = new StackPanel();
             text.Children.Add(Theme.Label(rc.Name, 14, Theme.Text, bold: true));
-            string details = rc.Ingredients.Length > 0 ? "Нужно: " + rc.Ingredients : "";
-            if (rc.Skill > 1) details += (details.Length > 0 ? " · " : "") + $"навык готовки {rc.Skill}";
-            if (rc.Cooked) details += (details.Length > 0 ? " · " : "") + "уже готовили";
+            string details = rc.Ingredients.Length > 0 ? L.T("Нужно: ", "Needs: ") + rc.Ingredients : "";
+            if (rc.Skill > 1) details += (details.Length > 0 ? " · " : "") + L.T($"навык готовки {rc.Skill}", $"cooking skill {rc.Skill}");
+            if (rc.Cooked) details += (details.Length > 0 ? " · " : "") + L.T("уже готовили", "cooked before");
             if (details.Length > 0)
             {
                 var d = Theme.Label(details, 11, Theme.Muted);
@@ -132,27 +133,27 @@ namespace TrainerByEMPEROR.App
                 Padding = new Thickness(8, 2, 8, 2),
                 Margin = new Thickness(10, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = Theme.Label(rc.Unlocked ? "открыт" : "закрыт", 11, rc.Unlocked ? Theme.Good : Theme.Warn),
+                Child = Theme.Label(rc.Unlocked ? L.T("открыт", "unlocked") : L.T("закрыт", "locked"), 11, rc.Unlocked ? Theme.Good : Theme.Warn),
             };
             Grid.SetColumn(chip, 1);
             g.Children.Add(chip);
 
-            var open = Theme.Button("Открыть");
+            var open = Theme.Button(L.T("Открыть", "Unlock"));
             open.IsEnabled = !rc.Unlocked;
             open.VerticalAlignment = VerticalAlignment.Center;
             open.Click += async (_, _) =>
             {
-                if (await _ctx.Request(new { cmd = "unlockrecipe", index = rc.Index }, $"Рецепт открыт: {rc.Name}") != null) await Load();
+                if (await _ctx.Request(new { cmd = "unlockrecipe", index = rc.Index }, L.T($"Рецепт открыт: {rc.Name}", $"Recipe unlocked: {rc.Name}")) != null) await Load();
             };
             Grid.SetColumn(open, 2);
             g.Children.Add(open);
 
             if (rc.Dish != null)
             {
-                var give = Theme.Button("Выдать блюдо");
+                var give = Theme.Button(L.T("Выдать блюдо", "Give the dish"));
                 give.Margin = new Thickness(6, 0, 0, 0);
                 give.VerticalAlignment = VerticalAlignment.Center;
-                give.Click += async (_, _) => await _ctx.Request(new { cmd = "spawn", item = rc.Dish, count = 1 }, $"Выдано: {rc.Name}");
+                give.Click += async (_, _) => await _ctx.Request(new { cmd = "spawn", item = rc.Dish, count = 1 }, L.T($"Выдано: {rc.Name}", $"Given: {rc.Name}"));
                 Grid.SetColumn(give, 3);
                 g.Children.Add(give);
             }

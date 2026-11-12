@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Il2Cpp;
 using Il2CppTLD.Missions;
 using MelonLoader;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -29,7 +30,7 @@ namespace TrainerByEMPEROR
         public static List<MissionView> List()
         {
             var amm = ActiveMissionManager.Instance;
-            if (amm == null) throw new InvalidOperationException("Журнал заданий ещё не загружен");
+            if (amm == null) throw new InvalidOperationException(L.T("Журнал заданий ещё не загружен", "The quest journal is not loaded yet"));
 
             var missions = new List<MissionView>();
             var byId = new Dictionary<string, MissionView>();

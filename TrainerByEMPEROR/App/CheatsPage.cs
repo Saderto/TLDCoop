@@ -45,7 +45,7 @@ namespace TrainerByEMPEROR.App
 
             var stack = new StackPanel();
             var keysRow = new DockPanel { Margin = new Thickness(0, 0, 0, 12) };
-            var resetKeys = Theme.Button("Клавиши по умолчанию");
+            var resetKeys = Theme.Button(L.T("Клавиши по умолчанию", "Default keys"));
             resetKeys.Click += async (_, _) =>
             {
                 _capturing = null;
@@ -55,14 +55,14 @@ namespace TrainerByEMPEROR.App
             };
             DockPanel.SetDock(resetKeys, Dock.Right);
             keysRow.Children.Add(resetKeys);
-            keysRow.Children.Add(Theme.Label("Горячие клавиши работают в игре. Щёлкните по клавише рядом с функцией, чтобы назначить свою или сочетание (Ctrl, Shift, Alt + клавиша). Правый щелчок убирает клавишу.", 12, Theme.Muted));
+            keysRow.Children.Add(Theme.Label(L.T("Горячие клавиши работают в игре. Щёлкните по клавише рядом с функцией, чтобы назначить свою или сочетание (Ctrl, Shift, Alt + клавиша). Правый щелчок убирает клавишу.", "Hotkeys work in the game. Click the key next to a feature to set your own key or combination (Ctrl, Shift, Alt + key). Right-click removes the key."), 12, Theme.Muted));
             stack.Children.Add(keysRow);
             foreach (var cat in Features.Categories)
             {
                 var defs = Features.All.Where(f => f.Category == cat).ToList();
                 if (defs.Count == 0) continue;
                 var card = new StackPanel();
-                card.Children.Add(Theme.Label(cat, 16, Theme.Text, bold: true));
+                card.Children.Add(Theme.Label(Features.CatName(cat), 16, Theme.Text, bold: true));
                 foreach (var def in defs) card.Children.Add(Row(def));
                 if (cat == Features.CatStats) card.Children.Add(new SkillsPanel(_ctx));
                 stack.Children.Add(Theme.CardBorder(card));
@@ -135,12 +135,12 @@ namespace TrainerByEMPEROR.App
                 Background = Theme.Control,
                 Foreground = Theme.Muted,
                 VerticalAlignment = VerticalAlignment.Center,
-                ToolTip = "Щелчок — назначить клавишу или сочетание (например Ctrl+Shift+H).\nПравый щелчок — убрать клавишу. Esc — отмена.",
+                ToolTip = L.T("Щелчок — назначить клавишу или сочетание (например Ctrl+Shift+H).\nПравый щелчок — убрать клавишу. Esc — отмена.", "Click to set a key or combination (for example Ctrl+Shift+H).\nRight-click removes the key. Esc cancels."),
             };
             void Show()
             {
                 bool capturing = _capturing == def.Id;
-                b.Content = capturing ? "нажмите клавиши…" : "⌨ " + Features.DisplayCombo(_ctx.GetBind(def.Id));
+                b.Content = capturing ? L.T("нажмите клавиши…", "press keys…") : "⌨ " + Features.DisplayCombo(_ctx.GetBind(def.Id));
                 b.Background = capturing ? Theme.Accent : Theme.Control;
                 b.Foreground = capturing ? Brushes.White : Theme.Muted;
             }
@@ -182,7 +182,7 @@ namespace TrainerByEMPEROR.App
             string name = KeyNames.ToUnity(key);
             if (name == null)
             {
-                _ctx.Notify("Эту клавишу назначить нельзя, выберите другую.", true);
+                _ctx.Notify(L.T("Эту клавишу назначить нельзя, выберите другую.", "This key cannot be assigned, pick another one."), true);
                 return;
             }
 
@@ -204,7 +204,7 @@ namespace TrainerByEMPEROR.App
             sw.Changed += async v =>
             {
                 _ctx.SetLocal(def.Id, v ? 1f : 0f);
-                await _ctx.Request(new { cmd = "set", id = def.Id, value = v ? 1.0 : 0.0 }, $"{def.Name}: {(v ? "включено" : "выключено")}");
+                await _ctx.Request(new { cmd = "set", id = def.Id, value = v ? 1.0 : 0.0 }, $"{def.Name}: {(v ? L.T("включено", "on") : L.T("выключено", "off"))}");
             };
             _refreshers.Add(() => sw.Value = _ctx.Get(def.Id) > 0.5f);
             _needConnection.Add(sw);
@@ -226,7 +226,7 @@ namespace TrainerByEMPEROR.App
             var value = Theme.Label(Format(def, def.Default), 13, Theme.Accent, bold: true);
             value.Width = 90;
             value.TextAlignment = TextAlignment.Right;
-            var reset = new Button { Content = "↺", Padding = new Thickness(8, 3, 8, 3), Margin = new Thickness(6, 0, 0, 0), ToolTip = "Как в игре" };
+            var reset = new Button { Content = "↺", Padding = new Thickness(8, 3, 8, 3), Margin = new Thickness(6, 0, 0, 0), ToolTip = L.T("Как в игре", "As in the game") };
 
             var debounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
             debounce.Tick += async (_, _) =>
@@ -263,7 +263,7 @@ namespace TrainerByEMPEROR.App
 
         private static string Format(FeatureDef def, float v) => def.Id switch
         {
-            "carry" => v < 0.5f ? "как в игре" : $"{v:0} кг",
+            "carry" => v < 0.5f ? L.T("как в игре", "as in the game") : L.T($"{v:0} кг", $"{v:0} kg"),
             "flyspeed" => $"{v:0}",
             "hungerlvl" or "thirstlvl" or "fatiguelvl" or "freezelvl" => $"{v:0} %",
             _ => $"×{v:0.0#}",
@@ -271,10 +271,10 @@ namespace TrainerByEMPEROR.App
 
         private FrameworkElement ActionControl(FeatureDef def)
         {
-            var b = Theme.Button("Применить", Theme.Accent);
+            var b = Theme.Button(L.T("Применить", "Apply"), Theme.Accent);
             b.HorizontalAlignment = HorizontalAlignment.Right;
             b.Foreground = Brushes.White;
-            b.Click += async (_, _) => await _ctx.Request(new { cmd = "action", id = def.Id }, $"{def.Name}: готово");
+            b.Click += async (_, _) => await _ctx.Request(new { cmd = "action", id = def.Id }, L.T($"{def.Name}: готово", $"{def.Name}: done"));
             _needGame.Add(b);
             return b;
         }
@@ -294,11 +294,11 @@ namespace TrainerByEMPEROR.App
             var label = Theme.Label("12:00", 13, Theme.Accent, bold: true);
             label.Width = 50;
             slider.ValueChanged += (_, e) => label.Text = $"{(int)e.NewValue:00}:00";
-            var apply = Theme.Button("Установить", Theme.Accent);
+            var apply = Theme.Button(L.T("Установить", "Set"), Theme.Accent);
             apply.Foreground = Brushes.White;
             apply.Margin = new Thickness(10, 0, 0, 0);
             apply.Click += async (_, _) =>
-                await _ctx.Request(new { cmd = "settime", hour = (int)slider.Value }, $"Время установлено: {(int)slider.Value:00}:00");
+                await _ctx.Request(new { cmd = "settime", hour = (int)slider.Value }, L.T($"Время установлено: {(int)slider.Value:00}:00", $"Time set: {(int)slider.Value:00}:00"));
             _needGame.Add(apply);
 
             var sp = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
@@ -316,7 +316,7 @@ namespace TrainerByEMPEROR.App
                 var b = new Button { Content = w.Name, Margin = new Thickness(4, 4, 0, 0), Padding = new Thickness(10, 5, 10, 5), FontSize = 12 };
                 var stage = w.Stage;
                 var name = w.Name;
-                b.Click += async (_, _) => await _ctx.Request(new { cmd = "weather", stage }, $"Погода: {name}");
+                b.Click += async (_, _) => await _ctx.Request(new { cmd = "weather", stage }, L.T($"Погода: {name}", $"Weather: {name}"));
                 _needGame.Add(b);
                 wrap.Children.Add(b);
             }
@@ -342,13 +342,13 @@ namespace TrainerByEMPEROR.App
             {
                 _banner.Visibility = Visibility.Visible;
                 _bannerText.Text = _ctx.GameRunning
-                    ? "Игра запущена, но трейнер в ней не отвечает. Если игра только запускается, подождите. Если нет — откройте раздел «Установка» и установите трейнер, затем перезапустите игру."
-                    : "Игра не запущена. Нажмите «Играть» вверху справа. Переключатели станут активны, когда игра запустится.";
+                    ? L.T("Игра запущена, но трейнер в ней не отвечает. Если игра только запускается, подождите. Если нет — откройте раздел «Установка» и установите трейнер, затем перезапустите игру.", "The game is running, but the trainer in it does not answer. If the game is still starting, wait. If not, open “Setup”, install the trainer and restart the game.")
+                    : L.T("Игра не запущена. Нажмите «Играть» вверху справа. Переключатели станут активны, когда игра запустится.", "The game is not running. Press “Play” at the top right. The switches become active when the game starts.");
             }
             else if (!_ctx.InGame)
             {
                 _banner.Visibility = Visibility.Visible;
-                _bannerText.Text = "Игра подключена. Переключатели можно включать уже сейчас, они сработают после загрузки сохранения. Кнопки «Применить» доступны в самой игре.";
+                _bannerText.Text = L.T("Игра подключена. Переключатели можно включать уже сейчас, они сработают после загрузки сохранения. Кнопки «Применить» доступны в самой игре.", "Game connected. You can turn switches on now, they take effect once a save is loaded. “Apply” buttons work in a loaded game.");
             }
             else
             {

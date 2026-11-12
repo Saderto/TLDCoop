@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Il2Cpp;
 using MelonLoader;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -19,7 +20,7 @@ namespace TrainerByEMPEROR
         private static IEnumerable<Skill> All()
         {
             var sm = GameManager.GetSkillsManager();
-            if (sm == null) throw new InvalidOperationException("Загрузите сохранение");
+            if (sm == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
             for (int i = 0; i < sm.GetNumSkills(); i++)
             {
                 var s = sm.GetSkillFromIndex(i);
@@ -71,7 +72,7 @@ namespace TrainerByEMPEROR
                 MelonLogger.Msg($"Навык {s.m_SkillType}: уровень {tier + 1}");
                 return;
             }
-            throw new InvalidOperationException("Навык не найден");
+            throw new InvalidOperationException(L.T("Навык не найден", "Skill not found"));
         }
     }
 }

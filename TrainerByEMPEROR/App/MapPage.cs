@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -119,6 +120,21 @@ namespace TrainerByEMPEROR.App
         private bool Shown(Marker m) => _filters.TryGetValue(GroupOf(m), out var f) && f.IsChecked == true;
 
         // Слои, которые были до 2.4.2: у старых настроек новые слои включаются по умолчанию.
+        // Подписи фильтров на английском (по ключу группы).
+        private static readonly Dictionary<string, string> GroupsEn = new()
+        {
+            ["gamebuild"] = "Game map: buildings, caves, interiors",
+            ["game"] = "Game map: labels and landmarks",
+            ["places"] = "More buildings and caves (found by the trainer)",
+            ["exit"] = "Exits to other regions",
+            ["animal"] = "Animals",
+            ["camp"] = "Fires, beds, workbenches, ropes",
+            ["foodpack"] = "FoodPack sake, whiskey and cards",
+            ["loot"] = "Loot: containers, carcasses, plants, items",
+        };
+
+        private static string GroupLabel(string key, string ru) => L.En && GroupsEn.TryGetValue(key, out var en) ? en : ru;
+
         private static readonly string[] OldLayers =
         {
             "building", "cave", "exit", "animal", "carcass", "container", "loot", "plant", "breakdown", "fire", "bed", "workbench", "fishing", "rope", "cairn",
@@ -144,15 +160,15 @@ namespace TrainerByEMPEROR.App
 
             // Панель управления
             var bar = new WrapPanel { Margin = new Thickness(0, 0, 0, 10) };
-            var render = Theme.Button("Обновить карту", Theme.Accent);
+            var render = Theme.Button(L.T("Обновить карту", "Refresh map"), Theme.Accent);
             render.Foreground = Brushes.White;
             render.Click += async (_, _) => await RenderMap(force: true);
             bar.Children.Add(render);
-            var refresh = Theme.Button("Обновить метки");
+            var refresh = Theme.Button(L.T("Обновить метки", "Refresh markers"));
             refresh.Margin = new Thickness(8, 0, 0, 0);
             refresh.Click += async (_, _) => await LoadMarkers(refresh: true);
             bar.Children.Add(refresh);
-            var center = Theme.Button("К себе");
+            var center = Theme.Button(L.T("К себе", "To me"));
             center.Margin = new Thickness(8, 0, 16, 0);
             center.Click += (_, _) =>
             {
@@ -160,7 +176,7 @@ namespace TrainerByEMPEROR.App
                 CenterOnPlayer();
             };
             bar.Children.Add(center);
-            var tpLabel = Theme.Label("Телепорт по щелчку", 13);
+            var tpLabel = Theme.Label(L.T("Телепорт по щелчку", "Teleport on click"), 13);
             tpLabel.VerticalAlignment = VerticalAlignment.Center;
             tpLabel.Margin = new Thickness(0, 0, 8, 0);
             bar.Children.Add(tpLabel);
@@ -172,7 +188,7 @@ namespace TrainerByEMPEROR.App
                 _view.Cursor = v ? Cursors.Cross : Cursors.Arrow;
             };
             bar.Children.Add(tpSwitch);
-            var bgLabel = Theme.Label("Карта из игры", 13);
+            var bgLabel = Theme.Label(L.T("Карта из игры", "Game map"), 13);
             bgLabel.VerticalAlignment = VerticalAlignment.Center;
             bgLabel.Margin = new Thickness(16, 0, 8, 0);
             bar.Children.Add(bgLabel);
@@ -286,7 +302,7 @@ namespace TrainerByEMPEROR.App
             _coords = Theme.Label("", 12, Theme.Muted);
             DockPanel.SetDock(_coords, Dock.Right);
             foot.Children.Add(_coords);
-            _status = Theme.Label("Щелчок — телепорт в точку. Колесо мыши — масштаб. Зажмите кнопку мыши и тяните, чтобы двигать карту.", 12, Theme.Muted);
+            _status = Theme.Label(L.T("Щелчок — телепорт в точку. Колесо мыши — масштаб. Зажмите кнопку мыши и тяните, чтобы двигать карту.", "Click to teleport there. Mouse wheel zooms. Hold the mouse button and drag to move the map."), 12, Theme.Muted);
             foot.Children.Add(_status);
             SetRow(foot, 2);
             Children.Add(foot);
@@ -320,11 +336,11 @@ namespace TrainerByEMPEROR.App
             if (_busy) return;
             if (!_ctx.InGame)
             {
-                _status.Text = "Загрузите сохранение в игре, чтобы увидеть карту.";
+                _status.Text = L.T("Загрузите сохранение в игре, чтобы увидеть карту.", "Load a save in the game to see the map.");
                 return;
             }
             _busy = true;
-            _status.Text = "Карта готовится в игре…";
+            _status.Text = L.T("Карта готовится в игре…", "The game is preparing the map…");
             try
             {
                 string note = null;
@@ -335,7 +351,7 @@ namespace TrainerByEMPEROR.App
                     if (r == null) return;
                     if (r.Value.TryGetProperty("unavailable", out var un) && un.ValueKind == JsonValueKind.True)
                     {
-                        note = "Карта из игры недоступна (" + r.Value.GetProperty("reason").GetString() + "), показана схема рельефа.";
+                        note = L.T("Карта из игры недоступна (", "The game map is not available (") + r.Value.GetProperty("reason").GetString() + L.T("), показана схема рельефа.", "), showing the terrain scheme.");
                         r = null;
                     }
                 }
@@ -355,7 +371,7 @@ namespace TrainerByEMPEROR.App
                 _background.Height = _markers.Height = _playerLayer.Height = _h;
 
                 FitToView();
-                _status.Text = note ?? "Щелчок — телепорт в точку. Колесо мыши — масштаб. Зажмите кнопку мыши и тяните, чтобы двигать карту.";
+                _status.Text = note ?? L.T("Щелчок — телепорт в точку. Колесо мыши — масштаб. Зажмите кнопку мыши и тяните, чтобы двигать карту.", "Click to teleport there. Mouse wheel zooms. Hold the mouse button and drag to move the map.");
                 await LoadMarkers(refresh: force);
                 _follow = true;
                 await UpdatePlayer();
@@ -385,11 +401,11 @@ namespace TrainerByEMPEROR.App
                 force = false;
                 if (r.TryGetProperty("ready", out var ready) && ready.ValueKind == JsonValueKind.True) return r;
                 int progress = r.TryGetProperty("progress", out var pr) ? pr.GetInt32() : 0;
-                _status.Text = $"Карта готовится в игре: {progress}%. Играть можно, игра не замирает.";
+                _status.Text = L.T($"Карта готовится в игре: {progress}%. Играть можно, игра не замирает.", $"The game is preparing the map: {progress}%. You can keep playing, the game does not freeze.");
                 await Task.Delay(1000);
                 if (!IsVisible || !_ctx.InGame)
                 {
-                    _status.Text = "Карта достраивается в игре и откроется, когда вы вернётесь в этот раздел.";
+                    _status.Text = L.T("Карта достраивается в игре и откроется, когда вы вернётесь в этот раздел.", "The map is still being built in the game and opens when you come back to this page.");
                     _scene = null;
                     return null;
                 }
@@ -784,9 +800,9 @@ namespace TrainerByEMPEROR.App
             }
             string label = m.Type switch
             {
-                "container" => m.Name + (m.Done ? " (обыскан)" : ""),
-                "carcass" => m.Name + (m.Done ? " (разделана)" : ""),
-                "plant" => m.Name + (m.Done ? " (собрано)" : ""),
+                "container" => m.Name + (m.Done ? L.T(" (обыскан)", " (searched)") : ""),
+                "carcass" => m.Name + (m.Done ? L.T(" (разделана)", " (harvested)") : ""),
+                "plant" => m.Name + (m.Done ? L.T(" (собрано)", " (picked)") : ""),
                 _ => m.Name,
             };
             body.MouseEnter += (_, e) =>
@@ -884,7 +900,7 @@ namespace TrainerByEMPEROR.App
         {
             if (!ClickTeleport || _size <= 0 || !_ctx.InGame) return;
             var (x, z) = ToWorld(boardPoint);
-            var r = await _ctx.Request(new { cmd = "teleport", x, z }, $"Телепорт: X {x:0}, Z {z:0}");
+            var r = await _ctx.Request(new { cmd = "teleport", x, z }, L.T($"Телепорт: X {x:0}, Z {z:0}", $"Teleport: X {x:0}, Z {z:0}"));
             if (r != null) await UpdatePlayer();
         }
 
@@ -957,10 +973,10 @@ namespace TrainerByEMPEROR.App
         {
             var list = new StackPanel();
             var head = new DockPanel { Margin = new Thickness(0, 0, 0, 6) };
-            var collapse = new Button { Content = "▾", Padding = new Thickness(8, 2, 8, 2), Background = Theme.Control, ToolTip = "Свернуть / развернуть" };
+            var collapse = new Button { Content = "▾", Padding = new Thickness(8, 2, 8, 2), Background = Theme.Control, ToolTip = L.T("Свернуть / развернуть", "Collapse / expand") };
             DockPanel.SetDock(collapse, Dock.Right);
             head.Children.Add(collapse);
-            head.Children.Add(Theme.Label("Фильтры", 14, Theme.Text, bold: true));
+            head.Children.Add(Theme.Label(L.T("Фильтры", "Filters"), 14, Theme.Text, bold: true));
             var body = new StackPanel();
             collapse.Click += (_, _) =>
             {
@@ -969,8 +985,8 @@ namespace TrainerByEMPEROR.App
             };
 
             var allNone = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 6) };
-            var all = new Button { Content = "Все", Padding = new Thickness(10, 3, 10, 3), Background = Theme.Control, FontSize = 12 };
-            var none = new Button { Content = "Ничего", Padding = new Thickness(10, 3, 10, 3), Background = Theme.Control, FontSize = 12, Margin = new Thickness(6, 0, 0, 0) };
+            var all = new Button { Content = L.T("Все", "All"), Padding = new Thickness(10, 3, 10, 3), Background = Theme.Control, FontSize = 12 };
+            var none = new Button { Content = L.T("Ничего", "None"), Padding = new Thickness(10, 3, 10, 3), Background = Theme.Control, FontSize = 12, Margin = new Thickness(6, 0, 0, 0) };
             all.Click += (_, _) => SetAll(true);
             none.Click += (_, _) => SetAll(false);
             allNone.Children.Add(all);
@@ -986,7 +1002,7 @@ namespace TrainerByEMPEROR.App
                     Margin = new Thickness(0, 0, 0, 4),
                     Cursor = Cursors.Hand,
                     HorizontalContentAlignment = HorizontalAlignment.Left,
-                    Content = MakeLegend(label, color),
+                    Content = MakeLegend(GroupLabel(key, label), color),
                     Template = ChipTemplate(),
                 };
                 t.Checked += (_, _) => FiltersChanged();
@@ -1035,7 +1051,8 @@ namespace TrainerByEMPEROR.App
             {
                 if (!_filters.TryGetValue(key, out var t)) continue;
                 int n = _markerData.Count(m => GroupOf(m) == key);
-                t.Content = MakeLegend(n > 0 ? $"{label}  ({n})" : label, color);
+                string text = GroupLabel(key, label);
+                t.Content = MakeLegend(n > 0 ? $"{text}  ({n})" : text, color);
             }
         }
 

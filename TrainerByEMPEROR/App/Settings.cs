@@ -9,6 +9,9 @@ namespace TrainerByEMPEROR.App
     {
         public string GamePath { get; set; }
 
+        // Язык окна трейнера: "ru" или "en". null = как в Windows (русский, если Windows на русском).
+        public string Language { get; set; }
+
         // Назначенные клавиши: id функции → сочетание. null = клавиши по умолчанию.
         public Dictionary<string, string> Binds { get; set; }
 

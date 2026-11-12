@@ -88,6 +88,8 @@ namespace TrainerByEMPEROR
                     return new { ok = true, version = Features.Version };
 
                 case "state":
+                    // Окно передаёт свой язык: ответы и подсказки модуля идут на нём же.
+                    if (r.TryGetProperty("lang", out var lang) && lang.ValueKind == JsonValueKind.String) L.En = lang.GetString() == "en";
                     return new { ok = true, inGame = InGame, values = State.Snapshot() };
 
                 case "set":
@@ -347,13 +349,13 @@ namespace TrainerByEMPEROR
                 }
 
                 default:
-                    throw new ArgumentException("Неизвестная команда " + cmd);
+                    throw new ArgumentException(L.T("Неизвестная команда ", "Unknown command ") + cmd);
             }
         }
 
         private static void RequireGame()
         {
-            if (!InGame) throw new InvalidOperationException("Сначала загрузите сохранение в игре");
+            if (!InGame) throw new InvalidOperationException(L.T("Сначала загрузите сохранение в игре", "Load a save in the game first"));
         }
     }
 }

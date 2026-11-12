@@ -18,6 +18,7 @@
     <PackageReference Include="Il2CppInterop.Runtime" Version="1.5.1" />
     <Reference Include="..\refs-2.58\*.dll" Private="false" />
     <Compile Include="..\Shared\Features.cs" Link="Shared\Features.cs" />
+    <Compile Include="..\Shared\L.cs" Link="Shared\L.cs" />
   </ItemGroup>
 
 </Project>

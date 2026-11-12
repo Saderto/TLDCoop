@@ -23,11 +23,11 @@ namespace TrainerByEMPEROR.App
                 {
                     if (_client == null) Connect();
                     _writer.WriteLine(JsonSerializer.Serialize(request));
-                    string line = _reader.ReadLine() ?? throw new IOException("Соединение закрыто");
+                    string line = _reader.ReadLine() ?? throw new IOException(L.T("Соединение закрыто", "Connection closed"));
                     using var doc = JsonDocument.Parse(line);
                     var root = doc.RootElement.Clone();
                     if (root.TryGetProperty("ok", out var ok) && ok.ValueKind == JsonValueKind.False)
-                        throw new GameException(root.TryGetProperty("error", out var e) ? e.GetString() : "Ошибка");
+                        throw new GameException(root.TryGetProperty("error", out var e) ? e.GetString() : L.T("Ошибка", "Error"));
                     return root;
                 }
                 catch (GameException)
@@ -48,7 +48,7 @@ namespace TrainerByEMPEROR.App
             if (!c.ConnectAsync("127.0.0.1", Features.Port).Wait(400))
             {
                 c.Dispose();
-                throw new IOException("Игра не отвечает");
+                throw new IOException(L.T("Игра не отвечает", "The game does not answer"));
             }
             c.ReceiveTimeout = 25000;
             var stream = c.GetStream();

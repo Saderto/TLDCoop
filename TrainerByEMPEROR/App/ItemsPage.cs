@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -42,7 +43,7 @@ namespace TrainerByEMPEROR.App
             ColumnDefinitions.Add(new ColumnDefinition());
 
             var top = new DockPanel { Margin = new Thickness(0, 0, 0, 10) };
-            var refresh = Theme.Button("Обновить список");
+            var refresh = Theme.Button(L.T("Обновить список", "Refresh list"));
             refresh.Margin = new Thickness(10, 0, 0, 0);
             refresh.Click += async (_, _) =>
             {
@@ -52,7 +53,7 @@ namespace TrainerByEMPEROR.App
             };
             DockPanel.SetDock(refresh, Dock.Right);
             top.Children.Add(refresh);
-            _search = new TextBox { ToolTip = "Поиск по названию или коду" };
+            _search = new TextBox { ToolTip = L.T("Поиск по названию или коду", "Search by name or code") };
             _search.TextChanged += (_, _) => Render();
             top.Children.Add(_search);
             SetColumnSpan(top, 2);
@@ -91,7 +92,7 @@ namespace TrainerByEMPEROR.App
             if (_loading) return;
             if (!_ctx.Connected)
             {
-                _status.Text = "Запустите игру: список предметов берётся прямо из неё.";
+                _status.Text = L.T("Запустите игру: список предметов берётся прямо из неё.", "Start the game: the item list is taken from it.");
                 return;
             }
             _loading = true;
@@ -125,7 +126,7 @@ namespace TrainerByEMPEROR.App
                 {
                     int done = r.GetProperty("progress").GetInt32();
                     int total = r.GetProperty("total").GetInt32();
-                    _status.Text = $"Игра собирает список предметов: {done} из {total}… (только при первом запуске)";
+                    _status.Text = L.T($"Игра собирает список предметов: {done} из {total}… (только при первом запуске)", $"The game is collecting the item list: {done} of {total}… (first run only)");
                 }
             }
             finally
@@ -133,6 +134,35 @@ namespace TrainerByEMPEROR.App
                 _loading = false;
             }
         }
+
+        // Группы приходят из модуля в игре по-русски (они же ключи), на экран — на выбранном языке.
+        internal static string GroupName(string g) => !L.En ? g : g switch
+        {
+            AllGroups => "All items",
+            "Из модов" => "From mods",
+            "Оружие и боеприпасы" => "Weapons and ammo",
+            "Еда и напитки" => "Food and drinks",
+            "Одежда" => "Clothing",
+            "Медицина" => "First aid",
+            "Розжиг и свет" => "Fire and light",
+            "Инструменты" => "Tools",
+            "Материалы" => "Materials",
+            "Прочее" => "Other",
+            "FoodPack: напитки" => "FoodPack: drinks",
+            "FoodPack: блюда" => "FoodPack: dishes",
+            "FoodPack: консервы" => "FoodPack: canned food",
+            "FoodPack: перекусы" => "FoodPack: snacks",
+            "FoodPack: упаковки" => "FoodPack: packs",
+            "FoodPack: карточки рецептов" => "FoodPack: recipe cards",
+            "FoodPack: ингредиенты" => "FoodPack: ingredients",
+            "Табак: заправки для зажигалок" => "Tobacco: lighter refills",
+            "Табак: зажигалки" => "Tobacco: lighters",
+            "Табак: сигареты" => "Tobacco: cigarettes",
+            "Табак: сигары" => "Tobacco: cigars",
+            "Табак: трубки и табак" => "Tobacco: pipes and tobacco",
+            "Табак: прочее" => "Tobacco: other",
+            _ => g,
+        };
 
         private void RenderGroups()
         {
@@ -143,7 +173,7 @@ namespace TrainerByEMPEROR.App
             {
                 var b = new Button
                 {
-                    Content = $"{name}  ({count})",
+                    Content = $"{GroupName(name)}  ({count})",
                     HorizontalContentAlignment = HorizontalAlignment.Left,
                     Margin = new Thickness(0, 0, 0, 6),
                     Background = name == _group ? Theme.Accent : Theme.Control,
@@ -171,8 +201,8 @@ namespace TrainerByEMPEROR.App
                 .ToList();
 
             _status.Text = found.Count > MaxRows
-                ? $"Найдено {found.Count}, показаны первые {MaxRows}. Уточните поиск."
-                : $"Найдено: {found.Count}. Предметы появляются в инвентаре сразу.";
+                ? L.T($"Найдено {found.Count}, показаны первые {MaxRows}. Уточните поиск.", $"Found {found.Count}, showing the first {MaxRows}. Narrow the search.")
+                : L.T($"Найдено: {found.Count}. Предметы появляются в инвентаре сразу.", $"Found: {found.Count}. Items appear in the inventory right away.");
 
             foreach (var item in found.Take(MaxRows)) _list.Children.Add(Row(item));
         }
@@ -185,7 +215,7 @@ namespace TrainerByEMPEROR.App
 
             var title = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
             title.Children.Add(Theme.Label(item.Name, 14, Theme.Text, bold: true));
-            title.Children.Add(Theme.Label($"{item.Group} · {item.Id}", 11, Theme.Muted));
+            title.Children.Add(Theme.Label($"{GroupName(item.Group)} · {item.Id}", 11, Theme.Muted));
             g.Children.Add(title);
 
             var buttons = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
@@ -194,7 +224,7 @@ namespace TrainerByEMPEROR.App
                 var b = new Button { Content = $"+{n}", Width = 52, Margin = new Thickness(6, 0, 0, 0), Background = Theme.ControlHi };
                 int count = n;
                 b.Click += async (_, _) =>
-                    await _ctx.Request(new { cmd = "spawn", item = item.Id, count }, $"Выдано: {item.Name} ×{count}");
+                    await _ctx.Request(new { cmd = "spawn", item = item.Id, count }, L.T($"Выдано: {item.Name} ×{count}", $"Given: {item.Name} ×{count}"));
                 buttons.Children.Add(b);
             }
             Grid.SetColumn(buttons, 1);

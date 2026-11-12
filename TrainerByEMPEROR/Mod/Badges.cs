@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Il2Cpp;
 using Il2CppTLD.SaveState;
 using MelonLoader;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -76,7 +77,7 @@ namespace TrainerByEMPEROR
                 list.Add(new BadgeEntry
                 {
                     Id = (int)type,
-                    Name = string.IsNullOrWhiteSpace(name) ? (Fallback.TryGetValue(type, out var n) ? n : type.ToString()) : name,
+                    Name = string.IsNullOrWhiteSpace(name) ? (L.En ? type.ToString().Replace("Badge_", "") : Fallback.TryGetValue(type, out var n) ? n : type.ToString()) : name,
                     Description = desc ?? "",
                     Unlocked = got.Contains((int)type) || (info != null && info.m_Unlocked),
                 });
@@ -177,13 +178,13 @@ namespace TrainerByEMPEROR
                 MelonLogger.Msg($"Подвиг открыт: {f.m_FeatType}");
                 return;
             }
-            throw new InvalidOperationException("Подвиг не найден — откройте главное меню или загрузите сохранение");
+            throw new InvalidOperationException(L.T("Подвиг не найден — откройте главное меню или загрузите сохранение", "Feat not found: open the main menu or load a save"));
         }
 
         public static void UnlockAllFeats()
         {
             var feats = Feats();
-            if (feats.Count == 0) throw new InvalidOperationException("Подвиги ещё не загружены — откройте главное меню или загрузите сохранение");
+            if (feats.Count == 0) throw new InvalidOperationException(L.T("Подвиги ещё не загружены — откройте главное меню или загрузите сохранение", "Feats are not loaded yet: open the main menu or load a save"));
             foreach (var f in feats)
                 if (!f.IsUnlocked()) Complete(f);
             SaveGameSystem.SaveProfile();

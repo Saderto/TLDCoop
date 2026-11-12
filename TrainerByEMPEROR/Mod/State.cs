@@ -68,7 +68,7 @@ namespace TrainerByEMPEROR
         {
             Set(id, On(id) ? 0f : 1f);
             var def = Features.Find(id);
-            Toast.Show($"{def?.Name}: {(On(id) ? "ВКЛ" : "выкл")}");
+            Toast.Show($"{def?.Name}: {(On(id) ? L.T("ВКЛ", "ON") : L.T("выкл", "off"))}");
         }
 
         public static Dictionary<string, float> Snapshot() => new(Values);

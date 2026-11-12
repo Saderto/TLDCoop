@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Il2CppTLD.Cooking;
 using MelonLoader;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -26,9 +27,9 @@ namespace TrainerByEMPEROR
         private static List<RecipeData> All()
         {
             var book = RecipeBook.Instance;
-            if (book == null) throw new InvalidOperationException("Загрузите сохранение");
+            if (book == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
             var all = book.AllRecipes;
-            if (all == null || all.Count == 0) throw new InvalidOperationException("Игра ещё загружает рецепты, попробуйте через пару секунд");
+            if (all == null || all.Count == 0) throw new InvalidOperationException(L.T("Игра ещё загружает рецепты, попробуйте через пару секунд", "The game is still loading recipes, try again in a few seconds"));
             var list = new List<RecipeData>();
             var seen = new HashSet<IntPtr>();
             for (int i = 0; i < all.Count; i++)

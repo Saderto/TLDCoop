@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -19,16 +20,21 @@ namespace TrainerByEMPEROR.App
         private readonly TextBlock _message = Theme.Label("", 12, Theme.Muted);
         private readonly DispatcherTimer _messageTimer = new() { Interval = TimeSpan.FromSeconds(6) };
 
-        private readonly CheatsPage _cheats;
-        private readonly ItemsPage _items;
-        private readonly BlueprintsPage _blueprints;
-        private readonly RecipesPage _recipes;
-        private readonly QuestsPage _quests;
-        private readonly BadgesPage _badges;
-        private readonly MapPage _map;
-        private readonly SetupPage _setup;
+        private CheatsPage _cheats;
+        private ItemsPage _items;
+        private BlueprintsPage _blueprints;
+        private RecipesPage _recipes;
+        private QuestsPage _quests;
+        private BadgesPage _badges;
+        private MapPage _map;
+        private SetupPage _setup;
         private bool _polling;
-        private readonly Button _hide;
+        private Button _hide;
+        private string _current = "cheats";
+
+        // Язык из настроек; если не выбран — как в Windows.
+        public static bool ResolveEnglish(string lang) =>
+            lang == "en" || (lang != "ru" && !System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("ru", StringComparison.OrdinalIgnoreCase));
 
         public MainWindow(bool background = false, bool openNow = false)
         {
@@ -50,6 +56,42 @@ namespace TrainerByEMPEROR.App
                 _message.Text = "";
             };
 
+            L.En = ResolveEnglish(_ctx.Settings.Language);
+            BuildUi();
+            Navigate(_setup.Ready() ? "cheats" : "setup");
+            Title = "TrainerByEMPEROR " + Shared.Features.Version;
+
+            var poll = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            poll.Tick += async (_, _) => await Poll();
+            poll.Start();
+            UpdateConnection();
+
+            _ctx.Overlay = new Overlay(this, _ctx);
+            if (background) _ctx.Overlay.StartInBackground(openNow);
+            AutoStart.Update(_ctx.Settings);
+            _ctx.Overlay.ModeChanged += () =>
+            {
+                _hide.Visibility = _ctx.Overlay.Active ? Visibility.Visible : Visibility.Collapsed;
+                _hide.Content = L.T($"Скрыть ({KeyTitle(_ctx.Overlay.OverlayKey)})", $"Hide ({KeyTitle(_ctx.Overlay.OverlayKey)})");
+            };
+            // Окно поверх игры закрывать нельзя — только прятать; иначе трейнер выключится.
+            SizeChanged += (_, _) => _ctx.Overlay?.SizeChanged();
+            Closing += (_, e) =>
+            {
+                if (_ctx.Overlay.Active && GameInstaller.IsGameRunning())
+                {
+                    e.Cancel = true;
+                    _ctx.Overlay.Close();
+                }
+            };
+        }
+
+        // Строит всё содержимое окна на текущем языке (при смене языка — заново).
+        private void BuildUi()
+        {
+            // Эти элементы живут всё время; при перестройке снимаем их со старой разметки.
+            foreach (FrameworkElement e in new FrameworkElement[] { _page, _message, _dot, _connText })
+                (e.Parent as Panel)?.Children.Remove(e);
             _cheats = new CheatsPage(_ctx);
             _items = new ItemsPage(_ctx);
             _blueprints = new BlueprintsPage(_ctx);
@@ -77,7 +119,7 @@ namespace TrainerByEMPEROR.App
 
             var play = new Button
             {
-                Content = "▶  Играть",
+                Content = L.T("▶  Играть", "▶  Play"),
                 Background = Brushes.White,
                 Foreground = Theme.Window,
                 FontSize = 15,
@@ -92,7 +134,7 @@ namespace TrainerByEMPEROR.App
             // Поверх игры у окна нет рамки — прячем его этой кнопкой или той же клавишей.
             _hide = new Button
             {
-                Content = "Скрыть",
+                Content = L.T("Скрыть", "Hide"),
                 FontSize = 14,
                 Padding = new Thickness(16, 8, 16, 8),
                 Margin = new Thickness(0, 0, 10, 0),
@@ -102,6 +144,28 @@ namespace TrainerByEMPEROR.App
             _hide.Click += (_, _) => _ctx.Overlay?.Close();
             DockPanel.SetDock(_hide, Dock.Right);
             top.Children.Add(_hide);
+
+            // Язык окна: RU / EN. Выбор сохраняется и передаётся модулю в игре.
+            var langBox = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 14, 0) };
+            foreach (var (code, text) in new[] { ("ru", "RU"), ("en", "EN") })
+            {
+                bool active = (code == "en") == L.En;
+                var lb = new Button
+                {
+                    Content = text,
+                    FontSize = 12,
+                    FontWeight = active ? FontWeights.Bold : FontWeights.Normal,
+                    Padding = new Thickness(9, 5, 9, 5),
+                    Background = active ? Theme.Control : Brushes.Transparent,
+                    Foreground = active ? Theme.Text : Theme.Muted,
+                    ToolTip = code == "en" ? "English" : "Русский",
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+                lb.Click += (_, _) => SetLanguage(code);
+                langBox.Children.Add(lb);
+            }
+            DockPanel.SetDock(langBox, Dock.Right);
+            top.Children.Add(langBox);
 
             var conn = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 18, 0) };
             conn.Children.Add(_dot);
@@ -135,14 +199,14 @@ namespace TrainerByEMPEROR.App
 
             // Меню слева
             var nav = new StackPanel { Margin = new Thickness(14, 16, 14, 0) };
-            AddNav(nav, "cheats", "Читы");
-            AddNav(nav, "items", "Предметы");
-            AddNav(nav, "blueprints", "Чертежи");
-            AddNav(nav, "recipes", "Рецепты");
-            AddNav(nav, "map", "Карта");
-            AddNav(nav, "quests", "Задания");
-            AddNav(nav, "badges", "Значки");
-            AddNav(nav, "setup", "Установка");
+            AddNav(nav, "cheats", L.T("Читы", "Cheats"));
+            AddNav(nav, "items", L.T("Предметы", "Items"));
+            AddNav(nav, "blueprints", L.T("Чертежи", "Blueprints"));
+            AddNav(nav, "recipes", L.T("Рецепты", "Recipes"));
+            AddNav(nav, "map", L.T("Карта", "Map"));
+            AddNav(nav, "quests", L.T("Задания", "Quests"));
+            AddNav(nav, "badges", L.T("Значки", "Badges"));
+            AddNav(nav, "setup", L.T("Установка", "Setup"));
             var navBorder = new Border { Background = Theme.Panel, Child = nav };
             Grid.SetRow(navBorder, 1);
             Grid.SetRowSpan(navBorder, 2);
@@ -159,33 +223,27 @@ namespace TrainerByEMPEROR.App
             root.Children.Add(_message);
 
             Content = root;
-
-            Navigate(_setup.Ready() ? "cheats" : "setup");
-            Title = "TrainerByEMPEROR " + Shared.Features.Version;
-
-            var poll = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            poll.Tick += async (_, _) => await Poll();
-            poll.Start();
-            UpdateConnection();
-
-            _ctx.Overlay = new Overlay(this, _ctx);
-            if (background) _ctx.Overlay.StartInBackground(openNow);
-            AutoStart.Update(_ctx.Settings);
-            _ctx.Overlay.ModeChanged += () =>
+            if (_ctx.Overlay != null)
             {
                 _hide.Visibility = _ctx.Overlay.Active ? Visibility.Visible : Visibility.Collapsed;
-                _hide.Content = $"Скрыть ({KeyTitle(_ctx.Overlay.OverlayKey)})";
-            };
-            // Окно поверх игры закрывать нельзя — только прятать; иначе трейнер выключится.
-            SizeChanged += (_, _) => _ctx.Overlay?.SizeChanged();
-            Closing += (_, e) =>
-            {
-                if (_ctx.Overlay.Active && GameInstaller.IsGameRunning())
-                {
-                    e.Cancel = true;
-                    _ctx.Overlay.Close();
-                }
-            };
+                _hide.Content = L.T($"Скрыть ({KeyTitle(_ctx.Overlay.OverlayKey)})", $"Hide ({KeyTitle(_ctx.Overlay.OverlayKey)})");
+            }
+        }
+
+        private void SetLanguage(string code)
+        {
+            bool en = code == "en";
+            _ctx.Settings.Language = code;
+            _ctx.Settings.Save();
+            if (en == L.En) return;
+            L.En = en;
+            string page = _current;
+            _ctx.ClearPageEvents();
+            BuildUi();
+            Navigate(page);
+            UpdateConnection();
+            _ctx.Overlay?.ApplyLanguage();
+            ShowMessage(L.T("Язык: русский", "Language: English"), false);
         }
 
         private static bool IsInButton(DependencyObject d)
@@ -223,6 +281,7 @@ namespace TrainerByEMPEROR.App
 
         private void Navigate(string key)
         {
+            _current = key;
             foreach (var kv in _nav) kv.Value.Background = kv.Key == key ? Theme.Control : Brushes.Transparent;
             switch (key)
             {
@@ -264,30 +323,30 @@ namespace TrainerByEMPEROR.App
         {
             if (GameInstaller.IsGameRunning())
             {
-                ShowMessage("Игра уже запущена.", false);
+                ShowMessage(L.T("Игра уже запущена.", "The game is already running."), false);
                 return;
             }
             if (!GameInstaller.IsGameFolder(_ctx.Settings.GamePath))
             {
                 Navigate("setup");
-                ShowMessage("Сначала укажите папку игры.", true);
+                ShowMessage(L.T("Сначала укажите папку игры.", "Choose the game folder first."), true);
                 return;
             }
             if (!_setup.Ready())
             {
                 Navigate("setup");
-                ShowMessage("Устанавливаю трейнер в игру…", false);
+                ShowMessage(L.T("Устанавливаю трейнер в игру…", "Installing the trainer into the game…"), false);
                 if (!await _setup.Install()) return;
             }
             try
             {
                 GameInstaller.Launch(_ctx.Settings.GamePath);
-                ShowMessage("Запускаю игру…", false);
+                ShowMessage(L.T("Запускаю игру…", "Starting the game…"), false);
                 Navigate("cheats");
             }
             catch (Exception e)
             {
-                ShowMessage("Не удалось запустить игру: " + e.Message, true);
+                ShowMessage(L.T("Не удалось запустить игру: ", "Could not start the game: ") + e.Message, true);
             }
         }
 
@@ -312,22 +371,22 @@ namespace TrainerByEMPEROR.App
             if (_ctx.Connected && _ctx.InGame)
             {
                 _dot.Fill = Theme.Good;
-                _connText.Text = "Подключено к игре";
+                _connText.Text = L.T("Подключено к игре", "Connected to the game");
             }
             else if (_ctx.Connected)
             {
                 _dot.Fill = Theme.Warn;
-                _connText.Text = "Подключено, загрузите сохранение";
+                _connText.Text = L.T("Подключено, загрузите сохранение", "Connected, load a save");
             }
             else if (_ctx.GameRunning)
             {
                 _dot.Fill = Theme.Warn;
-                _connText.Text = "Игра запускается…";
+                _connText.Text = L.T("Игра запускается…", "The game is starting…");
             }
             else
             {
                 _dot.Fill = Theme.Muted;
-                _connText.Text = "Игра не запущена";
+                _connText.Text = L.T("Игра не запущена", "Game not running");
             }
         }
 

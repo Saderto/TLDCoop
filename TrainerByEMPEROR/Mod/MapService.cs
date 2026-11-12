@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Il2Cpp;
 using UnityEngine;
 using Il2CppInterop.Runtime.InteropTypes;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -68,7 +69,7 @@ namespace TrainerByEMPEROR
         public static object Position()
         {
             var t = GameManager.GetPlayerTransform();
-            if (t == null) throw new InvalidOperationException("Игрок не найден");
+            if (t == null) throw new InvalidOperationException(L.T("Игрок не найден", "Player not found"));
             var cam = GameManager.GetMainCamera();
             float yaw = cam != null ? cam.transform.eulerAngles.y : t.eulerAngles.y;
             var p = t.position;
@@ -117,13 +118,13 @@ namespace TrainerByEMPEROR
                 if (ai.m_CurrentMode == AiMode.Dead || ai.m_CurrentMode == AiMode.Disabled) continue;
                 var (kind, name) = ai.m_AiSubType switch
                 {
-                    AiSubType.Wolf => ("wolf", "Волк"),
-                    AiSubType.Bear => ("bear", "Медведь"),
-                    AiSubType.Stag => ("deer", "Олень"),
-                    AiSubType.Rabbit => ("rabbit", "Кролик"),
-                    AiSubType.Moose => ("moose", "Лось"),
-                    AiSubType.Cougar => ("cougar", "Пума"),
-                    _ => ("bird", "Животное"),
+                    AiSubType.Wolf => ("wolf", L.T("Волк", "Wolf")),
+                    AiSubType.Bear => ("bear", L.T("Медведь", "Bear")),
+                    AiSubType.Stag => ("deer", L.T("Олень", "Deer")),
+                    AiSubType.Rabbit => ("rabbit", L.T("Кролик", "Rabbit")),
+                    AiSubType.Moose => ("moose", L.T("Лось", "Moose")),
+                    AiSubType.Cougar => ("cougar", L.T("Пума", "Cougar")),
+                    _ => ("bird", L.T("Животное", "Animal")),
                 };
                 list.Add(new MapMarker { Type = "animal", Kind = kind, Name = name, X = ai.transform.position.x, Z = ai.transform.position.z });
             }
@@ -211,7 +212,7 @@ namespace TrainerByEMPEROR
                 {
                     // без имени
                 }
-                if (string.IsNullOrWhiteSpace(name)) name = "Туша";
+                if (string.IsNullOrWhiteSpace(name)) name = L.T("Туша", "Carcass");
                 bool empty = false;
                 try
                 {
@@ -246,21 +247,21 @@ namespace TrainerByEMPEROR
                     {
                         // без имени
                     }
-                    Add(list, "breakdown", string.IsNullOrWhiteSpace(name) ? "Можно разобрать" : name, b.transform.position, false);
+                    Add(list, "breakdown", string.IsNullOrWhiteSpace(name) ? L.T("Можно разобрать", "Can be broken down") : name, b.transform.position, false);
                 }
             }
 
             Stage("костры, кровати, верстаки");
             // Огонь, сон, мастерские, рыбалка, верёвки, каирны
             Scan<Fire>(list, "fire", f => FireName(f.gameObject.name));
-            Scan<Bed>(list, "bed", _ => "Кровать");
-            Scan<SnowShelter>(list, "bed", _ => "Снежное укрытие", _ => "shelter");
-            Scan<WorkBench>(list, "workbench", _ => "Верстак");
-            Scan<AmmoWorkBench>(list, "workbench", _ => "Станок для патронов");
-            Scan<Forge>(list, "workbench", _ => "Кузница", _ => "forge");
-            Scan<IceFishingHole>(list, "fishing", _ => "Лунка для рыбалки");
-            Scan<RopeClimbPoint>(list, "rope", _ => "Верёвка для подъёма");
-            Scan<Cairn>(list, "cairn", _ => "Каирн");
+            Scan<Bed>(list, "bed", _ => L.T("Кровать", "Bed"));
+            Scan<SnowShelter>(list, "bed", _ => L.T("Снежное укрытие", "Snow shelter"), _ => "shelter");
+            Scan<WorkBench>(list, "workbench", _ => L.T("Верстак", "Workbench"));
+            Scan<AmmoWorkBench>(list, "workbench", _ => L.T("Станок для патронов", "Ammo workbench"));
+            Scan<Forge>(list, "workbench", _ => L.T("Кузница", "Forge"), _ => "forge");
+            Scan<IceFishingHole>(list, "fishing", _ => L.T("Лунка для рыбалки", "Fishing hole"));
+            Scan<RopeClimbPoint>(list, "rope", _ => L.T("Верёвка для подъёма", "Climbing rope"));
+            Scan<Cairn>(list, "cairn", _ => L.T("Каирн", "Cairn"));
 
             Stage("контейнеры");
             // Контейнеры
@@ -459,7 +460,7 @@ namespace TrainerByEMPEROR
         public static void Teleport(float x, float z)
         {
             var player = GameManager.GetPlayerTransform();
-            if (player == null) throw new InvalidOperationException("Игрок не найден");
+            if (player == null) throw new InvalidOperationException(L.T("Игрок не найден", "Player not found"));
             bool outdoors = Outdoors();
             float y = player.position.y;
 
@@ -478,7 +479,7 @@ namespace TrainerByEMPEROR
                 return;
             }
             var pm = GameManager.GetPlayerManagerComponent();
-            if (pm == null) throw new InvalidOperationException("Игрок не найден");
+            if (pm == null) throw new InvalidOperationException(L.T("Игрок не найден", "Player not found"));
             pm.TeleportPlayer(pos, player.rotation);
         }
 
@@ -562,25 +563,25 @@ namespace TrainerByEMPEROR
         private static string PlantName(string n)
         {
             n = n ?? "";
-            if (n.Contains("RoseHip", StringComparison.OrdinalIgnoreCase)) return "Шиповник";
-            if (n.Contains("Cattail", StringComparison.OrdinalIgnoreCase)) return "Рогоз";
-            if (n.Contains("Reishi", StringComparison.OrdinalIgnoreCase)) return "Гриб рейши";
-            if (n.Contains("OldMansBeard", StringComparison.OrdinalIgnoreCase) || n.Contains("Lichen", StringComparison.OrdinalIgnoreCase)) return "Бородач (лишайник)";
-            if (n.Contains("Burdock", StringComparison.OrdinalIgnoreCase)) return "Лопух";
-            if (n.Contains("Birch", StringComparison.OrdinalIgnoreCase)) return "Берёзовая кора";
-            if (n.Contains("Acorn", StringComparison.OrdinalIgnoreCase)) return "Жёлуди";
-            if (n.Contains("Mushroom", StringComparison.OrdinalIgnoreCase)) return "Грибы";
-            return "Растение";
+            if (n.Contains("RoseHip", StringComparison.OrdinalIgnoreCase)) return L.T("Шиповник", "Rose hip");
+            if (n.Contains("Cattail", StringComparison.OrdinalIgnoreCase)) return L.T("Рогоз", "Cattail");
+            if (n.Contains("Reishi", StringComparison.OrdinalIgnoreCase)) return L.T("Гриб рейши", "Reishi mushroom");
+            if (n.Contains("OldMansBeard", StringComparison.OrdinalIgnoreCase) || n.Contains("Lichen", StringComparison.OrdinalIgnoreCase)) return L.T("Бородач (лишайник)", "Old man's beard lichen");
+            if (n.Contains("Burdock", StringComparison.OrdinalIgnoreCase)) return L.T("Лопух", "Burdock");
+            if (n.Contains("Birch", StringComparison.OrdinalIgnoreCase)) return L.T("Берёзовая кора", "Birch bark");
+            if (n.Contains("Acorn", StringComparison.OrdinalIgnoreCase)) return L.T("Жёлуди", "Acorns");
+            if (n.Contains("Mushroom", StringComparison.OrdinalIgnoreCase)) return L.T("Грибы", "Mushrooms");
+            return L.T("Растение", "Plant");
         }
 
         private static string FireName(string n)
         {
             n = n ?? "";
-            if (n.Contains("Stove", StringComparison.OrdinalIgnoreCase)) return "Печь";
-            if (n.Contains("Fireplace", StringComparison.OrdinalIgnoreCase)) return "Камин";
-            if (n.Contains("Barrel", StringComparison.OrdinalIgnoreCase)) return "Бочка для огня";
-            if (n.Contains("Forge", StringComparison.OrdinalIgnoreCase)) return "Кузница";
-            return "Место для костра";
+            if (n.Contains("Stove", StringComparison.OrdinalIgnoreCase)) return L.T("Печь", "Stove");
+            if (n.Contains("Fireplace", StringComparison.OrdinalIgnoreCase)) return L.T("Камин", "Fireplace");
+            if (n.Contains("Barrel", StringComparison.OrdinalIgnoreCase)) return L.T("Бочка для огня", "Fire barrel");
+            if (n.Contains("Forge", StringComparison.OrdinalIgnoreCase)) return L.T("Кузница", "Forge");
+            return L.T("Место для костра", "Fire spot");
         }
 
         private static void Add(List<MapMarker> list, string type, string name, Vector3 p, bool done)

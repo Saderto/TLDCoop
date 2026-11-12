@@ -9,6 +9,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -36,9 +37,19 @@ namespace TrainerByEMPEROR.App
         // На пару секунд показываем масштаб внизу круга.
         private DateTime _scaleUntil;
 
+        private TextBlock _north;
+
+        // Язык сменили в окне трейнера: обновляем подписи мини-карты.
+        public void ApplyLanguage()
+        {
+            Title = L.T("TrainerByEMPEROR — мини-карта", "TrainerByEMPEROR — minimap");
+            if (_north != null) _north.Text = L.T("С", "N");
+            if (_editHint != null) _editHint.Text = L.T("Тяните мышью, колесо — масштаб\nДвойной щелчок — на место", "Drag with the mouse, wheel zooms\nDouble-click puts it back");
+        }
+
         public void ShowScale()
         {
-            _scaleText.Text = $"{(int)RadiusMeters} м";
+            _scaleText.Text = L.T($"{(int)RadiusMeters} м", $"{(int)RadiusMeters} m");
             _scaleText.Visibility = Visibility.Visible;
             _scaleUntil = DateTime.UtcNow.AddSeconds(2);
         }
@@ -129,7 +140,7 @@ namespace TrainerByEMPEROR.App
             ShowActivated = false;
             ResizeMode = ResizeMode.NoResize;
             Width = Height = D;
-            Title = "TrainerByEMPEROR — мини-карта";
+            Title = L.T("TrainerByEMPEROR — мини-карта", "TrainerByEMPEROR — minimap");
 
             var clip = new EllipseGeometry(new Point(D / 2, D / 2), D / 2 - 3, D / 2 - 3);
             var view = new Grid { Width = D, Height = D, Clip = clip };
@@ -165,9 +176,9 @@ namespace TrainerByEMPEROR.App
             var root = new Grid();
             root.Children.Add(view);
             root.Children.Add(new Ellipse { Stroke = new SolidColorBrush(Color.FromArgb(220, 230, 232, 238)), StrokeThickness = 3 });
-            var north = new TextBlock
+            _north = new TextBlock
             {
-                Text = "С",
+                Text = L.T("С", "N"),
                 Foreground = Brushes.White,
                 FontWeight = FontWeights.Bold,
                 FontSize = 13,
@@ -175,7 +186,7 @@ namespace TrainerByEMPEROR.App
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(0, 5, 0, 0),
             };
-            root.Children.Add(north);
+            root.Children.Add(_north);
             _editFrame = new Ellipse
             {
                 Stroke = new SolidColorBrush(Color.FromRgb(255, 200, 80)),
@@ -186,7 +197,7 @@ namespace TrainerByEMPEROR.App
             root.Children.Add(_editFrame);
             _editHint = new TextBlock
             {
-                Text = "Тяните мышью, колесо — масштаб\nДвойной щелчок — на место",
+                Text = L.T("Тяните мышью, колесо — масштаб\nДвойной щелчок — на место", "Drag with the mouse, wheel zooms\nDouble-click puts it back"),
                 Foreground = Brushes.White,
                 Background = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0)),
                 FontSize = 11,
@@ -345,7 +356,7 @@ namespace TrainerByEMPEROR.App
         private async Task LoadMap(string scene)
         {
             _loading = true;
-            _note.Text = "Карта готовится…";
+            _note.Text = L.T("Карта готовится…", "Preparing the map…");
             try
             {
                 JsonElement? map = null;
@@ -381,7 +392,7 @@ namespace TrainerByEMPEROR.App
             {
                 var r = await Task.Run(() => _ctx.Client.Send(new { cmd = "maprender", force = false, source }));
                 if (r.TryGetProperty("ready", out var ready) && ready.ValueKind == JsonValueKind.True) return r;
-                if (r.TryGetProperty("progress", out var pr)) _note.Text = $"Карта готовится: {pr.GetInt32()}%";
+                if (r.TryGetProperty("progress", out var pr)) _note.Text = L.T($"Карта готовится: {pr.GetInt32()}%", $"Preparing the map: {pr.GetInt32()}%");
                 await Task.Delay(1000);
             }
             return null;
@@ -407,7 +418,7 @@ namespace TrainerByEMPEROR.App
             ["wolf"] = ("🐺", Color.FromRgb(85, 95, 110), null),
             ["bear"] = ("🐻", Color.FromRgb(150, 95, 55), null),
             ["deer"] = ("🦌", Color.FromRgb(215, 170, 110), null),
-            ["moose"] = (HasEmoji(0x1FACE) ? "🫎" : "🦌", Color.FromRgb(95, 70, 45), HasEmoji(0x1FACE) ? null : "Л"),
+            ["moose"] = (HasEmoji(0x1FACE) ? "🫎" : "🦌", Color.FromRgb(95, 70, 45), HasEmoji(0x1FACE) ? null : L.T("Л", "M")),
             ["rabbit"] = ("🐰", Color.FromRgb(150, 150, 150), null),
             ["cougar"] = ("🐆", Color.FromRgb(200, 150, 90), null),
             ["bird"] = ("🐔", Color.FromRgb(100, 160, 210), null),

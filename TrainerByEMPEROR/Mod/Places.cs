@@ -1,11 +1,76 @@
 using System;
 using Il2Cpp;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
     // Определяет, что находится за дверью или проходом: здание (и какого типа), пещера или другая локация.
     internal static class Places
     {
+        // Подписи на английском (окно трейнера может быть на английском).
+        private static readonly System.Collections.Generic.Dictionary<string, string> En = new()
+        {
+            ["Таинственное озеро"] = "Mystery Lake",
+            ["Береговое шоссе"] = "Coastal Highway",
+            ["Тихая долина"] = "Pleasant Valley",
+            ["Лес Тимбервольф"] = "Timberwolf Mountain",
+            ["Милтон"] = "Mountain Town",
+            ["Унылый мыс"] = "Desolation Point",
+            ["Скорбная топь"] = "Forlorn Muskeg",
+            ["Овраг"] = "Ravine",
+            ["Скорбная дорога"] = "Crumbling Highway",
+            ["Пути"] = "Broken Railroad",
+            ["Долина Хашман"] = "Hushed River Valley",
+            ["Бледный берег"] = "Bleak Inlet",
+            ["Пепельный каньон"] = "Ash Canyon",
+            ["Чёрный камень"] = "Blackrock",
+            ["Затерянное поле"] = "Forsaken Airfield",
+            ["Зона заражения"] = "Zone of Contamination",
+            ["Транзит"] = "Transfer Pass",
+            ["Перевал"] = "Sundered Pass",
+            ["Долгая дорога"] = "Far Range Branch Line",
+            ["Разрушенное шоссе"] = "Crumbling Highway",
+            ["Плотина"] = "Dam",
+            ["Церковь"] = "Church",
+            ["Маяк"] = "Lighthouse",
+            ["Амбар"] = "Barn",
+            ["Ферма"] = "Farm",
+            ["Охотничий домик"] = "Hunting lodge",
+            ["Хижина"] = "Cabin",
+            ["Лачуга"] = "Shack",
+            ["Трейлер"] = "Trailer",
+            ["Магазин"] = "Store",
+            ["Банк"] = "Bank",
+            ["Почта"] = "Post office",
+            ["Офис"] = "Office",
+            ["Заправка"] = "Gas station",
+            ["Гараж"] = "Garage",
+            ["Тюрьма"] = "Prison",
+            ["Завод"] = "Factory",
+            ["Консервный завод"] = "Cannery",
+            ["Лесопилка"] = "Lumber mill",
+            ["Склад"] = "Warehouse",
+            ["Станция"] = "Station",
+            ["Школа"] = "School",
+            ["Вышка"] = "Lookout",
+            ["Бункер"] = "Bunker",
+            ["Ангар"] = "Hangar",
+            ["Особняк"] = "Mansion",
+            ["Дом"] = "House",
+            ["Квартира"] = "Apartment",
+            ["Мотель"] = "Motel",
+            ["Гостиница"] = "Hotel",
+            ["Пещера (на этой локации)"] = "Cave (in this region)",
+            ["Шахта"] = "Mine",
+            ["Постройка"] = "Building",
+            ["Ориентир"] = "Landmark",
+            ["Шахта (на этой локации)"] = "Mine (in this region)",
+            ["Здание"] = "Building",
+            ["другая локация"] = "another region",
+        };
+
+        private static string N(string ru) => L.En && En.TryGetValue(ru, out var e) ? e : ru;
+
         private static readonly (string Key, string Name)[] Regions =
         {
             ("LakeRegion", "Таинственное озеро"),
@@ -78,22 +143,22 @@ namespace TrainerByEMPEROR
 
             foreach (var (key, name) in Regions)
                 if (t.StartsWith(key, StringComparison.OrdinalIgnoreCase) && IsOutdoors(t))
-                    return ("exit", "exit", "Переход: " + (string.IsNullOrWhiteSpace(shownName) ? name : shownName));
+                    return ("exit", "exit", L.T("Переход: ", "Exit: ") + (string.IsNullOrWhiteSpace(shownName) ? N(name) : shownName));
 
             if (IsOutdoors(t))
-                return ("exit", "exit", "Переход: " + (string.IsNullOrWhiteSpace(shownName) ? Pretty(t) : shownName));
+                return ("exit", "exit", L.T("Переход: ", "Exit: ") + (string.IsNullOrWhiteSpace(shownName) ? Pretty(t) : shownName));
 
             // Пещеры и шахты, которые загружаются отдельной локацией
             if (t.IndexOf("Cave", StringComparison.OrdinalIgnoreCase) >= 0)
-                return ("cavescene", "cavescene", "Вход в пещеру-локацию" + (string.IsNullOrWhiteSpace(shownName) ? "" : ": " + shownName));
+                return ("cavescene", "cavescene", L.T("Вход в пещеру-локацию", "Cave entrance") + (string.IsNullOrWhiteSpace(shownName) ? "" : ": " + shownName));
             if (t.IndexOf("Mine", StringComparison.OrdinalIgnoreCase) >= 0)
-                return ("cavescene", "mine", "Вход в шахту-локацию" + (string.IsNullOrWhiteSpace(shownName) ? "" : ": " + shownName));
+                return ("cavescene", "mine", L.T("Вход в шахту-локацию", "Mine entrance") + (string.IsNullOrWhiteSpace(shownName) ? "" : ": " + shownName));
 
             foreach (var (key, kind, name) in Buildings)
                 if (t.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0)
-                    return ("building", kind, string.IsNullOrWhiteSpace(shownName) ? name : shownName);
+                    return ("building", kind, string.IsNullOrWhiteSpace(shownName) ? N(name) : shownName);
 
-            return ("building", "house", string.IsNullOrWhiteSpace(shownName) ? "Здание" : shownName);
+            return ("building", "house", string.IsNullOrWhiteSpace(shownName) ? N("Здание") : shownName);
         }
 
         // Помещение внутри локации: пещера, шахта или здание (по ключевым словам в именах зоны).
@@ -102,12 +167,12 @@ namespace TrainerByEMPEROR
             string n = names ?? "";
             bool has(string w) => n.IndexOf(w, StringComparison.OrdinalIgnoreCase) >= 0;
             if (has("cave") || has("grotto") || has("crevice"))
-                return ("cave", "cave", string.IsNullOrWhiteSpace(shownName) ? "Пещера (на этой локации)" : shownName);
+                return ("cave", "cave", string.IsNullOrWhiteSpace(shownName) ? N("Пещера (на этой локации)") : shownName);
             if (has("mine") && !has("mineral"))
-                return ("cave", "mine", string.IsNullOrWhiteSpace(shownName) ? "Шахта (на этой локации)" : shownName);
+                return ("cave", "mine", string.IsNullOrWhiteSpace(shownName) ? N("Шахта (на этой локации)") : shownName);
             foreach (var (key, kind, name) in Buildings)
                 if (has(key))
-                    return ("building", kind, string.IsNullOrWhiteSpace(shownName) ? name : shownName);
+                    return ("building", kind, string.IsNullOrWhiteSpace(shownName) ? N(name) : shownName);
             // Без названия от игры и без явного признака здания это обычно контейнер, вагон или навес — не здание.
             if (string.IsNullOrWhiteSpace(shownName)) return (null, null, null);
             if (has("trailer") || has("cabin") || has("hut") || has("shed"))
@@ -131,16 +196,16 @@ namespace TrainerByEMPEROR
             string n = $"{sprite} {locId} {objName}";
             bool has(string w) => n.IndexOf(w, StringComparison.OrdinalIgnoreCase) >= 0;
             if (has("cave"))
-                return ("cave", "cave", string.IsNullOrWhiteSpace(shown) ? "Пещера (на этой локации)" : shown);
+                return ("cave", "cave", string.IsNullOrWhiteSpace(shown) ? N("Пещера (на этой локации)") : shown);
             if (has("mine") && !has("mineral"))
-                return ("cave", "mine", string.IsNullOrWhiteSpace(shown) ? "Шахта" : shown);
+                return ("cave", "mine", string.IsNullOrWhiteSpace(shown) ? N("Шахта") : shown);
             foreach (var (key, kind, name) in Buildings)
                 if (has(key))
-                    return ("building", kind, string.IsNullOrWhiteSpace(shown) ? name : shown);
+                    return ("building", kind, string.IsNullOrWhiteSpace(shown) ? N(name) : shown);
             if (has("trailer") || has("cabin") || has("hut") || has("shed") || has("house") || has("building"))
-                return ("building", "house", string.IsNullOrWhiteSpace(shown) ? "Постройка" : shown);
+                return ("building", "house", string.IsNullOrWhiteSpace(shown) ? N("Постройка") : shown);
             if (!topIcon && string.IsNullOrWhiteSpace(shown)) return (null, null, null);
-            return ("landmark", "landmark", string.IsNullOrWhiteSpace(shown) ? "Ориентир" : shown);
+            return ("landmark", "landmark", string.IsNullOrWhiteSpace(shown) ? N("Ориентир") : shown);
         }
 
         private static bool IsOutdoors(string scene)
@@ -156,6 +221,6 @@ namespace TrainerByEMPEROR
             }
         }
 
-        private static string Pretty(string scene) => string.IsNullOrEmpty(scene) ? "другая локация" : scene.Replace("_", " ");
+        private static string Pretty(string scene) => string.IsNullOrEmpty(scene) ? N("другая локация") : scene.Replace("_", " ");
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using MelonLoader;
 using MelonLoader.Utils;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR
 {
@@ -50,7 +51,7 @@ namespace TrainerByEMPEROR
                     string id = idEl.GetString();
                     string cat = e.TryGetProperty("Category", out var c) && c.ValueKind == JsonValueKind.String ? c.GetString() : "";
                     string name = names.TryGetValue($"SEAGULL_{id}_NAME", out var n) && !string.IsNullOrWhiteSpace(n) ? n : id.Replace('_', ' ');
-                    if (id.EndsWith("_P", StringComparison.Ordinal) && cat == "recipe") name += " (порция)";
+                    if (id.EndsWith("_P", StringComparison.Ordinal) && cat == "recipe") name += L.T(" (порция)", " (portion)");
                     list.Add(new ItemInfo
                     {
                         Id = "GEAR_Seagull_" + id,
@@ -188,7 +189,7 @@ namespace TrainerByEMPEROR
                 var o = s.Options[Chosen(seed, s.Item, s.Options.Count)];
                 if (!SameScene(scene, o.Scene)) continue;
                 // Место в этой локации, но предмета там нет — значит, уже подобран.
-                string name = (names.TryGetValue(id, out var nm) ? nm : s.Item) + " (уже подобрано)";
+                string name = (names.TryGetValue(id, out var nm) ? nm : s.Item) + L.T(" (уже подобрано)", " (already picked up)");
                 list.Add(new MapMarker { Type = "foodpack", Kind = Kind(id), Name = name, X = o.X, Z = o.Z, Done = true });
             }
         }

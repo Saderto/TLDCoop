@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -24,7 +25,7 @@ namespace TrainerByEMPEROR.App
             _ctx = ctx;
             Margin = new Thickness(0, 14, 0, 0);
             var head = new DockPanel();
-            var refresh = Theme.Button("Обновить");
+            var refresh = Theme.Button(L.T("Обновить", "Refresh"));
             refresh.Click += async (_, _) => await Load();
             DockPanel.SetDock(refresh, Dock.Right);
             head.Children.Add(refresh);
@@ -32,8 +33,8 @@ namespace TrainerByEMPEROR.App
             {
                 Children =
                 {
-                    Theme.Label("Уровень каждого навыка", 14, Theme.Text, bold: true),
-                    Theme.Label("Кнопки −1 и +1 меняют уровень навыка на один.", 12, Theme.Muted),
+                    Theme.Label(L.T("Уровень каждого навыка", "Level of each skill"), 14, Theme.Text, bold: true),
+                    Theme.Label(L.T("Кнопки −1 и +1 меняют уровень навыка на один.", "The −1 and +1 buttons change the skill level by one."), 12, Theme.Muted),
                 },
             });
             Children.Add(head);
@@ -52,11 +53,11 @@ namespace TrainerByEMPEROR.App
                 {
                     _loaded = false;
                     _rows.Children.Clear();
-                    _note.Text = "Загрузите сохранение, чтобы увидеть навыки.";
+                    _note.Text = L.T("Загрузите сохранение, чтобы увидеть навыки.", "Load a save to see the skills.");
                 }
                 else if (!_loaded && IsVisible) await Load();
             };
-            _note.Text = "Загрузите сохранение, чтобы увидеть навыки.";
+            _note.Text = L.T("Загрузите сохранение, чтобы увидеть навыки.", "Load a save to see the skills.");
         }
 
         private async Task Load()
@@ -104,7 +105,7 @@ namespace TrainerByEMPEROR.App
             Grid.SetColumn(minus, 1);
             g.Children.Add(minus);
 
-            var level = Theme.Label($"{s.Level} из {s.MaxLevel}", 14, Theme.Accent, bold: true);
+            var level = Theme.Label(L.T($"{s.Level} из {s.MaxLevel}", $"{s.Level} of {s.MaxLevel}"), 14, Theme.Accent, bold: true);
             level.HorizontalAlignment = HorizontalAlignment.Center;
             level.VerticalAlignment = VerticalAlignment.Center;
             Grid.SetColumn(level, 2);
@@ -121,7 +122,7 @@ namespace TrainerByEMPEROR.App
 
         private async Task Change(SkillRow s, int delta)
         {
-            if (await _ctx.Request(new { cmd = "skilllevel", id = s.Id, delta }, $"{s.Name}: уровень {Math.Clamp(s.Level + delta, 1, s.MaxLevel)}") != null)
+            if (await _ctx.Request(new { cmd = "skilllevel", id = s.Id, delta }, L.T($"{s.Name}: уровень {Math.Clamp(s.Level + delta, 1, s.MaxLevel)}", $"{s.Name}: level {Math.Clamp(s.Level + delta, 1, s.MaxLevel)}")) != null)
                 await Load();
         }
     }

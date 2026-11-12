@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
+using TrainerByEMPEROR.Shared;
 
 namespace TrainerByEMPEROR.App
 {
@@ -22,15 +23,15 @@ namespace TrainerByEMPEROR.App
             _ctx = ctx;
 
             var card = new StackPanel();
-            card.Children.Add(Theme.Label("Папка игры", 16, Theme.Text, bold: true));
+            card.Children.Add(Theme.Label(L.T("Папка игры", "Game folder"), 16, Theme.Text, bold: true));
             card.Children.Add(Gap(8));
             var pathRow = new DockPanel();
-            var browse = Theme.Button("Выбрать tld.exe…");
+            var browse = Theme.Button(L.T("Выбрать tld.exe…", "Choose tld.exe…"));
             browse.Margin = new Thickness(8, 0, 0, 0);
             browse.Click += (_, _) => Browse();
             DockPanel.SetDock(browse, Dock.Right);
             pathRow.Children.Add(browse);
-            var find = Theme.Button("Найти автоматически");
+            var find = Theme.Button(L.T("Найти автоматически", "Find automatically"));
             find.Margin = new Thickness(8, 0, 0, 0);
             find.Click += (_, _) => AutoFind(true);
             DockPanel.SetDock(find, Dock.Right);
@@ -41,7 +42,7 @@ namespace TrainerByEMPEROR.App
             Children.Add(Theme.CardBorder(card));
 
             var status = new StackPanel();
-            status.Children.Add(Theme.Label("Состояние", 16, Theme.Text, bold: true));
+            status.Children.Add(Theme.Label(L.T("Состояние", "Status"), 16, Theme.Text, bold: true));
             status.Children.Add(Gap(8));
             _mlStatus = Theme.Label("", 13);
             _modStatus = Theme.Label("", 13);
@@ -50,10 +51,10 @@ namespace TrainerByEMPEROR.App
             status.Children.Add(_modStatus);
             status.Children.Add(Gap(12));
             var buttons = new StackPanel { Orientation = Orientation.Horizontal };
-            _install = Theme.Button("Установить / обновить", Theme.Accent);
+            _install = Theme.Button(L.T("Установить / обновить", "Install / update"), Theme.Accent);
             _install.Foreground = Brushes.White;
             _install.Click += async (_, _) => await Install();
-            _remove = Theme.Button("Удалить трейнер из игры");
+            _remove = Theme.Button(L.T("Удалить трейнер из игры", "Remove the trainer from the game"));
             _remove.Margin = new Thickness(8, 0, 0, 0);
             _remove.Click += (_, _) => Remove();
             buttons.Children.Add(_install);
@@ -61,8 +62,8 @@ namespace TrainerByEMPEROR.App
             status.Children.Add(buttons);
             status.Children.Add(Gap(12));
             status.Children.Add(Theme.Label(
-                "Трейнер ставит в игру загрузчик модов MelonLoader и свой модуль TrainerByEMPEROR.dll в папку Mods. " +
-                "Сама игра и сохранения не меняются. Удалить можно кнопкой выше.", 12, Theme.Muted));
+                L.T("Трейнер ставит в игру загрузчик модов MelonLoader и свой модуль TrainerByEMPEROR.dll в папку Mods. " +
+                "Сама игра и сохранения не меняются. Удалить можно кнопкой выше.", "The trainer installs the MelonLoader mod loader and its own module TrainerByEMPEROR.dll into the Mods folder. The game itself and your saves are not changed. Use the button above to remove it."), 12, Theme.Muted));
             Children.Add(Theme.CardBorder(status));
 
             Children.Add(Theme.CardBorder(OverlayCard()));
@@ -93,16 +94,16 @@ namespace TrainerByEMPEROR.App
         private FrameworkElement OverlayCard()
         {
             var card = new StackPanel();
-            card.Children.Add(Theme.Label("Поверх игры", 16, Theme.Text, bold: true));
+            card.Children.Add(Theme.Label(L.T("Поверх игры", "Over the game"), 16, Theme.Text, bold: true));
             card.Children.Add(Gap(8));
             card.Children.Add(Theme.Label(
-                "Во время игры окно трейнера открывается прямо над игрой и прячется той же клавишей. Игра при этом не сворачивается и продолжает идти. " +
-                "Мини-карта показывается в правом верхнем углу экрана игры. Пока трейнер открыт поверх игры, мини-карту можно перетащить мышью, а колесом мыши над ней менять масштаб.", 12, Theme.Muted));
+                L.T("Во время игры окно трейнера открывается прямо над игрой и прячется той же клавишей. Игра при этом не сворачивается и продолжает идти. " +
+                "Мини-карта показывается в правом верхнем углу экрана игры. Пока трейнер открыт поверх игры, мини-карту можно перетащить мышью, а колесом мыши над ней менять масштаб.", "While you play, the trainer window opens right over the game and hides with the same key. The game is not minimized and keeps running. The minimap is shown in the top right corner of the game screen. While the trainer is open over the game, drag the minimap with the mouse and use the mouse wheel over it to zoom."), 12, Theme.Muted));
             card.Children.Add(Gap(10));
 
-            card.Children.Add(Row("Показать / скрыть трейнер", KeyButton(() => _ctx.Settings.OverlayKey, System.Windows.Input.Key.Insert, v => _ctx.Settings.OverlayKey = v)));
+            card.Children.Add(Row(L.T("Показать / скрыть трейнер", "Show / hide the trainer"), KeyButton(() => _ctx.Settings.OverlayKey, System.Windows.Input.Key.Insert, v => _ctx.Settings.OverlayKey = v)));
             card.Children.Add(Gap(6));
-            card.Children.Add(Row("Мини-карта: клавиша", KeyButton(() => _ctx.Settings.MiniMapKey, System.Windows.Input.Key.Home, v => _ctx.Settings.MiniMapKey = v)));
+            card.Children.Add(Row(L.T("Мини-карта: клавиша", "Minimap: key"), KeyButton(() => _ctx.Settings.MiniMapKey, System.Windows.Input.Key.Home, v => _ctx.Settings.MiniMapKey = v)));
             card.Children.Add(Gap(6));
             _miniSwitch = new OffOnSwitch { Value = _ctx.Settings.MiniMapOn ?? false };
             _miniSwitch.Changed += v =>
@@ -114,7 +115,7 @@ namespace TrainerByEMPEROR.App
                     _ctx.Settings.Save();
                 }
             };
-            card.Children.Add(Row("Мини-карта включена", _miniSwitch));
+            card.Children.Add(Row(L.T("Мини-карта включена", "Minimap on"), _miniSwitch));
             card.Children.Add(Gap(6));
             var radiusLabel = Theme.Label("", 13, Theme.Muted);
             var radius = new Slider
@@ -128,7 +129,7 @@ namespace TrainerByEMPEROR.App
                 TickFrequency = 10,
                 Value = _ctx.Settings.MiniMapRadius ?? MiniMap.DefaultRadius,
             };
-            void ShowRadius() => radiusLabel.Text = $"{(int)radius.Value} м от центра до края  ";
+            void ShowRadius() => radiusLabel.Text = L.T($"{(int)radius.Value} м от центра до края  ", $"{(int)radius.Value} m from centre to edge  ");
             ShowRadius();
             bool fromMap = false;
             radius.ValueChanged += (_, _) =>
@@ -147,7 +148,7 @@ namespace TrainerByEMPEROR.App
             var radiusBox = new StackPanel { Orientation = Orientation.Horizontal };
             radiusBox.Children.Add(radiusLabel);
             radiusBox.Children.Add(radius);
-            card.Children.Add(Row("Мини-карта: масштаб", radiusBox));
+            card.Children.Add(Row(L.T("Мини-карта: масштаб", "Minimap: scale"), radiusBox));
             card.Children.Add(Gap(6));
             var hide = new OffOnSwitch { Value = _ctx.Settings.HideWhenPlaying ?? true };
             hide.Changed += v =>
@@ -155,7 +156,7 @@ namespace TrainerByEMPEROR.App
                 _ctx.Settings.HideWhenPlaying = v;
                 _ctx.Settings.Save();
             };
-            card.Children.Add(Row("Прятать окно трейнера, когда запущена игра", hide));
+            card.Children.Add(Row(L.T("Прятать окно трейнера, когда запущена игра", "Hide the trainer window while the game runs"), hide));
             card.Children.Add(Gap(6));
             var auto = new OffOnSwitch { Value = _ctx.Settings.StartWithGame ?? true };
             auto.Changed += v =>
@@ -164,7 +165,7 @@ namespace TrainerByEMPEROR.App
                 _ctx.Settings.Save();
                 AutoStart.Update(_ctx.Settings);
             };
-            card.Children.Add(Row("Запускать трейнер вместе с игрой (открывается клавишей)", auto));
+            card.Children.Add(Row(L.T("Запускать трейнер вместе с игрой (открывается клавишей)", "Start the trainer with the game (opens with the key)"), auto));
             return card;
         }
 
@@ -189,7 +190,7 @@ namespace TrainerByEMPEROR.App
             b.Click += (_, _) =>
             {
                 waiting = true;
-                b.Content = "Нажмите клавишу…";
+                b.Content = L.T("Нажмите клавишу…", "Press a key…");
                 b.Focus();
             };
             b.PreviewKeyDown += (_, e) =>
@@ -227,18 +228,18 @@ namespace TrainerByEMPEROR.App
                 _ctx.Settings.GamePath = dir;
                 AutoStart.Update(_ctx.Settings);
                 _ctx.Settings.Save();
-                Log("Игра найдена: " + dir);
+                Log(L.T("Игра найдена: ", "Game found: ") + dir);
             }
             else if (force)
             {
-                Log("Игра не найдена автоматически. Укажите tld.exe вручную.");
+                Log(L.T("Игра не найдена автоматически. Укажите tld.exe вручную.", "The game was not found automatically. Choose tld.exe by hand."));
             }
             UpdateStatus();
         }
 
         private void Browse()
         {
-            var dlg = new OpenFileDialog { Filter = "The Long Dark (tld.exe)|tld.exe", Title = "Укажите tld.exe в папке игры" };
+            var dlg = new OpenFileDialog { Filter = "The Long Dark (tld.exe)|tld.exe", Title = L.T("Укажите tld.exe в папке игры", "Choose tld.exe in the game folder") };
             if (dlg.ShowDialog() != true) return;
             _ctx.Settings.GamePath = System.IO.Path.GetDirectoryName(dlg.FileName);
             _ctx.Settings.Save();
@@ -249,28 +250,28 @@ namespace TrainerByEMPEROR.App
         {
             string dir = _ctx.Settings.GamePath;
             bool ok = GameInstaller.IsGameFolder(dir);
-            _path.Text = ok ? dir : "не выбрана";
+            _path.Text = ok ? dir : L.T("не выбрана", "not chosen");
             _install.IsEnabled = ok;
             _remove.IsEnabled = ok;
             if (!ok)
             {
                 Status(_mlStatus, "MelonLoader: —", Theme.Muted);
-                Status(_modStatus, "Трейнер в игре: —", Theme.Muted);
+                Status(_modStatus, L.T("Трейнер в игре: —", "Trainer in the game: —"), Theme.Muted);
                 return;
             }
 
             bool ml = GameInstaller.MelonLoaderInstalled(dir);
-            Status(_mlStatus, ml ? "MelonLoader: установлен" : "MelonLoader: не установлен", ml ? Theme.Good : Theme.Warn);
+            Status(_mlStatus, ml ? L.T("MelonLoader: установлен", "MelonLoader: installed") : L.T("MelonLoader: не установлен", "MelonLoader: not installed"), ml ? Theme.Good : Theme.Warn);
             switch (GameInstaller.GetModStatus(dir))
             {
                 case ModStatus.Installed:
-                    Status(_modStatus, "Трейнер в игре: установлен, актуальная версия", Theme.Good);
+                    Status(_modStatus, L.T("Трейнер в игре: установлен, актуальная версия", "Trainer in the game: installed, up to date"), Theme.Good);
                     break;
                 case ModStatus.Outdated:
-                    Status(_modStatus, "Трейнер в игре: старая версия, нажмите «Установить / обновить»", Theme.Warn);
+                    Status(_modStatus, L.T("Трейнер в игре: старая версия, нажмите «Установить / обновить»", "Trainer in the game: old version, press “Install / update”"), Theme.Warn);
                     break;
                 default:
-                    Status(_modStatus, "Трейнер в игре: не установлен", Theme.Warn);
+                    Status(_modStatus, L.T("Трейнер в игре: не установлен", "Trainer in the game: not installed"), Theme.Warn);
                     break;
             }
         }
@@ -288,13 +289,13 @@ namespace TrainerByEMPEROR.App
             try
             {
                 await GameInstaller.Install(_ctx.Settings.GamePath, Log);
-                _ctx.Notify("Трейнер установлен в игру", false);
+                _ctx.Notify(L.T("Трейнер установлен в игру", "Trainer installed into the game"), false);
                 return true;
             }
             catch (Exception e)
             {
-                Log("Ошибка: " + e.Message);
-                _ctx.Notify("Не удалось установить: " + e.Message, true);
+                Log(L.T("Ошибка: ", "Error: ") + e.Message);
+                _ctx.Notify(L.T("Не удалось установить: ", "Could not install: ") + e.Message, true);
                 return false;
             }
             finally
@@ -308,11 +309,11 @@ namespace TrainerByEMPEROR.App
             try
             {
                 GameInstaller.RemoveMod(_ctx.Settings.GamePath);
-                Log("Модуль трейнера удалён из папки Mods. MelonLoader оставлен (его можно удалить вручную: version.dll и папка MelonLoader).");
+                Log(L.T("Модуль трейнера удалён из папки Mods. MelonLoader оставлен (его можно удалить вручную: version.dll и папка MelonLoader).", "The trainer module was removed from Mods. MelonLoader was kept (remove it by hand: version.dll and the MelonLoader folder)."));
             }
             catch (Exception e)
             {
-                Log("Ошибка: " + e.Message);
+                Log(L.T("Ошибка: ", "Error: ") + e.Message);
             }
             UpdateStatus();
         }
