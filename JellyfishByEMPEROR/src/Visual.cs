@@ -124,10 +124,16 @@ public static class Visual
         try { indoors = GameManager.GetWeatherComponent().IsIndoorEnvironment(); } catch { }
         try { night = GameManager.GetTimeOfDayComponent().IsNight(); } catch { }
         // the owner (11-12): the aquarium's water shone in the dark. Real night is near black: only a fire or a light in the hands brings it up
-        light = indoors ? (night ? .03f : .45f) : night ? .025f : 1f;
-        if (light < .2f && LitNear()) light = .2f;
-        if (Math.Abs(light - lastLight) > .001f) { Safe.Debug($"glass light {light:0.000} (indoors {indoors}, night {night})"); lastLight = light; }
-        foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, 1f);
+        // 0.2.9: still lighter than the dark room (the game's eye adapts to the dark). The scene's own ambient light is the measure now:
+        // at night the glass is never brighter than the ambient says, and it also gets thinner (less of it covers what is behind)
+        light = indoors ? (night ? .012f : .45f) : night ? .01f : 1f;
+        float amb = -1f;
+        try { var a = RenderSettings.ambientLight; amb = Math.Max(a.r, Math.Max(a.g, a.b)); } catch { }
+        if (night && amb >= 0f) light = Math.Min(light, Mathf.Clamp(amb * 2f, .003f, 1f));
+        if (light < .15f && LitNear()) light = .15f;
+        float alpha = night ? .5f : 1f;
+        if (Math.Abs(light - lastLight) > .001f) { Safe.Debug($"glass light {light:0.000} (indoors {indoors}, night {night}, ambient {amb:0.000})"); lastLight = light; }
+        foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, alpha);
         float j = Math.Max(.75f, light);
         foreach (var m in mats.Values) if (m != null) m.color = new Color(j, j, j, 1f);
         var me = GameManager.GetPlayerTransform()?.position ?? Vector3.zero;
@@ -145,7 +151,8 @@ public static class Visual
             if (l.Water == null || l.Def.Colour == null) continue;
             try
             {
-                var c = glow > 0f ? Color.Lerp(new Color(light, light, light, 1f), l.Def.Colour.Glow, .45f) : new Color(light, light, light, 1f);
+                var c = glow > 0f ? Color.Lerp(new Color(light, light, light, alpha), l.Def.Colour.Glow, .45f) : new Color(light, light, light, alpha);
+                c.a = alpha;
                 block ??= new MaterialPropertyBlock();
                 block.SetColor("_Color", c);
                 l.Water.SetPropertyBlock(block);
@@ -159,7 +166,8 @@ public static class Visual
             try
             {
                 var c0 = Mix(Tanks.Of(t.G));
-                var c = glow > 0f && c0 is { } gc ? Color.Lerp(new Color(light, light, light, 1f), gc, .3f) : new Color(light, light, light, 1f);
+                var c = glow > 0f && c0 is { } gc ? Color.Lerp(new Color(light, light, light, alpha), gc, .12f) : new Color(light, light, light, alpha);
+                c.a = alpha;
                 block ??= new MaterialPropertyBlock();
                 block.SetColor("_Color", c);
                 t.Water.SetPropertyBlock(block);
