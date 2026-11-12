@@ -10,6 +10,15 @@
 
 Сделано под версию игры **2.55** (Steam или Epic, Windows).
 
+## Язык / Language
+
+Вверху окна есть переключатель **RU / EN**: язык окна, подсказок, карты и названий мест. Выбор сохраняется в настройках трейнера и
+передаётся модулю в игре. Пока язык не выбран, он берётся из языка Windows. Названия предметов идут из самой игры, поэтому они на языке игры.
+
+The **RU / EN** switch at the top of the window sets the language of the window, hints, map and place names. The choice is saved in the
+trainer's settings and sent to the in-game module. Until you pick one, the Windows language is used. Item names come from the game itself,
+so they follow the game's language.
+
 ## Быстрый старт
 
 **Проще всего:** поставьте трейнер лаунчером `TLDModsLauncher.exe` (галочка «Трейнер»). Он положит мод в `Mods`, а программу в `Mods\TrainerByEMPEROR`, и трейнер будет открываться прямо в игре по Ins. Вручную: распакуйте `TrainerByEMPEROR.zip` в папку игры.
