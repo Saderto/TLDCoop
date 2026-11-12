@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 using InventorySearchByEMPEROR;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Mod), "InventorySearchByEMPEROR", "0.6.0", "EMPEROR", null)]
+[assembly: MelonInfo(typeof(Mod), "InventorySearchByEMPEROR", "0.6.1", "EMPEROR", null)]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: AssemblyCompany("InventorySearchByEMPEROR")]
 [assembly: AssemblyConfiguration("Release")]

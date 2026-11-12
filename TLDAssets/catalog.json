@@ -50,8 +50,8 @@
   "SmokesAudioOn": {
    "zip": "SmokesAudioOnByEMPEROR.zip",
    "path": "Plugins/SmokesAudioOnByEMPEROR.dll",
-   "note": "1.0.0 EMPEROR: Unity sound on (smokes, smokehouse kettle)",
-   "version": "1.0.0"
+   "note": "1.0.1 EMPEROR: Unity sound on (smokes, smokehouse kettle)",
+   "version": "1.0.1"
   }
  },
  "mods": [

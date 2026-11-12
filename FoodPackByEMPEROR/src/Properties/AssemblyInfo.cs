@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 using FoodPackByEMPEROR;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Mod), "FoodPackByEMPEROR", "1.1.0", "EMPEROR", null)]
+[assembly: MelonInfo(typeof(Mod), "FoodPackByEMPEROR", "1.1.1", "EMPEROR", null)]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: MelonAdditionalDependencies(new string[] { "AfflictionComponent", "ModData" })]
 [assembly: AssemblyCompany("FoodPackByEMPEROR")]

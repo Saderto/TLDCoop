@@ -5,7 +5,7 @@ namespace InventorySearchByEMPEROR;
 
 public class Mod : MelonMod
 {
-	public const string VersionText = "0.6.0";
+	public const string VersionText = "0.6.1";
 
 	internal static MelonLogger.Instance Log;
 

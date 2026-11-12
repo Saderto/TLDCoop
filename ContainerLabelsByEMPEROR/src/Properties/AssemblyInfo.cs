@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 using ContainerLabelsByEMPEROR;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Mod), "ContainerLabelsByEMPEROR", "0.6.0", "EMPEROR", null)]
+[assembly: MelonInfo(typeof(Mod), "ContainerLabelsByEMPEROR", "0.6.1", "EMPEROR", null)]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: MelonAdditionalDependencies(new string[] { "ModData" })]
 [assembly: AssemblyCompany("ContainerLabelsByEMPEROR")]

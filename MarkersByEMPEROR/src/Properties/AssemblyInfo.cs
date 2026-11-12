@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 using MarkersByEMPEROR;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Mod), "MarkersByEMPEROR", "0.4.5", "EMPEROR", null)]
+[assembly: MelonInfo(typeof(Mod), "MarkersByEMPEROR", "0.4.6", "EMPEROR", null)]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: AssemblyCompany("MarkersByEMPEROR")]
 [assembly: AssemblyConfiguration("Release")]

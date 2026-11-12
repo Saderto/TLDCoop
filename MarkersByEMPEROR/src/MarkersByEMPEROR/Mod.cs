@@ -7,7 +7,7 @@ namespace MarkersByEMPEROR;
 
 public class Mod : MelonMod
 {
-	public const string VersionText = "0.4.5";
+	public const string VersionText = "0.4.6";
 
 	public static string Root => Path.Combine(MelonEnvironment.ModsDirectory, "MarkersByEMPEROR");
 
@@ -15,7 +15,7 @@ public class Mod : MelonMod
 	{
 		Texts.Load(Root);
 		Config.Load();
-		base.LoggerInstance.Msg($"MarkersByEMPEROR {"0.4.5"}: {Texts.Count} text keys, HUD range {Config.Range} m.");
+		base.LoggerInstance.Msg($"MarkersByEMPEROR {"0.4.6"}: {Texts.Count} text keys, HUD range {Config.Range} m.");
 	}
 
 	public override void OnSceneWasInitialized(int buildIndex, string sceneName)

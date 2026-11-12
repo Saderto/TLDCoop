@@ -6,7 +6,7 @@ namespace FoodBalanceByEMPEROR;
 
 public class Mod : MelonMod
 {
-	public const string VersionText = "1.0.0";
+	public const string VersionText = "1.0.1";
 
 	public static string Root => Path.Combine(MelonEnvironment.ModsDirectory, "FoodBalanceByEMPEROR");
 

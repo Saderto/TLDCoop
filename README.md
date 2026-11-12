@@ -27,6 +27,7 @@ does it when updating. Game saves are kept: their keys did not change.
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
 | `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |
 | `TrainerByEMPEROR` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
+| `SmokehouseByEMPEROR` | плагин `SmokesAudioOnByEMPEROR.dll` в папке `Plugins` для звука кипения котла (лаунчер ставит его сам) / the `SmokesAudioOnByEMPEROR.dll` plugin in `Plugins` for the kettle's boiling sound (the launcher installs it) |
 | `FoodPackByEMPEROR` | Новая еда и напитки с эффектами / New food and drinks with effects |
 | `FoodBalanceByEMPEROR` | Ползунки: сколько еды разных модов на картах и в контейнерах / Sliders: how much food of each food mod spawns on maps and in containers |
 | `ContainerLabelsByEMPEROR` | Подписи на контейнерах / Labels on containers |
