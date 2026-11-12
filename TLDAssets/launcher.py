@@ -71,6 +71,7 @@ class App:
         p = ui.Painter(self.skin, bg)
         p.spr('vignetteFullscreen', W / 2, H / 2, W + 6, H + 4, (0, 0, 0, 0.6))
         ui.window(p, PX, PY, PW, PH)
+        p.rect(PX + 8, PY + 8, PW - 16, PH - 16, (0.03, 0.04, 0.045, 0.62))   # calm, dark ground under the text
         self.base = bg
         self.render()
 
@@ -203,11 +204,11 @@ class App:
         if k not in self.rows: self.rows[k] = self._row_layout(p, m)
         return self.rows[k]
     def _row_layout(self, p, m):
-        desc = p.wrap(m['desc']['ru' if RU else 'en'], 13, ROW_W - 60)
+        desc = p.wrap(m['desc']['ru' if RU else 'en'], 14, ROW_W - 60)
         extra = []
         if m.get('needs'): extra.append(T('Нужно: ', 'Needs: ') + ', '.join(m['needs']))
         if m.get('assets'): extra.append(T('файлы из сюжета (эпизод 5) соберутся сами', 'story files (episode 5) are built automatically'))
-        h = 14 + 22 + len(desc) * 18 + (17 if extra else 0) + 10
+        h = 14 + 22 + len(desc) * 20 + (19 if extra else 0) + 10
         return desc, '   ·   '.join(extra), h
 
     def render(self):
@@ -263,9 +264,9 @@ class App:
         ly = y + 58
         lines = []
         for s in self.logs[-6:]:
-            lines += p.wrap(s, 12, ROW_W) or ['']
+            lines += p.wrap(s, 13, ROW_W) or ['']
         for s in lines[-5:]:
-            p.text(s, L, ly, 12, ui.GREY, shadow=False); ly += 16
+            p.text(s, L, ly, 13, ui.GREY, shadow=False); ly += 17
         self.show(im.convert('RGB'))
 
     def show(self, frame):
@@ -301,8 +302,7 @@ class App:
         self.scroll = max(0, min(self.scroll, max(0, total - LIST_H)))
         sub = Image.new('RGBA', (ROW_W, LIST_H))
         sp = ui.Painter(self.skin, sub)
-        sp.spr('inv_slotBack', ROW_W / 2, LIST_H / 2, ROW_W, LIST_H, (0.17, 0.21, 0.21, 0.44), True,
-               fallback=lambda pp, cx, cy, w, h, c: pp.rect(0, 0, w, h, (0.1, 0.12, 0.12, 0.45)))
+        sp.rect(0, 0, ROW_W, LIST_H, (0.05, 0.06, 0.065, 0.88))
         for m, desc, extra, h, top in lay:
             y0 = top - self.scroll
             if y0 + h < 0 or y0 > LIST_H: continue
@@ -322,8 +322,8 @@ class App:
             sp.text(size_txt(m.get('size', 0)), ROW_W - 14, y0 + 24, 13, ui.DIM, al='r')
             yy = y0 + 46
             for ln in desc:
-                sp.text(ln, 44, yy, 13, ui.GREY); yy += 18
-            if extra: sp.text(extra, 44, yy, 11, ui.TEAL)
+                sp.text(ln, 44, yy, 14, ui.GREY); yy += 20
+            if extra: sp.text(extra, 44, yy, 12, ui.TEAL)
             ui.line(sp, 10, y0 + h - 1, ROW_W - 20, 0.35)
             vy0, vy1 = max(0, y0), min(LIST_H, y0 + h)
             if vy1 > vy0:
