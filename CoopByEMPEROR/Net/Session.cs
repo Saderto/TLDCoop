@@ -298,6 +298,7 @@ namespace CoopByEMPEROR.Net
             Challenges.Reset();
             SharedRecipes.Reset();
             SmokehouseLink.Reset();
+            JellyfishLink.Reset();
             QuestItems.Reset();
             RandomObjects.Reset();
             BotTests.Reset();
@@ -508,6 +509,7 @@ namespace CoopByEMPEROR.Net
             GlobalSync.Tick(now);
             SharedRecipes.Tick(now);
             SmokehouseLink.Tick(now);
+            JellyfishLink.Tick(now);
             Load.Lap(Load.Global);
             VoiceSync.Tick(now);
             Load.Lap(Load.Voice);
@@ -1167,6 +1169,17 @@ namespace CoopByEMPEROR.Net
                 case MsgType.SmokehouseAsk:
                     if (peer.Greeted) SmokehouseLink.HostAsk(peer, r);
                     break;
+                case MsgType.Jellyfish:
+                    if (!peer.Greeted) return;
+                    JellyfishLink.Receive(r);
+                    Broadcast(raw, except: peer);
+                    break;
+                case MsgType.JellyfishAll:
+                    if (peer.Greeted) JellyfishLink.HostAll(peer, r);
+                    break;
+                case MsgType.JellyfishAsk:
+                    if (peer.Greeted) JellyfishLink.HostAsk(peer, r);
+                    break;
                 case MsgType.Chronicle:
                     if (peer.Greeted) Chronicle.HostReceive(r, Players.TryGetValue(peer.Id, out var writer) ? writer.Name : "друг");
                     break;
@@ -1605,6 +1618,15 @@ namespace CoopByEMPEROR.Net
                     break;
                 case MsgType.SmokehouseAsk:
                     SmokehouseLink.ClientAnswer(r);
+                    break;
+                case MsgType.Jellyfish:
+                    JellyfishLink.Receive(r);
+                    break;
+                case MsgType.JellyfishAll:
+                    JellyfishLink.ClientAll(r);
+                    break;
+                case MsgType.JellyfishAsk:
+                    JellyfishLink.ClientAnswer(r);
                     break;
                 case MsgType.AnimalHit:
                 case MsgType.AnimalTransfer:

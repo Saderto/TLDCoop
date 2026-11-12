@@ -49,7 +49,7 @@ namespace CoopByEMPEROR.Net
         public static bool Logged(byte type) => (MsgType)type switch
         {
             MsgType.ItemDrop or MsgType.ItemPick or MsgType.ItemUpdate or MsgType.ObjectState or MsgType.WorldEvent or MsgType.TraderState
-                or MsgType.GiveItem or MsgType.GiveAck or MsgType.AnimalHarvest or MsgType.Feature or MsgType.AnimalArrow or MsgType.Smokehouse => true,
+                or MsgType.GiveItem or MsgType.GiveAck or MsgType.AnimalHarvest or MsgType.Feature or MsgType.AnimalArrow or MsgType.Smokehouse or MsgType.Jellyfish => true,
             _ => false,
         };
 

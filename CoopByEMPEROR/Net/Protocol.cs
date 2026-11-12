@@ -104,6 +104,9 @@ namespace CoopByEMPEROR.Net
         Smokehouse = 99,     // все, с номером: бочка коптильни изменилась — JSON одной бочки (SmokehouseByEMPEROR, Game/SmokehouseLink.cs)
         SmokehouseAll = 100, // друг → хост: дай все бочки мира (пустая строка); хост → друг: все бочки (Game/SmokehouseLink.cs)
         SmokehouseAsk = 101, // друг → хост: номер и действие с бочкой; хост → друг: номер и ответ (решает хост; Game/SmokehouseLink.cs)
+        Jellyfish = 102,     // все, с номером: событие мода медуз — медуза в лунке, аквариум (JellyfishByEMPEROR, Game/JellyfishLink.cs)
+        JellyfishAll = 103,  // друг → хост: дай все аквариумы; хост → друг: все аквариумы (Game/JellyfishLink.cs)
+        JellyfishAsk = 104,  // друг → хост: номер и действие (забрать медузу, перелить, отловить); хост → друг: номер и ответ (Game/JellyfishLink.cs)
     }
 
     public static class Protocol
