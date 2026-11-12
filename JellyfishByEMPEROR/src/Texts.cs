@@ -48,7 +48,7 @@ public static class Texts
         Add("CATCH_JAR", "Зачерпнуть банкой ({0})", "Scoop up with a jar ({0})");
         Add("CATCH_NOJAR", "Нет пустой банки", "No empty jar");
         Add("CATCH_LET", "Отпустить", "Let it go");
-        Add("CATCH_GAME", "Жми буквы по порядку", "Press the letters in order");
+        Add("CATCH_GAME", "Жми W A S D по порядку", "Press W A S D in order");
         Add("MSG_ESCAPED", "Медуза выскользнула и ушла на дно", "The jellyfish slipped away to the bottom");
         Add("MSG_SANK", "Медуза ушла под воду", "The jellyfish sank out of sight");
         Add("MSG_JAR", "Медуза в банке: {0}", "Jellyfish in the jar: {0}");

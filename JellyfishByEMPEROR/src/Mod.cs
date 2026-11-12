@@ -8,7 +8,7 @@ namespace JellyfishByEMPEROR;
 /// an aquarium to swim free, and caught back out with a jar. Decoration only (the owner, 11-12). Six species, 20 colours. Coop: CoopApi.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.2.4";
+    public const string VersionText = "0.2.5";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "JellyfishByEMPEROR");
 

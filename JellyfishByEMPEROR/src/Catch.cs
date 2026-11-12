@@ -25,7 +25,7 @@ public static class Catch
     static int at0;
     static float letterUntil, letterTime;
     static bool playing;
-    const string Abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const string Abc = "WASD"; // the owner (11-12): only W, A, S, D
     static readonly System.Random rnd = new();
     public static bool Showing => sp != null && window;
 
@@ -197,7 +197,7 @@ public static class Catch
         Sink();
     }
 
-    static readonly KeyCode[] Keys = Enumerable.Range(0, 26).Select(i => (KeyCode)((int)KeyCode.A + i)).ToArray();
+    static readonly KeyCode[] Keys = { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D };
 
     static void Game()
     {
