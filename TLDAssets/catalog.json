@@ -53,7 +53,7 @@
    "id": "TLDCoop",
    "zip": "CoopByEMPEROR.zip",
    "version": "0.19.68",
-   "size": 32636250,
+   "size": 34151092,
    "detect": "Mods/CoopByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDCoop.dll",
@@ -74,7 +74,7 @@
    "id": "TLDShotgun",
    "zip": "ShotgunByEMPEROR.zip",
    "version": "0.1.35",
-   "size": 32891019,
+   "size": 34405861,
    "detect": "Mods/ShotgunByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDShotgun.dll",
@@ -100,7 +100,7 @@
    "id": "TLDMilitaryStim",
    "zip": "MilitaryStimByEMPEROR.zip",
    "version": "0.1.6",
-   "size": 32183357,
+   "size": 33698199,
    "detect": "Mods/MilitaryStimByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDMilitaryStim.dll",
@@ -124,7 +124,7 @@
    "id": "TLDCrankLamp",
    "zip": "CrankLampByEMPEROR.zip",
    "version": "0.4.2",
-   "size": 32200230,
+   "size": 33715072,
    "detect": "Mods/CrankLampByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDCrankLamp.dll",
