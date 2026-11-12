@@ -51,14 +51,12 @@ public static class Texts
         Add("Table_NAME", "Колбасный стол", "Sausage table");
         Add("Table_DESC", "Стол с жердью для колбас. Ставится где угодно, огня не нужно. Полкило мяса, кишка и соль дают сырую колбасу одного из двух десятков видов. Готовят её только дымом в коптильне.",
             "A table with a pole for sausages. Stands anywhere and needs no fire. Half a kilo of meat, a gut and salt make a raw sausage of one of two dozen kinds. Only the smokehouse's smoke makes it food.");
-        Add("CanDeer_NAME", "Тушёнка из оленины", "Canned venison");
-        Add("CanMoose_NAME", "Тушёнка из лосятины", "Canned moose");
-        Add("CanBear_NAME", "Тушёнка из медвежатины", "Canned bear meat");
-        Add("CanFish_NAME", "Рыба в собственном соку", "Fish in its own juice");
-        Add("CanPate_NAME", "Паштет из дичи", "Game pate");
-        foreach (var (id, r, e) in new[] { ("CanDeer", "Оленина", "Venison"), ("CanMoose", "Лосятина", "Moose meat"), ("CanBear", "Медвежатина", "Bear meat"), ("CanFish", "Рыба", "Fish"), ("CanPate", "Заяц или куропатка", "Rabbit or ptarmigan") })
-            Add(id + "_DESC", r + ", сваренная в банке за 24 часа в котле. Не портится, не пахнет, паразитов нет. Открывается без инструмента, пустая банка остаётся.",
-                e + " boiled in a tin for 24 hours in the kettle. Never spoils, has no smell and no parasites. Opens with no tool; the empty tin is left.");
+        foreach (var c in Defs.Cans)
+        {
+            Add(c.Id + "_NAME", c.Ru, c.En);
+            Add(c.Id + "_DESC", c.RuOf + ": сварено в банке за 24 часа в котле. Не портится, не пахнет, паразитов нет. Открывается без инструмента, пустая банка остаётся.",
+                c.EnOf + ", boiled in a tin for 24 hours in the kettle. Never spoils, has no smell and no parasites. Opens with no tool; the empty tin is left.");
+        }
         Add("SausRaw_NAME", "Сырая колбаса", "Raw sausage");
         Add("SausRaw_DESC", "Рубленое мясо с солью в кишке. Сырую есть опасно, портится быстро. Закоптите её в коптильне.",
             "Minced meat with salt in a gut. Unsafe to eat raw and quick to spoil. Smoke it in the smokehouse.");
@@ -68,6 +66,9 @@ public static class Texts
             string id = "Saus" + k.Id, of = all ? "все восемь видов рыбы" : string.Join(", ", k.Parts.Select(p => Defs.GroupNames[p.Group].Ru)), ofEn = all ? "all eight kinds of fish" : string.Join(", ", k.Parts.Select(p => Defs.GroupNames[p.Group].En));
             string h6 = Texts.Hours(Tune.SausHotFxHours * k.Hours), h12 = Texts.Hours(Tune.SausDryFxHours * k.Hours);
             Add(id + "Raw_NAME", k.RuRaw, "Raw " + k.En);
+            Add(id + "Wip_NAME", k.RuRaw.Replace("Сырая", "Недоделанная").Replace("Сырые", "Недоделанные"), "Unfinished " + k.En);
+            Add(id + "Wip_DESC", "Мясо (" + of + "), кишка и соль уже в деле, но набивка не закончена. Есть и коптить её нельзя. Доделывается за любым колбасным столом кнопкой «Продолжить».",
+                "The meat (" + ofEn + "), the gut and the salt are already in it, but the stuffing is not finished. It cannot be eaten or smoked. Finish it at any sausage table with «Continue».");
             Add(id + "Raw_DESC", "Рубленое мясо (" + of + ") с солью в кишке. На огне её не готовят: закоптите в коптильне горячим дымом за 32 часа или холодным за 52. Сырую есть опасно, портится быстро.",
                 "Minced meat (" + ofEn + ") with salt in a gut. It is not cooked on a fire: smoke it in the smokehouse, 32 hours hot or 52 hours cold. Unsafe to eat raw and quick to spoil.");
             Add(id + "Hot_NAME", k.Ru + " горячего копчения", "Hot-smoked " + k.En);
@@ -89,6 +90,8 @@ public static class Texts
         Add("K_SALT", "соль 300 г (есть {0} кг)", "salt 300 g ({0} kg in the pack)");
         Add("K_M_DEER", "оленина", "venison"); Add("K_M_MOOSE", "лосятина", "moose meat"); Add("K_M_BEAR", "медвежатина", "bear meat");
         Add("K_M_FISH", "любая рыба", "any fish"); Add("K_M_PATE", "заяц или куропатка", "rabbit or ptarmigan");
+        Add("K_DIFF_FISH", "разные виды рыбы: {0}, каждой по {1} (у вас подходящих {2})", "{0} different kinds of fish, {1} of each (you have {2} that fit)");
+        Add("K_NEED_PART", "Не хватает: {0}. Нужен один вид мяса на всю порцию", "Not enough: {0}. One kind of meat must cover the portion");
         Add("K_HAVE", "В рюкзаке {0} кг.", "{0} kg in the pack.");
         Add("K_ROW", "Варится 24 ч, не портится", "Boils for 24 h, never spoils");
         Add("K_DO", "В котёл", "Into the kettle");
@@ -109,7 +112,10 @@ public static class Texts
         Add("T_CONTINUE", "Продолжить ({0}%)", "Continue ({0}%)");
         Add("T_WORK", "{0}: набивка", "{0}: stuffing");
         Add("B_PAUSED", "Постройка не закончена, готово {0}%. Заготовка в рюкзаке, достроить можно у любого верстака", "The build is not finished, {0}% done. The unfinished piece is in your pack, finish it at any workbench");
-        Add("T_PAUSED", "Колбаса не закончена, готово {0}%. Доделать можно за колбасным столом", "The sausage is not finished, {0}% done. Finish it at the sausage table");
+        Add("T_LEVEL", "Кулинария {0}", "Cooking {0}");
+        Add("T_NEED_LEVEL", "Для этой колбасы нужен {0} уровень кулинарии", "This sausage needs Cooking level {0}");
+        Add("T_BROKEN", "Работа прервана. Мясо, кишка и соль остались у вас", "The work was broken off. The meat, the gut and the salt are still yours");
+        Add("T_PAUSED", "Колбаса не закончена, готово {0}%. Заготовка в рюкзаке, доделать можно за любым колбасным столом", "The sausage is not finished, {0}% done. It is in your pack, finish it at any sausage table");
         Add("T_ALLFISH", "все восемь видов рыбы по {0} кг", "all eight kinds of fish, {0} kg each");
         Add("T_GUTS", "кишка (есть {0})", "a gut ({0} in the pack)");
         Add("T_HINT", "Годится оленина, лосятина, заяц и куропатка.", "Venison, moose, rabbit and ptarmigan will do.");

@@ -8,6 +8,8 @@ public class Job
 {
     public string Kind = "";
     public float Done, Kg, Cal, Cond;
+    /// <summary>The unfinished sausage was put in the pack as an item (0.4.19): the work goes on only with it at hand.</summary>
+    public bool Item;
 }
 
 public static partial class Barrels

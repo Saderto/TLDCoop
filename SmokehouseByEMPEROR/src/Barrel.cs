@@ -11,6 +11,16 @@ public class Slot
     public float Hours;            // smoked so far
     public bool Salted;
     public bool Can;               // the kettle: a tin and water went in with it
+    /// <summary>0.4.22, the kettle: the can this will be (a Defs.Cans id) and the meats that went in, so that each comes back raw if taken out early.
+    /// Empty in a slot of an older save: the can is then told by Species as before.</summary>
+    public string Recipe = "";
+    public List<SlotPart>? Parts;
+}
+
+public class SlotPart
+{
+    public string Raw = "";
+    public float Kg, RawCal, Cond;
 }
 
 /// <summary>A log in the firebox: what it was and how much of it is left. A log the fire has not touched can be taken back.</summary>

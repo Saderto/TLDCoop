@@ -7,7 +7,7 @@ namespace SmokehouseByEMPEROR;
 /// Since 0.3.0 also a canning kettle (cans, boiled sausage) and a sausage table (raw sausage, dry-cured in the barrel).</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.4.18";
+    public const string VersionText = "0.4.26";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SmokehouseByEMPEROR");
 
@@ -52,7 +52,7 @@ public class Mod : MelonMod
                 foreach (var st in new[] { Defs.Barrel, Defs.Kettle, Defs.Table })
                     pm.InstantiateItemInPlayerInventory(Defs.Prefix + st, 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
                 // 11-12 owner: one press gives everything there is to check
-                foreach (var own in new[] { "CanDeer", "CanMoose", "CanBear", "CanFish", "CanPate", "SausHuntRaw", "SausTaigaRaw", "SausFishRaw", "SausGreatBearRaw", "SausHuntHot", "SausHuntDry", "SausCohoHot", "HotDeer", "ColdDeer_S", "HotCoho", "ColdBass" })
+                foreach (var own in new[] { "CanDeer", "CanMoose", "CanBear", "CanFish", "CanPate", "CanWolf", "CanCougar", "CanSalmon", "CanSea", "CanHunter", "CanStew", "CanBeast", "CanAngler", "CanGreat", "CanFishMix", "SausHuntRaw", "SausTaigaRaw", "SausFishRaw", "SausGreatBearRaw", "SausHuntHot", "SausHuntDry", "SausCohoHot", "HotDeer", "ColdDeer_S", "HotCoho", "ColdBass" })
                 {
                     try { pm.InstantiateItemInPlayerInventory(Defs.Prefix + own, 1, 1f, PlayerManager.InventoryInstantiateFlags.None); } catch (Exception e) { Safe.Log("Test give " + own, e); }
                 }

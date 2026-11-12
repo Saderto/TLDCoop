@@ -335,8 +335,7 @@ public static partial class Window
     /// <summary>The piece comes out into the pack: smoked, canned or boiled if it is done, raw as it went in otherwise (an unused tin comes back with it).</summary>
     static bool Give(Slot s, bool done, bool cold, string? kind)
     {
-        var sp = Defs.SpeciesById(s.Species);
-        var def = done && sp != null ? Defs.Result(kind ?? "", sp, cold, s.Salted) : null;
+        var def = done ? Defs.ResultOf(kind ?? "", s, cold) : null;
         GearItem? got;
         if (def != null)
         {
@@ -349,7 +348,13 @@ public static partial class Window
         }
         else
         {
-            got = Items.GiveFood(s.Raw, s.Kg, s.RawCal, s.Cond);
+            if (s.Parts is { Count: > 0 } parts)
+            {
+                // a can of several meats taken out early: every meat comes back as it went in
+                got = null;
+                foreach (var p in parts) got = Items.GiveFood(p.Raw, p.Kg, p.RawCal, p.Cond) ?? got;
+            }
+            else got = Items.GiveFood(s.Raw, s.Kg, s.RawCal, s.Cond);
             if (got != null && s.Can)
             {
                 try { GameManager.GetPlayerManagerComponent().InstantiateItemInPlayerInventory(Defs.Can, 1, 1f, PlayerManager.InventoryInstantiateFlags.None); }
@@ -477,7 +482,66 @@ public static partial class Window
 
     const float W = 640f, Pad = 22f, RowH = 28f;
     const float CanRow = 46f;
-    static readonly (string id, string need)[] CanKinds = { ("CanDeer", "K_M_DEER"), ("CanMoose", "K_M_MOOSE"), ("CanBear", "K_M_BEAR"), ("CanFish", "K_M_FISH"), ("CanPate", "K_M_PATE") };
+    const int CansPerPage = 5;
+
+    /// <summary>The meat of the pack that covers a recipe's part: one kind of the group with the whole portion (the one there is most of).</summary>
+    static RawEntry? PartPick(Part p, ICollection<string>? taken = null)
+    {
+        RawEntry? best = null;
+        var ids = Defs.Groups.TryGetValue(p.Group, out var g) ? g : new[] { p.Group };
+        foreach (var e in raws)
+            if (ids.Contains(e.S.Id) && (taken == null || !taken.Contains(e.S.Id)) && e.Total >= p.Kg - .001f && (best == null || e.Total > best.Total)) best = e;
+        return best;
+    }
+
+    /// <summary>The pack's meat for every part of a recipe, a different kind for each part («Рыбное ассорти»: three different fish). null where there is none.</summary>
+    static RawEntry?[] Picks(CanKind k)
+    {
+        var taken = new HashSet<string>();
+        var res = new RawEntry?[k.Parts.Length];
+        for (int i = 0; i < res.Length; i++)
+        {
+            res[i] = PartPick(k.Parts[i], taken);
+            if (res[i] != null) taken.Add(res[i]!.S.Id);
+        }
+        return res;
+    }
+
+    /// <summary>All parts of one group: «three different fish».</summary>
+    static bool SameGroup(CanKind k) => k.Parts.Length > 1 && k.Parts.All(p => p.Group == k.Parts[0].Group);
+
+    static string PartName(Part p) => (Texts.Russian ? Defs.GroupNames[p.Group].Ru : Defs.GroupNames[p.Group].En) + " " + Texts.Get("KG", p.Kg.ToString("0.00"));
+
+    /// <summary>A can goes to boil: a tin, water, salt and the recipe's meats leave the pack (at a friend's host: when the host says yes).</summary>
+    static void PutCan(BarrelState b, CanKind k)
+    {
+        int i = Array.FindIndex(b.Slots, s => s == null);
+        if (i < 0) { Barrels.Say("MSG_FULL"); return; }
+        var slot = new Slot { Can = true, Salted = true, Recipe = k.Id, Parts = new() };
+        float condSum = 0f;
+        var picks = Picks(k);
+        for (int pi = 0; pi < k.Parts.Length; pi++)
+        {
+            var p = k.Parts[pi];
+            var e = picks[pi];
+            string raw = e != null ? Defs.Clean(e.G.name) : "";
+            if (e == null || !Portion(raw, p.Kg, false, out float pc, out float pcond, out float pr)) { Barrels.Say("K_NEED_PART", PartName(p)); return; }
+            slot.Parts.Add(new SlotPart { Raw = raw, Kg = p.Kg, RawCal = pc, Cond = pcond });
+            if (slot.Raw.Length == 0) { slot.Raw = raw; slot.Species = e.S.Id; }
+            slot.Kg += p.Kg; slot.RawCal += pc; slot.Cal += pc * Mathf.Clamp(pr, .5f, 2f); condSum += pcond * p.Kg;
+        }
+        slot.Cond = slot.Kg > 0f ? condSum / slot.Kg : 1f;
+        if (canCount <= 0) { Barrels.Say("MSG_NEED_CAN"); return; }
+        if (waterL < Tune.CanWater - .001f) { Barrels.Say("MSG_NEED_WATER"); return; }
+        if (saltCount <= 0) { Barrels.Say("MSG_NEED_SALT"); return; }
+        if (Remote) { Ask(b, new Op { Kind = "put", Piece = slot }, null); return; }
+        TakeNamed(Defs.Can); TakeWater(); TakeSalt();
+        foreach (var part in slot.Parts) Portion(part.Raw, part.Kg, true, out _, out _, out _);
+        b.Slots[i] = slot;
+        nextScan = 0f;
+        Barrels.Changed(b);
+        Safe.Debug($"Can {k.Id} put in: {slot.Kg:0.00} kg, {slot.RawCal:0} kcal raw, {slot.Cal:0} cooked");
+    }
 
     static bool Btn(Rect r, string text, bool enabled = true, bool selected = false) => Ui.Button(r, text, enabled && !Waiting, selected) && !Waiting;
 
@@ -545,9 +609,9 @@ public static partial class Window
         Ui.Begin();
         const int perPage = 4;
         int pages = Math.Max(1, (raws.Count + perPage - 1) / perPage);
-        if (page >= pages) page = 0;
+        if (!b.Kettle && page >= pages) page = 0;      // in the kettle the button turns the pages of recipes instead
         int shown = Math.Min(perPage, Math.Max(0, raws.Count - page * perPage));
-        float h = 52f + 34f + 30f + Tune.Slots * (RowH + 3f) + 12f + 34f + 30f + 34f + 12f + 28f + (kt ? CanKinds.Length * (CanRow + 3f) - 28f : Math.Max(1, shown) * (RowH + 3f) + 34f) + 44f + 10f;
+        float h = 52f + 34f + 30f + Tune.Slots * (RowH + 3f) + 12f + 34f + 30f + 34f + 12f + 28f + (kt ? CansPerPage * (CanRow + 3f) - 28f : Math.Max(1, shown) * (RowH + 3f) + 34f) + 44f + 10f;
         float x = kt ? (Ui.SW - W) / 2f : Math.Max(8f, (Ui.SW - W - RecW - 10f) / 2f), y = Math.Max(14f, (Ui.SH - h) / 2f);
         if (!kt) Recipes(new Rect(x + W + 10f, y, RecW, h), b);
         Ui.Panel(new Rect(x, y, W, h), Texts.Get(kt ? "K_TITLE" : "TITLE") + (Waiting ? "   " + Texts.Get("WAIT_HOST") : ""));
@@ -591,10 +655,11 @@ public static partial class Window
             {
                 var sp = Defs.SpeciesById(s.Species);
                 bool done = b.Done(s);
-                var def = sp != null ? Defs.Result(b.Kind, sp, b.Cold, false) : null;
+                var def = Defs.ResultOf(b.Kind, s, b.Cold);
                 float need = b.NeedOf(s);
                 if (def != null) Ui.Icon(new Rect(lx + 4f, cy + 1f, RowH - 2f, RowH - 2f), Assets.Texture(def.Icon, compress: false));
                 string name = sp == null ? s.Raw : Texts.Russian ? sp.Ru : char.ToUpperInvariant(sp.En[0]) + sp.En.Substring(1);
+                if (kt && s.Recipe.Length > 0 && Defs.CanById(s.Recipe) is { } ck) name = ck.Name;
                 if (s.Salted && !kt) name += ", " + Texts.Get("SALTED");
                 Ui.Label(new Rect(lx + RowH + 8f, cy, 250f, RowH), name + "   " + Ui.Colored(Texts.Get("KG", s.Kg.ToString("0.00")), Ui.Dim));
                 Ui.Bar(new Rect(lx + 300f, cy + RowH - 6f, 170f, 3f), s.Hours / need, done ? Ui.Good : Ui.Accent);
@@ -626,25 +691,35 @@ public static partial class Window
             Ui.Label(new Rect(lx, cy, cw, 26f), Texts.Get("K_PUT_IN"));
             cy += 28f;
             bool room = b.Slots.Any(s => s == null);
-            foreach (var (id, need) in CanKinds)
+            int canPages = (Defs.Cans.Length + CansPerPage - 1) / CansPerPage;
+            if (page >= canPages) page = 0;
+            var shownCans = Defs.Cans.Skip(page * CansPerPage).Take(CansPerPage).ToArray();
+            foreach (var k in shownCans)
             {
-                RawEntry? pick = null; float have = 0f;
-                foreach (var e in raws)
+                bool all = true;
+                var bits = new List<string>();
+                var picks = Picks(k);
+                for (int pi = 0; pi < k.Parts.Length; pi++)
                 {
-                    if (Defs.CanOf(e.S) != id) continue;
-                    have += e.Total;
-                    if (pick == null && e.Total >= Tune.CanMeatKg - .001f) pick = e;
+                    bool ok = picks[pi] != null;
+                    all &= ok;
+                    bits.Add(ok ? PartName(k.Parts[pi]) : Ui.Colored(PartName(k.Parts[pi]), Ui.Fire));
+                }
+                if (SameGroup(k))
+                {
+                    string t = Texts.Get("K_DIFF_FISH", k.Parts.Length, Texts.Get("KG", k.Parts[0].Kg.ToString("0.00")), picks.Count(x => x != null));
+                    bits = new List<string> { all ? t : Ui.Colored(t, Ui.Fire) };
                 }
                 Ui.Row(new Rect(lx, cy, cw, CanRow));
-                Ui.Icon(new Rect(lx + 4f, cy + 3f, CanRow - 6f, CanRow - 6f), Assets.Texture("icons/" + id + ".png", compress: false));
-                string meat = Texts.Get(need) + " " + Texts.Get("KG", Tune.CanMeatKg.ToString("0.00"));
-                Ui.Fit(new Rect(lx + CanRow + 6f, cy - 1f, cw - CanRow - 136f, 24f), Texts.Get(id + "_NAME") + ":   " + (pick != null ? meat : Ui.Colored(meat, Ui.Fire)));
-                Ui.Fit(new Rect(lx + CanRow + 6f, cy + 20f, cw - CanRow - 136f, 24f), Ui.Colored(Texts.Get("K_HAVE", have.ToString("0.00")) + "  " + Texts.Get("K_ROW"), Ui.Dim));
-                bool can = pick != null && room && canCount > 0 && saltCount > 0 && waterL >= Tune.CanWater - .001f;
-                if (Btn(new Rect(lx + cw - 124f, cy + 8f, 120f, CanRow - 16f), Texts.Get("K_DO"), can)) { PutIn(b, pick!); break; }
+                Ui.Icon(new Rect(lx + 4f, cy + 3f, CanRow - 6f, CanRow - 6f), Assets.Texture("icons/" + k.Id + ".png", compress: false));
+                Ui.Fit(new Rect(lx + CanRow + 6f, cy - 1f, cw - CanRow - 136f, 24f), k.Name);
+                Ui.Fit(new Rect(lx + CanRow + 6f, cy + 20f, cw - CanRow - 136f, 24f), string.Join(" + ", bits));      // K_DIFF_FISH: one line for the whole recipe
+                bool can = all && room && canCount > 0 && saltCount > 0 && waterL >= Tune.CanWater - .001f;
+                if (Btn(new Rect(lx + cw - 124f, cy + 8f, 120f, CanRow - 16f), Texts.Get("K_DO"), can)) { PutCan(b, k); break; }
                 cy += CanRow + 3f;
             }
-            cy += 6f;
+            cy += (CansPerPage - shownCans.Length) * (CanRow + 3f) + 6f;
+            if (Ui.Button(new Rect(lx + (cw - 200f) / 2f, cy, 200f, 32f), Texts.Get("MORE", $"{page + 1}/{canPages}"))) page = (page + 1) % canPages;
             if (Btn(new Rect(lx, cy, 200f, 32f), Texts.Get("K_PICK_UP"), b.Idle)) { PickUp(b); return; }
             if (Ui.Button(new Rect(lx + cw - 200f, cy, 200f, 32f), Texts.Get("CLOSE"))) Close();
             return;

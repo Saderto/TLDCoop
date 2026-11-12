@@ -182,7 +182,7 @@
   {
    "id": "SmokehouseBySeagull",
    "zip": "SmokehouseByEMPEROR.zip",
-   "version": "0.4.18",
+   "version": "0.4.26",
    "size": 102993565,
    "detect": "Mods/SmokehouseByEMPEROR.dll",
    "legacy": {
@@ -195,8 +195,8 @@
     "en": "Smokehouse"
    },
    "desc": {
-    "ru": "Бочка-коптильня, котёл для консервов и стол для колбас: копчёное мясо и рыба, 5 видов консервов, 24 вида колбас.",
-    "en": "A barrel smokehouse, a canning kettle and a sausage table: smoked meat and fish, 5 kinds of cans, 24 kinds of sausage."
+    "ru": "Бочка-коптильня, котёл для консервов и стол для колбас: копчёное мясо и рыба, 15 видов консервов, 24 вида колбас.",
+    "en": "A barrel smokehouse, a canning kettle and a sausage table: smoked meat and fish, 15 kinds of cans, 24 kinds of sausage."
    },
    "needs": [
     "SmokesAudioOn"

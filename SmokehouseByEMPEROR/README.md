@@ -46,25 +46,32 @@ The barrel and the kettle are lit outdoors only. A station can be picked up or m
 
 ## Котёл и консервы / Kettle and cans
 
-- 6 мест, крышка, пар и свой звук кипения. Банка консервов варится 24 часа.
-- 5 видов консервов: оленина, лосятина, медвежатина, рыба, паштет (кролик или куропатка). Не портятся, пустая банка
-  остаётся в рюкзаке.
+- 6 мест, крышка, пар и свой звук кипения. Банка консервов варится 24 часа, в неё идёт 0,3 кг мяса или рыбы.
+- 15 видов консервов. Из одного мяса: оленина, лосятина, медвежатина, волчатина, пума, паштет из дичи (заяц или куропатка),
+  рыба, лосось (кижуч или форель), морская рыба. Сборные: охотничья тушёнка (оленина и лосятина), рагу из дичи, тушёнка
+  зверобоя, рыбацкая похлёбка, «Великий Медведь» (оленина, лосятина и медвежатина), рыбное ассорти (три разные рыбы).
+- Консервы не портятся, пустая банка остаётся в рюкзаке. Рецепты в окне котла листаются по страницам.
 - Звук кипения сделан через звук Unity: он слышен, если стоит плагин SmokesAudioOn (есть в релизе).
 
-- 6 places, a lid, steam and its own boiling sound. A can boils for 24 hours.
-- 5 kinds of cans: venison, moose, bear, fish and pâté (rabbit or ptarmigan). They never spoil; the empty can stays in the pack.
+- 6 places, a lid, steam and its own boiling sound. A can boils for 24 hours and takes 0.3 kg of meat or fish.
+- 15 kinds of cans. From one meat: venison, moose, bear, wolf, cougar, game pâté (rabbit or ptarmigan), fish, salmon
+  (coho or trout), sea fish. Mixed: hunter's (venison and moose), game stew, beastslayer's, angler's chowder, Great Bear
+  (venison, moose and bear), fish medley (three different fish).
+- Cans never spoil; the empty can stays in the pack. The kettle's recipe list has pages.
 - The boiling sound plays through Unity audio: it is heard when the SmokesAudioOn plugin is installed (it is in the release).
 
 ## Колбасы / Sausages
 
-- На столе из мяса (0,5 кг), кишки и соли делается сырая колбаса. Работа идёт со временем, как крафт; недоделанную
-  колбасу доделывают потом у того же стола.
+- На столе из мяса (0,5 кг), кишки и соли делается сырая колбаса. Работа идёт со временем, как крафт. Мясо, кишка и соль
+  тратятся, только когда колбаса готова: если прервать работу, ничего не пропадёт.
+- Нужен уровень кулинарии: колбаса из одного мяса 1, из двух 2, из трёх 3, из четырёх 4, рыбная из всех рыб 5.
 - 24 вида колбас: из одного мяса или рыбы и сборные из нескольких. У каждой свой эффект, кроме обычной долгой сытости.
 - Колбасы только коптятся: горячего копчения или сыровяленые (холодное копчение).
 - Окно коптильни показывает панель рецептов.
 
-- At the table, meat (0.5 kg), a gut and salt make a raw sausage. The work takes time, as crafting does; an unfinished
-  sausage is finished later at the same table.
+- At the table, meat (0.5 kg), a gut and salt make a raw sausage. The work takes time, as crafting does. The meat, gut and
+  salt are spent only when the sausage is done: breaking the work off costs nothing.
+- Sausages need a Cooking level: one meat 1, two 2, three 3, four 4, the all-fish sausage 5.
 - 24 kinds of sausage: from one meat or fish, and mixed ones of several. Each has its own effect on top of the usual
   long satiety.
 - Sausages are only smoked: hot smoked or dry (cold smoked).

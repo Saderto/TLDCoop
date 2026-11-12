@@ -226,7 +226,12 @@ public static partial class Window
             case "put":
                 if (g != null) GameManager.GetInventoryComponent().DestroyGear(g.gameObject);
                 if (op.Piece != null && op.Piece.Salted) TakeSalt();
-                if (op.Piece != null && op.Piece.Can) { TakeNamed(Defs.Can); TakeWater(); Portion(op.Piece.Raw, Tune.CanMeatKg, true, out _, out _, out _); }
+                if (op.Piece != null && op.Piece.Can)
+                {
+                    TakeNamed(Defs.Can); TakeWater();
+                    if (op.Piece.Parts is { Count: > 0 } parts) foreach (var part in parts) Portion(part.Raw, part.Kg, true, out _, out _, out _);
+                    else Portion(op.Piece.Raw, Tune.CanMeatKg, true, out _, out _, out _);
+                }
                 break;
             case "take":
                 if (r.Piece != null && !Give(r.Piece, r.Done, r.Cold, op.Station)) MelonLogger.Error("Smokehouse: the piece the host gave out could not be created");

@@ -58,6 +58,11 @@ public static class Items
                 data.m_DailyHPDecay = 0f;
                 data.m_Type = GearType.Tool;
             }
+            else if (def.IsUnfinished)
+            {
+                data.m_BaseWeight = ItemWeight.FromKilograms(def.Kg);
+                data.m_DailyHPDecay = 0f;
+            }
             else data.m_DailyHPDecay *= def.Decay;
             if (def.Empty == Defs.Can)
             {
@@ -100,6 +105,31 @@ public static class Items
             g.transform.localScale = Vector3.one;
             // a box of the barrel's size on the item itself: whatever collider the scrap had fits a handful of scrap
             if (g.GetComponent<BoxCollider>() == null) g.gameObject.AddComponent<BoxCollider>();
+        }
+        else if (def.IsUnfinished)
+        {
+            g.WeightKG = ItemWeight.FromKilograms(def.Kg);
+            if (!restored)
+            {
+                g.m_StartCondition = GearStartCondition.Perfect;
+                g.CurrentHP = data.m_MaxHP > 0f ? data.m_MaxHP : 100f;
+            }
+            if (g.m_StackableItem is { } st)
+            {
+                UnityEngine.Object.DestroyImmediate(st);
+                g.m_StackableItem = null;
+            }
+            foreach (var c in g.GetComponentsInChildren<FuelSourceItem>(true)) UnityEngine.Object.DestroyImmediate(c);
+            foreach (var c in g.GetComponentsInChildren<Harvest>(true)) UnityEngine.Object.DestroyImmediate(c);
+            g.m_FuelSourceItem = null;
+            g.m_Harvest = null;
+            // the model was made for the raw sausage's item: the same size here whatever the gut's own scale is
+            try
+            {
+                var raw = Template(def.Unfinished);
+                if (raw != null) g.transform.localScale = raw.transform.localScale;
+            }
+            catch (Exception e) { Safe.Log("Unfinished sausage size", e); }
         }
         else Food(g, def, restored);
 

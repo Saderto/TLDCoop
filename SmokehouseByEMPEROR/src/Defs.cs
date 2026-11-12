@@ -18,6 +18,9 @@ public class Def
     public bool IsStation => Station.Length > 0;
     /// <summary>A station that was not finished at the workbench (11-12 owner): the same model under another name, it is not placed or used.</summary>
     public bool Wip;
+    /// <summary>An unfinished sausage (11-12 owner): the raw sausage's model under another name; it is not eaten or smoked, the table finishes it.</summary>
+    public string Unfinished = "";
+    public bool IsUnfinished => Unfinished.Length > 0;
     public bool Bulky => IsStation || Wip;
     public bool IsBarrel => Station == Defs.Barrel;
     public float Kg;              // a station's weight
@@ -47,7 +50,16 @@ public record SausKind(string Id, Part[] Parts, string RawBase, string CookedBas
 {
     public string RawId => "Saus" + Id + "Raw";
     public string SpeciesId => "Saus" + Id;
+    public string WipId => "Saus" + Id + "Wip";
+    /// <summary>11-12 owner: the more kinds of meat and fish in it, the higher the Cooking level it asks (1..5 as the game shows it); «Рыбная» of all fish is the top.</summary>
+    public int Level => Math.Clamp(Parts.Length, 1, 5);
     public string Name => Texts.Russian ? Ru : char.ToUpperInvariant(En[0]) + En.Substring(1);
+}
+
+/// <summary>A kind of can the kettle boils (11-12 owner: more than the first five, some of several meats): 0.30 kg of meat in all.</summary>
+public record CanKind(string Id, Part[] Parts, string Base, string Fx, string Ru, string En, string RuOf, string EnOf)
+{
+    public string Name => Texts.Russian ? Ru : En;
 }
 
 /// <summary>The numbers the owner agreed to (11-11).</summary>
@@ -92,11 +104,13 @@ public static class Defs
         ["Deer"] = new[] { "Deer" }, ["Moose"] = new[] { "Moose" }, ["Bear"] = new[] { "Bear" }, ["Predator"] = new[] { "Wolf", "Cougar" },
         ["Small"] = new[] { "Rabbit", "Ptarmigan" }, ["Wolf"] = new[] { "Wolf" }, ["Cougar"] = new[] { "Cougar" }, ["Rabbit"] = new[] { "Rabbit" }, ["Ptarmigan"] = new[] { "Ptarmigan" },
         ["Fish"] = new[] { "Coho", "WhiteFish", "Trout", "Bass", "Burbot", "Goldeye", "Rockfish", "IrishLord" },
+        ["Salmon"] = new[] { "Coho", "Trout" }, ["Sea"] = new[] { "Rockfish", "IrishLord" }, ["Lake"] = new[] { "WhiteFish", "Bass", "Burbot", "Goldeye" },
     };
     public static readonly Dictionary<string, (string Ru, string En)> GroupNames = new()
     {
         ["Deer"] = ("оленина", "venison"), ["Moose"] = ("лосятина", "moose"), ["Bear"] = ("медвежатина", "bear"), ["Predator"] = ("волк или пума", "wolf or cougar"),
         ["Small"] = ("заяц или куропатка", "rabbit or ptarmigan"), ["Fish"] = ("любая рыба", "any fish"),
+        ["Salmon"] = ("кижуч или форель", "coho or trout"), ["Sea"] = ("морской окунь или ирландский лорд", "rockfish or Irish lord"), ["Lake"] = ("сиг, окунь, налим или золотоглазка", "whitefish, bass, burbot or goldeye"),
         ["Wolf"] = ("волчатина", "wolf"), ["Cougar"] = ("мясо пумы", "cougar"), ["Rabbit"] = ("крольчатина", "rabbit"), ["Ptarmigan"] = ("куропатка", "ptarmigan"),
         ["Coho"] = ("кижуч", "coho salmon"), ["WhiteFish"] = ("сиг", "lake whitefish"), ["Trout"] = ("радужная форель", "rainbow trout"), ["Bass"] = ("малоротый окунь", "smallmouth bass"),
         ["Burbot"] = ("налим", "burbot"), ["Goldeye"] = ("золотоглазка", "goldeye"), ["Rockfish"] = ("морской окунь", "rockfish"), ["IrishLord"] = ("красный ирландский лорд", "red Irish lord"),
@@ -140,6 +154,31 @@ public static class Defs
         return new SausKind(id, ps, rawBase, cookedBase, parasites, fs.Select(f => (f, FxInfo[f].V * k)).ToArray(), ru, ruRaw, en,
             string.Join(", ", fs.Select(f => FxInfo[f].Ru)), string.Join(", ", fs.Select(f => FxInfo[f].En)), hours);
     }
+
+    static CanKind Can_(string id, string parts, string cooked, string fx, string ru, string en, string ruOf, string enOf) =>
+        new(id, parts.Split(' ').Select(x => x.Split(':')).Select(x => new Part(x[0], float.Parse(x[1], System.Globalization.CultureInfo.InvariantCulture))).ToArray(), "GEAR_Cooked" + cooked, fx, ru, en, ruOf, enOf);
+
+    /// <summary>The first five are the cans of 0.3; the rest came 11-12 («сделай для котла больше комбинаций»). Each takes 0.30 kg of meat in all.</summary>
+    public static readonly CanKind[] Cans =
+    {
+        Can_("CanDeer", "Deer:.3", "MeatDeer", "meat", "Тушёнка из оленины", "Canned venison", "Оленина", "Venison"),
+        Can_("CanMoose", "Moose:.3", "MeatMoose", "meat", "Тушёнка из лосятины", "Canned moose", "Лосятина", "Moose meat"),
+        Can_("CanBear", "Bear:.3", "MeatBear", "meat", "Тушёнка из медвежатины", "Canned bear meat", "Медвежатина", "Bear meat"),
+        Can_("CanWolf", "Wolf:.3", "MeatWolf", "meat", "Тушёнка из волчатины", "Canned wolf meat", "Волчатина", "Wolf meat"),
+        Can_("CanCougar", "Cougar:.3", "MeatCougar", "meat", "Тушёнка из пумы", "Canned cougar meat", "Мясо пумы", "Cougar meat"),
+        Can_("CanPate", "Small:.3", "MeatRabbit", "meat", "Паштет из дичи", "Game pate", "Заяц или куропатка", "Rabbit or ptarmigan"),
+        Can_("CanFish", "Fish:.3", "CohoSalmon", "fish", "Рыба в собственном соку", "Fish in its own juice", "Рыба", "Fish"),
+        Can_("CanSalmon", "Salmon:.3", "CohoSalmon", "fish", "Лосось в собственном соку", "Salmon in its own juice", "Кижуч или форель", "Coho or trout"),
+        Can_("CanSea", "Sea:.3", "Rockfish", "fish", "Морская рыба в собственном соку", "Sea fish in its own juice", "Морская рыба", "Sea fish"),
+        Can_("CanHunter", "Deer:.15 Moose:.15", "MeatDeer", "meat", "Охотничья тушёнка", "Hunter's canned meat", "Оленина с лосятиной", "Venison and moose"),
+        Can_("CanStew", "Deer:.15 Small:.15", "MeatDeer", "meat", "Рагу из дичи", "Game stew", "Оленина с зайцем или куропаткой", "Venison with rabbit or ptarmigan"),
+        Can_("CanBeast", "Bear:.15 Predator:.15", "MeatBear", "meat", "Тушёнка зверобоя", "Beastslayer's canned meat", "Медвежатина с мясом волка или пумы", "Bear with wolf or cougar meat"),
+        Can_("CanAngler", "Fish:.15 Small:.15", "CohoSalmon", "fish", "Рыбацкая похлёбка", "Angler's chowder", "Рыба с зайцем или куропаткой", "Fish with rabbit or ptarmigan"),
+        Can_("CanGreat", "Deer:.1 Moose:.1 Bear:.1", "MeatMoose", "meat", "Тушёнка «Великий Медведь»", "Great Bear canned meat", "Оленина, лосятина и медвежатина", "Venison, moose and bear"),
+        // 11-12 owner did not follow «лосось, морская и озёрная»: simply three different fish
+        Can_("CanFishMix", "Fish:.1 Fish:.1 Fish:.1", "CohoSalmon", "fish", "Рыбное ассорти", "Fish medley", "Три разные рыбы", "Three different fish"),
+    };
+    public static CanKind? CanById(string id) => Cans.FirstOrDefault(c => c.Id == id);
 
     static SausKind[]? sausages;
     /// <summary>One meat: its own effect. Two: both at 0.7. Three: all three at 0.55. Four have effects of their own.
@@ -208,8 +247,7 @@ public static class Defs
             All.Add(new Def { Id = s + "Wip", Base = d.Base, Mesh = d.Mesh, Texture = d.Texture, IconId = d.IconId, Wip = true, Kg = d.Kg });
         }
         // canned in the kettle: never spoils, no smell, the empty can is left
-        foreach (var (id, src, fx) in new[] { ("CanDeer", "GEAR_CookedMeatDeer", "meat"), ("CanMoose", "GEAR_CookedMeatMoose", "meat"), ("CanBear", "GEAR_CookedMeatBear", "meat"),
-                     ("CanFish", "GEAR_CookedCohoSalmon", "fish"), ("CanPate", "GEAR_CookedMeatRabbit", "meat") })
+        foreach (var (id, src, fx) in Cans.Select(c => (c.Id, c.Base, c.Fx)))
             All.Add(new Def { Id = id, Base = src, Mesh = id, Texture = id, IconId = id, Weight = Tune.CanWeight, Tare = Tune.CanTare, Decay = 0f, NoParasites = true, NoScent = true, Empty = Can, Fx = fx });
         // the one sausage of 0.3.x: no longer made, kept so that a save holding it loads; the raw one can still be smoked
         All.Add(new Def { Id = SausRaw, Base = "GEAR_RawMeatDeer", Mesh = SausRaw, Texture = SausRaw, IconId = SausRaw, NoCook = true });
@@ -224,6 +262,8 @@ public static class Defs
             All.Add(new Def { Id = id + "Raw", Base = k.RawBase, Mesh = id + "Raw", Texture = id + "Raw", IconId = id + "Raw", NoCook = true, NoParasites = !k.Parasites });
             All.Add(new Def { Id = id + "Hot", Base = k.CookedBase, Mesh = id + "Hot", Texture = id + "Hot", IconId = id + "Hot", Hot = true, Weight = Tune.HotWeight, Decay = 1f / Tune.HotKeeps, NoParasites = true, Kind = k });
             All.Add(new Def { Id = id + "Dry", Base = k.CookedBase, Mesh = id + "Dry", Texture = id + "Dry", IconId = id + "Dry", Weight = Tune.SausageDryWeight, Decay = 0f, NoParasites = !k.Parasites, Kind = k });
+            // a dried gut underneath: a plain thing that is not food, not fuel and does not spoil
+            All.Add(new Def { Id = id + "Wip", Base = "GEAR_GutDried", Mesh = id + "Raw", Texture = id + "Raw", IconId = id + "Raw", Unfinished = id + "Raw", Kg = Tune.SausageMeatKg + Tune.SausageSkin });
             var sp = new Species(k.SpeciesId, Prefix + k.RawId, k.CookedBase, false, k.Ru, k.En);
             sausSpecies[sp.Id] = sp;
             byRaw[sp.Raw] = sp;
@@ -283,7 +323,7 @@ public static class Defs
     public static IEnumerable<string> RawsOf(Part p) => (Groups.TryGetValue(p.Group, out var g) ? g : new[] { p.Group }).Select(id => AllSpecies.First(s => s.Id == id).Raw);
 
     /// <summary>Does this station take this raw thing at all.</summary>
-    public static bool Takes(string kind, Species s) => IsSausage(s) ? kind != Kettle : kind != Kettle || CanOf(s) != null;
+    public static bool Takes(string kind, Species s) => IsSausage(s) ? kind != Kettle : true;      // 0.4.22: the kettle has a can for every meat
 
     /// <summary>What a finished slot gives: a can or a boiled sausage out of the kettle, smoked food or a dry sausage out of the barrel.</summary>
     public static Def? Result(string kind, Species s, bool cold, bool salted)
@@ -292,6 +332,13 @@ public static class Defs
         if (IsSausage(s)) return kind == Kettle ? null : ById(s.Id + (cold ? "Dry" : "Hot"));
         if (kind == Kettle) return CanOf(s) is { } c ? ById(c) : null;
         return ById(OutId(s, !cold, salted));
+    }
+
+    /// <summary>What a slot gives when done: a kettle's slot knows its can by Recipe (0.4.22), an older one by its meat.</summary>
+    public static Def? ResultOf(string kind, Slot s, bool cold)
+    {
+        if (kind == Kettle && s.Recipe.Length > 0 && ById(s.Recipe) is { } can) return can;
+        return SpeciesById(s.Species) is { } sp ? Result(kind, sp, cold, s.Salted) : null;
     }
 
     public static Def? ById(string id) => byName.TryGetValue(Prefix + id, out var d) ? d : null;

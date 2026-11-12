@@ -149,6 +149,40 @@ internal static class Crafting
     static string? working;          // the station being built now
     static IntPtr workingOp;
     static bool ended;
+    /// <summary>Hours the game asks for what is left of the station, with every modifier on it (a feat that speeds crafting, 11-12: the player was offered
+    /// only 3/4 of the recipe's hours, so a station never came to its end). 0: unknown.</summary>
+    static float offeredHours;
+    /// <summary>The station whose last hours were just worked: when the game's own item is swept away, a clean finished one is given (0.4.24).
+    /// The game keeps its own «в процессе N%» on the item it hands over, and by its count our stations were never done: the player got a kettle
+    /// marked 78% that could be placed. So the game's item is never kept, whatever it thinks of it.</summary>
+    static string? finished;
+    static readonly Dictionary<string, bool> hadWip = new();
+    static string shownState = "";
+    static int refreshIn;
+
+    /// <summary>An unfinished station counts while its piece is at hand (11-12 owner: the piece was thrown away and the workbench still asked for it).
+    /// With the piece gone the recipe is the full one again, and beginning it starts a new station.</summary>
+    static bool Active(string id)
+    {
+        var job = Unfinished(id);
+        return job != null && (working == id || job.Kg < 1f || Count(id + "Wip") > 0);
+    }
+
+    /// <summary>The crafting window, if it is open, shows the recipe as it stands now (it kept the hours of the last go until another recipe was chosen).</summary>
+    static void RefreshPanel()
+    {
+        try
+        {
+            var panel = InterfaceManager.GetPanel<Panel_Crafting>();
+            if (panel == null || !panel.IsEnabled()) return;
+            // the chosen recipe is drawn again from its data: materials, tool and hours (0.4.25 refreshed only the list, the right side stayed as it was)
+            var scroll = panel.m_ScrollBehaviour;
+            if (scroll != null) panel.RefreshSelectedBlueprint(scroll.SelectedIndex);
+            var rc = panel.m_RequirementContainer;
+            if (rc != null) { rc.RefreshMaterialDisplay(); rc.RefreshCraftingTimeDisplay(); }
+        }
+        catch (Exception e) { Safe.Log("Crafting window refresh", e); }
+    }
     static (string id, int frames)? sweep;
     static (string id, int frames)? wipSweep;
 
@@ -161,7 +195,7 @@ internal static class Crafting
             {
                 var b = made.FirstOrDefault(m => m != null && m.name == NamePrefix + r.Id);
                 if (b == null) continue;
-                var job = Unfinished(r.Id);
+                var job = Active(r.Id) ? Unfinished(r.Id) : null;
                 float left = job == null ? 1f : Mathf.Clamp(1f - job.Done, .02f, 1f);
                 b.m_DurationMinutes = Math.Max(1, (int)Math.Round(r.Hours * 60 * left));
                 // a begun station asks for the unfinished piece alone
@@ -197,6 +231,7 @@ internal static class Crafting
         {
             if (!built) return;
             Saws();
+            if (refreshIn > 0 && --refreshIn == 0) { Apply(); RefreshPanel(); }
             if (sweep is { } s)
             {
                 // whatever the game handed over for the broken-off work goes away again
@@ -213,7 +248,22 @@ internal static class Crafting
                     if (extra != null) { inv.DestroyGear(extra.gameObject); Safe.Info($"Unfinished {s.id}: the item of the broken-off work is taken back"); }
                 }
                 sweep = s.frames > 1 ? (s.id, s.frames - 1) : null;
-                if (sweep == null)
+                if (sweep == null && finished == s.id)
+                {
+                    working = null; finished = null;
+                    var pm = GameManager.GetPlayerManagerComponent();
+                    if (inv != null)
+                        foreach (var o in inv.m_Items)
+                        {
+                            var g = o?.m_GearItem;
+                            if (g != null && g.name == Defs.Prefix + s.id + "Wip") { inv.DestroyGear(g.gameObject); break; }
+                        }
+                    var made = pm?.InstantiateItemInPlayerInventory(Defs.Prefix + s.id, 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
+                    Safe.Info($"Station {s.id}: finished, a clean one is given ({(made != null ? "ok" : "FAILED")})");
+                    baseline[s.id] = Count(s.id);
+                    Apply(); RefreshPanel();
+                }
+                else if (sweep == null)
                 {
                     working = null;
                     // the unfinished piece lies in the pack: one, whether the game took the old one for this go or not
@@ -224,6 +274,7 @@ internal static class Crafting
                         uj.Kg = 1f;      // the piece was handed over
                         Barrels.SaveJobs();
                     }
+                    Apply(); RefreshPanel();
                 }
                 return;
             }
@@ -242,7 +293,18 @@ internal static class Crafting
             }
             if (working != null) return;
             if (Time.frameCount % 30 != 0) return;
+            Adopt();
             foreach (var r in Recipes) baseline[r.Id] = Count(r.Id);
+            string state = "";
+            foreach (var r in Recipes)
+            {
+                bool wip = Count(r.Id + "Wip") > 0;
+                hadWip[r.Id] = wip;
+                // a piece picked up again after its station was begun anew: it is an unfinished station all the same
+                if (wip && Unfinished(r.Id) == null) { Barrels.Jobs.Add(new Job { Kind = JobPrefix + r.Id, Done = .02f, Kg = 1f }); Barrels.SaveJobs(); }
+                state += Active(r.Id) ? "1" : "0";
+            }
+            if (state != shownState) { shownState = state; Apply(); RefreshPanel(); }
             // a station begun under 0.4.6, which kept no piece in the pack: it gets one now
             foreach (var r in Recipes)
                 if (Unfinished(r.Id) is { Kg: < 1f } old && GameManager.GetPlayerManagerComponent() is { } pm && GameManager.GetInventoryComponent() != null)
@@ -252,6 +314,39 @@ internal static class Crafting
                 }
         }
         catch (Exception e) { Safe.Log("Station build tick", e); }
+    }
+
+    /// <summary>A station in the pack that the game itself marks as work in progress (left by 0.4.23 and older): it becomes our unfinished piece
+    /// with the same share of the work done, so that it is not placed and is finished by the recipe.</summary>
+    static void Adopt()
+    {
+        var inv = GameManager.GetInventoryComponent();
+        var pm = GameManager.GetPlayerManagerComponent();
+        if (inv == null || pm == null) return;
+        foreach (var r in Recipes)
+        {
+            GearItem? found = null; float pct = 0f;
+            foreach (var o in inv.m_Items)
+            {
+                var g = o?.m_GearItem;
+                if (g == null || g.name != Defs.Prefix + r.Id) continue;
+                var wip = g.m_InProgressCraftItem;
+                if (wip == null) continue;
+                float p = wip.GetPercentCompleteNormalized();
+                if (p >= .995f) continue;
+                found = g; pct = p; break;
+            }
+            if (found == null) continue;
+            inv.DestroyGear(found.gameObject);
+            var job = Unfinished(r.Id);
+            if (job == null) { job = new Job { Kind = JobPrefix + r.Id }; Barrels.Jobs.Add(job); }
+            job.Done = Mathf.Clamp(Math.Max(job.Done, pct), 0f, .98f);
+            job.Kg = 1f;
+            if (Count(r.Id + "Wip") == 0) pm.InstantiateItemInPlayerInventory(Defs.Prefix + r.Id + "Wip", 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
+            Barrels.SaveJobs();
+            Apply();
+            MelonLogger.Msg($"Station {r.Id}: the game's own unfinished one ({pct:0.00}) is turned into our unfinished piece");
+        }
     }
 
     static string? Ours(CraftingOperation op)
@@ -268,7 +363,20 @@ internal static class Crafting
         {
             var id = Ours(__instance);
             if (id == null) return;
+            // the unfinished piece is not at hand: this is a new station, the old record goes
+            if (Unfinished(id) is { Kg: >= 1f } stale && !(hadWip.TryGetValue(id, out var hw) && hw))
+            {
+                Barrels.Jobs.Remove(stale); Barrels.SaveJobs();
+                Safe.Info($"Station {id}: begun anew, the unfinished piece is not in the pack");
+            }
             working = id; workingOp = __instance.Pointer; ended = false; sweep = null;
+            offeredHours = 0f;
+            try
+            {
+                var panel = InterfaceManager.GetPanel<Panel_Crafting>();
+                if (panel != null) offeredHours = panel.GetAdjustedCraftingTime() / 60f;
+            }
+            catch (Exception e) { Safe.Log("Station build offered time", e); }
             Safe.Info($"Station {id}: work begun, done before {(Unfinished(id)?.Done ?? 0f):0.00}, in the pack {(baseline.TryGetValue(id, out var n) ? n : 0)}");
         }
         catch (Exception e) { Safe.Log("Station build start", e); }
@@ -297,13 +405,18 @@ internal static class Crafting
             float before = job?.Done ?? 0f;
             float left = Math.Max(.01f, r.Hours * (1f - before));
             if (go <= 0f) go = left;
-            float after = before + go * part / r.Hours;
-            MelonLogger.Msg($"Station {id}: go over ({(success ? "worked through" : "broken off")}), {spent:0.0}/{total:0.0} s, {go:0.00} h chosen of {left:0.00} h left, done {before:0.00} -> {after:0.00}, units {op.m_UnitsCompleted}/{op.m_TargetQuantity}, next {op.m_NextUnitProgress:0.00}");
-            if (go * part >= left * .97f)
+            // the share of what was left that this go did: by the hours the game itself offered, not by the recipe's
+            float full = offeredHours > .01f ? offeredHours : left;
+            float share = Mathf.Clamp01(go * part / full);
+            float after = before + (1f - before) * share;
+            MelonLogger.Msg($"Station {id}: go over ({(success ? "worked through" : "broken off")}), {spent:0.0}/{total:0.0} s, {go:0.00} h chosen of {full:0.00} h offered ({left:0.00} h by the recipe), done {before:0.00} -> {after:0.00}");
+            if (share >= .97f)
             {
-                working = null;
-                if (job != null) { Barrels.Jobs.Remove(job); Barrels.SaveJobs(); wipSweep = (id, 30); }
+                if (job != null) { Barrels.Jobs.Remove(job); Barrels.SaveJobs(); }
                 Apply();
+                finished = id;
+                sweep = (id, 90);
+                refreshIn = 4;
                 return;
             }
             if (job == null) { job = new Job { Kind = JobPrefix + id }; Barrels.Jobs.Add(job); }
@@ -311,6 +424,7 @@ internal static class Crafting
             Barrels.SaveJobs();
             Apply();
             sweep = (id, 90);
+            refreshIn = 4;
             Barrels.Say("B_PAUSED", (int)Math.Round(job.Done * 100f));
         }
         catch (Exception e) { Safe.Log("Station build end", e); }

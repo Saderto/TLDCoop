@@ -156,13 +156,25 @@ if 'TableOld' in only:
 
 # ---------------- cans: one mesh, a label per kind
 PAPER, COAL = (0.70, 0.62, 0.46), (0.035, 0.033, 0.035)
-KINDS = {k: (PAPER, COAL, v) for k, v in {'CanDeer': 'deer', 'CanMoose': 'moose', 'CanBear': 'bear', 'CanFish': 'fish', 'CanPate': 'hare'}.items()}
+KINDS = {k: (PAPER, COAL, v) for k, v in {'CanDeer': 'deer', 'CanMoose': 'moose', 'CanBear': 'bear', 'CanFish': 'fish', 'CanPate': 'hare',
+    # 11-12 owner: more kinds for the kettle. A can of several meats carries the drawing of each
+    'CanWolf': 'wolf', 'CanCougar': 'cougar', 'CanSalmon': 'salmon', 'CanSea': 'seafish',
+    'CanHunter': ('deer', 'moose'), 'CanStew': ('deer', 'hare'), 'CanBeast': ('bear', 'wolf'), 'CanAngler': ('fish', 'hare'),
+    'CanGreat': ('deer', 'moose', 'bear'), 'CanFishMix': 'shoal'}.items()}
+if os.environ.get('CANS'): KINDS = {k: v for k, v in KINDS.items() if k in os.environ['CANS'].split(',')}
 def label_image(paper, ink, pic, W=832, H=220):
     """A hand sketch in charcoal on plain paper: wobbly outline, hatched inside, paper tooth and a smudge."""
     SS = 2; w, h = W * SS, H * SS
     im = Image.new('L', (w, h), 0); d = ImageDraw.Draw(im); k = 255; pale = 0
-    for cx in (w // 4, 3 * w // 4):
-        cy = h // 2 + 7 * SS; s = 78 * SS
+    pics = pic if isinstance(pic, tuple) else (pic, pic)
+    if pics[0] == pics[-1] and len(pics) == 2: spots = [(w // 4, 78), (3 * w // 4, 78)]
+    else:
+        # several meats: the drawings stand side by side, the group twice round the can so that one look shows them all
+        n = len(pics); gap, sz = (0.17, 60) if n == 2 else (0.125, 44)
+        spots = [(int(w * (c + (i - (n - 1) / 2) * gap)), sz) for c in (0.25, 0.75) for i in range(n)]
+        pics = pics * 2
+    for (cx, sz), pic in zip(spots, pics):
+        cy = h // 2 + 7 * SS; s = sz * SS
         P = lambda pts: [(cx + x * s, cy - y * s) for x, y in pts]
         E = lambda x, y, rx, ry: d.ellipse([cx + (x - rx) * s, cy - (y + ry) * s, cx + (x + rx) * s, cy - (y - ry) * s], fill=k)
         Ln = lambda pts, w=7: d.line(P(pts), fill=k, width=int(w * SS * 1.6), joint='curve')
@@ -182,13 +194,69 @@ def label_image(paper, ink, pic, W=832, H=220):
             d.polygon(P([(-0.26, 0.15), (0.26, 0.15), (0.24, -0.6), (0.0, -0.9), (-0.24, -0.6)]), fill=k)
             for sg in (-1, 1):
                 d.polygon(P([(sg * 0.2, 0.1), (sg * 0.45, 0.25), (sg * 0.5, 0.9), (sg * 0.66, 0.5), (sg * 0.8, 0.88), (sg * 0.92, 0.45), (sg * 1.2, 0.7), (sg * 1.15, 0.15), (sg * 0.75, -0.05), (sg * 0.3, -0.02)]), fill=k)
+        elif pic == 'wolf':
+            d.polygon(P([(-0.5, 0.15), (-0.66, 0.95), (-0.2, 0.5), (0.2, 0.5), (0.66, 0.95), (0.5, 0.15), (0.2, -0.8), (-0.2, -0.8)]), fill=k)
+            for sg in (-1, 1): d.polygon(P([(sg * 0.12, 0.12), (sg * 0.36, 0.26), (sg * 0.3, 0.06)]), fill=pale)
+            d.polygon(P([(-0.1, -0.6), (0.1, -0.6), (0, -0.74)]), fill=pale)
+        elif pic == 'cougar':
+            # a cat's face: pointed ears, slanted eyes, a nose and long whiskers
+            E(0, -0.15, 0.62, 0.52)
+            for sg in (-1, 1):
+                d.polygon(P([(sg * 0.2, 0.25), (sg * 0.58, 0.95), (sg * 0.66, 0.1)]), fill=k)
+                d.polygon(P([(sg * 0.14, -0.02), (sg * 0.42, 0.12), (sg * 0.4, -0.06)]), fill=pale)
+                Ln([(sg * 0.3, -0.36), (sg * 1.1, -0.22)], 3); Ln([(sg * 0.3, -0.44), (sg * 1.08, -0.56)], 3)
+            d.polygon(P([(-0.1, -0.26), (0.1, -0.26), (0, -0.4)]), fill=pale)
+        elif pic == 'salmon':
+            # a salmon leaping out of the water
+            ca, sa = math.cos(math.radians(38)), math.sin(math.radians(38))
+            Rt = lambda pts: P([(x * ca - y * sa, x * sa + y * ca + 0.12) for x, y in pts])
+            d.polygon(Rt([(0.78 * math.cos(a) + 0.05, 0.27 * math.sin(a)) for a in [i * 2 * math.pi / 28 for i in range(28)]]), fill=k)
+            d.polygon(Rt([(-0.6, 0.0), (-1.12, 0.42), (-0.92, 0.0), (-1.12, -0.42)]), fill=k)
+            d.polygon(Rt([(-0.15, 0.22), (0.1, 0.52), (0.3, 0.2)]), fill=k); d.polygon(Rt([(-0.1, -0.22), (0.05, -0.45), (0.22, -0.2)]), fill=k)
+            ex, ey = 0.58 * ca - 0.06 * sa, 0.58 * sa + 0.06 * ca + 0.12
+            d.ellipse([cx + ex * s - 6, cy - ey * s - 6, cx + ex * s + 6, cy - ey * s + 6], fill=pale)
+            Ln([(-1.05 + i * 0.21, -0.82 + 0.08 * math.sin(i * 1.9)) for i in range(11)], 4)
+            for x, y in ((-0.2, -0.62), (0.15, -0.55), (0.5, -0.64)): E(x, y, 0.045, 0.07)
+        elif pic == 'shoal':
+            # three fish one above another, the middle one swims the other way: a medley
+            for y0, sg, fs in ((0.6, 1, 0.52), (0.0, -1, 0.6), (-0.6, 1, 0.52)):
+                Q = lambda pts: P([(sg * x * fs, y0 + y * fs) for x, y in pts])
+                d.polygon(Q([(-0.15 + 0.75 * math.cos(t), 0.36 * math.sin(t)) for t in [i * 2 * math.pi / 24 for i in range(24)]]), fill=k)
+                d.polygon(Q([(0.45, 0), (1.05, 0.5), (0.9, 0), (1.05, -0.5)]), fill=k)
+                d.polygon(Q([(-0.3, 0.3), (0.1, 0.62), (0.25, 0.25)]), fill=k)
+                ex = sg * -0.62 * fs; ey = y0 + 0.06 * fs
+                d.ellipse([cx + ex * s - 5, cy - ey * s - 5, cx + ex * s + 5, cy - ey * s + 5], fill=pale)
+        elif pic == 'fishlong':
+            E(-0.1, 0.0, 0.86, 0.2); d.polygon(P([(0.6, 0.0), (1.12, 0.4), (0.9, 0.0), (1.12, -0.4)]), fill=k)
+            d.polygon(P([(0.2, 0.15), (0.38, 0.42), (0.5, 0.12)]), fill=k); d.polygon(P([(0.2, -0.15), (0.38, -0.4), (0.5, -0.12)]), fill=k)
+            d.polygon(P([(-0.96, 0.0), (-1.15, -0.03), (-0.9, -0.12)]), fill=k)
+            d.ellipse([cx - 0.72 * s - 5, cy - 0.04 * s - 5, cx - 0.72 * s + 5, cy - 0.04 * s + 5], fill=pale)
+        elif pic == 'fishround':
+            E(-0.12, -0.05, 0.62, 0.45); d.polygon(P([(0.4, -0.05), (0.95, 0.45), (1.05, -0.05), (0.95, -0.55)]), fill=k)
+            for i in range(6): d.polygon(P([(-0.5 + i * 0.16, 0.3), (-0.4 + i * 0.16, 0.85 - 0.05 * abs(i - 2)), (-0.32 + i * 0.16, 0.3)]), fill=k)
+            d.polygon(P([(-0.2, -0.4), (0.0, -0.75), (0.15, -0.4)]), fill=k)
+            d.ellipse([cx - 0.5 * s - 9, cy - 0.1 * s - 9, cx - 0.5 * s + 9, cy - 0.1 * s + 9], fill=pale)
+        elif pic == 'seafish':
+            # a fish and an anchor: fish of the sea
+            fx, fs = -0.42, 0.62
+            d.ellipse([cx + (fx - 0.15 * fs - 0.75 * fs) * s, cy - 0.36 * fs * s - 0.1 * s, cx + (fx - 0.15 * fs + 0.75 * fs) * s, cy + 0.36 * fs * s - 0.1 * s], fill=k)
+            d.polygon(P([(fx + 0.45 * fs, 0.1), (fx + 1.05 * fs, 0.1 + 0.5 * fs), (fx + 0.9 * fs, 0.1), (fx + 1.05 * fs, 0.1 - 0.5 * fs)]), fill=k)
+            d.polygon(P([(fx - 0.3 * fs, 0.1 + 0.3 * fs), (fx + 0.1 * fs, 0.1 + 0.62 * fs), (fx + 0.25 * fs, 0.1 + 0.25 * fs)]), fill=k)
+            d.ellipse([cx + (fx - 0.62 * fs) * s - 5, cy - 0.15 * s - 5, cx + (fx - 0.62 * fs) * s + 5, cy - 0.15 * s + 5], fill=pale)
+            ax = 0.72
+            Ln([(ax, 0.55), (ax, -0.7)], 6); Ln([(ax - 0.22, 0.32), (ax + 0.22, 0.32)], 5)
+            Ln([(ax - 0.42, -0.3), (ax - 0.3, -0.58), (ax, -0.72), (ax + 0.3, -0.58), (ax + 0.42, -0.3)], 6)
+            for sg in (-1, 1): d.polygon(P([(ax + sg * 0.42, -0.12), (ax + sg * 0.56, -0.4), (ax + sg * 0.3, -0.36)]), fill=k)
+            E(ax, 0.72, 0.13, 0.13); d.ellipse([cx + (ax - 0.05) * s, cy - 0.77 * s, cx + (ax + 0.05) * s, cy - 0.67 * s], fill=pale)
         elif pic == 'hare':
             E(0, -0.38, 0.42, 0.4)
             for sg in (-1, 1):
                 d.polygon(P([(sg * 0.08, -0.1), (sg * 0.2, 0.9), (sg * 0.42, 0.95), (sg * 0.4, -0.1)]), fill=k)
             for sg in (-1, 1): d.ellipse([cx + sg * 0.17 * s - 4, cy + 0.3 * s - 4, cx + sg * 0.17 * s + 4, cy + 0.3 * s + 4], fill=pale)
     from PIL import ImageFilter
-    rs = np.random.RandomState(abs(hash(pic)) % 9999 + 1)
+    pic = '_'.join(dict.fromkeys(pics))
+    import zlib
+    rs = np.random.RandomState(zlib.crc32(pic.encode()) % 9999 + 1)
     def field(nx, ny): return np.array(Image.fromarray((rs.rand(ny, nx) * 255).astype(np.uint8)).resize((w, h), Image.BICUBIC), np.float32) / 255.0
     yy, xx = np.mgrid[0:h, 0:w]
     sx = np.clip(xx + (field(26, 7) - .5) * 9 * SS, 0, w - 1).astype(int); sy = np.clip(yy + (field(26, 7) - .5) * 9 * SS, 0, h - 1).astype(int)
@@ -246,7 +314,7 @@ if 'Can' in only:
         def f():
             im = bpy.data.images.load(label_image(paper, ink, pic)); ti.image = im
         return f
-    setter('CanDeer')()
+    setter(next(iter(KINDS)))()
     SEG = 28
     def can_uv(parts):
         # the can is a lathe: the label and the tin are unrolled flat by hand, so the drawing is sharp and nothing is wasted
