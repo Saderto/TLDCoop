@@ -388,6 +388,25 @@ def bell(R, H, power=.8, lobes=0, depth=0.0, sub=0, subdepth=0.0, thick=.25, wav
     return m
 
 
+def under_z(R, H, rr, power=.8, thick=.25, flat=0.0, rim_drop=0.0):
+    """Height of the bell's underside (subumbrella) at radius rr, lobes ignored: where tentacles and arms are rooted."""
+    best = None
+    for i in range(401):
+        f = i / 400
+        r = R * math.sin(f * math.pi / 2) ** power * (1 - .06 * (1 - f))
+        z = H * (math.cos(f * math.pi / 2) ** (1 + flat)) - rim_drop * f ** 3 - thick * H * math.sin(min(1.0, (1 - f) * 3) * math.pi / 2) * (1 - f * .3)
+        if best is None or abs(r - rr) < best[0]: best = (abs(r - rr), z)
+    return best[1]
+
+
+def stalk(z_top, z_bot, r_top, r_bot, n=32):
+    """The manubrium: a soft stalk hanging from the middle of the underside, the mouth arms grow from its end."""
+    fr = np.linspace(0, 1, 10)
+    r = np.concatenate([[.0002], r_top * (1.25 - .25 * fr) + (r_bot - r_top) * fr ** 1.5, [r_bot * .55]])
+    z = np.concatenate([[z_top + .0006], z_top - (z_top - z_bot) * fr, [z_bot - .0008]])
+    return lathe(r, z, n, lambda f, a: (.6 + .3 * a / 6.28, .55 + .1 * f))
+
+
 def frill(path, width, cols=9, amp=.35, freq=60.0, seed=0, uv=(.52, .98, .52, .98), normal_hint=(0, 0, 1.0)):
     """A ruffled arm: rows along the path, columns across; the further from the middle line, the deeper the waves."""
     path = np.asarray(path, float); k = len(path)
@@ -425,6 +444,7 @@ def hair(start, direction, length, seed, width=.0005, k=26, sway=.5, curl=0.0, t
 def lionsmane():
     m = M(); R, H = .033, .019
     m.merge(bell(R, H, power=.75, lobes=8, depth=.22, sub=32, subdepth=.10, thick=.45, wave=.04))
+    m.merge(stalk(under_z(R, H, 0, .75, .45), -.0035, .0075, .0058))
     # the huge folded curtain of oral arms: four ruffled arms hanging and turning
     for q in range(4):
         a = q * math.pi / 2 + .4
@@ -437,13 +457,14 @@ def lionsmane():
         for t in range(18):
             a = a0 + (t - 8.5) * .018; rr = R * (.70 + .06 * (t % 3)); s += 1
             ln = .05 + .035 * ((t * 37 + c * 11) % 7) / 6
-            m.merge(hair((rr * math.cos(a), rr * math.sin(a), -.002), (math.cos(a) * .10, math.sin(a) * .10, -1), ln, s, width=.00045, sway=.55))
+            m.merge(hair((rr * math.cos(a), rr * math.sin(a), under_z(R, H, rr, .75, .45) - .0002), (math.cos(a) * .10, math.sin(a) * .10, -1), ln, s, width=.00045, sway=.55))
     return m
 
 
 def aurelia():
     m = M(); R, H = .036, .0085
     m.merge(bell(R, H, power=.6, lobes=8, depth=.035, thick=.9, wave=.015, flat=.3))
+    m.merge(stalk(under_z(R, H, 0, .6, .9, .3), -.0026, .0045, .0035))
     s = 0
     for j in range(140):
         a = 2 * math.pi * j / 140; s += 1
@@ -461,15 +482,16 @@ def crystal():
     s = 0
     for j in range(90):
         a = 2 * math.pi * (j + .3) / 90; s += 1
-        m.merge(hair((R * .985 * math.cos(a), R * .985 * math.sin(a), -.0006), (math.cos(a) * .3, math.sin(a) * .3, -1), .018 + .016 * ((j * 7) % 5) / 4, s, width=.0003, k=12, sway=.45))
+        m.merge(hair((R * .985 * math.cos(a), R * .985 * math.sin(a), under_z(R, H, R * .985, .65, .8, .2) - .0002), (math.cos(a) * .3, math.sin(a) * .3, -1), .018 + .016 * ((j * 7) % 5) / 4, s, width=.0003, k=12, sway=.45))
     # the stomach: a short tube with a frilled mouth
-    m.merge(lathe(np.array([.0001, .0045, .0055, .0055, .0065, .0045]), np.array([.0005, -.0005, -.004, -.008, -.0105, -.012]), 32, lambda f, a: (.6 + .3 * a / 6.28, .55 + .1 * f)))
+    m.merge(lathe(np.array([.0001, .0065, .0055, .0055, .0065, .0045]), np.array([under_z(R, H, 0, .65, .8, .2) + .0004, under_z(R, H, 0, .65, .8, .2), -.004, -.008, -.0105, -.012]), 32, lambda f, a: (.6 + .3 * a / 6.28, .55 + .1 * f)))
     return m
 
 
 def seanettle():
     m = M(); R, H = .028, .021
     m.merge(bell(R, H, power=.85, lobes=16, depth=.10, thick=.45, wave=.03, rim_drop=.001))
+    m.merge(stalk(under_z(R, H, 0, .85, .45, 0, .001), -.0035, .0065, .0048))
     for q in range(4):
         a = q * math.pi / 2
         pts = []
@@ -480,7 +502,7 @@ def seanettle():
     s = 100
     for j in range(32):
         a = 2 * math.pi * (j + .5) / 32; s += 1
-        m.merge(hair((R * .93 * math.cos(a), R * .93 * math.sin(a), -.001), (math.cos(a) * .07, math.sin(a) * .07, -1), .065 + .02 * (j % 4) / 3, s, width=.0006, sway=.45))
+        m.merge(hair((R * .93 * math.cos(a), R * .93 * math.sin(a), under_z(R, H, R * .93, .85, .45, 0, .001) - .0002), (math.cos(a) * .07, math.sin(a) * .07, -1), .065 + .02 * (j % 4) / 3, s, width=.0006, sway=.45))
     return m
 
 
@@ -494,7 +516,7 @@ def periphylla():
     for j in range(12):
         a = 2 * math.pi * (j + .5) / 12; s += 1
         # rooted on the inside of the margin, between two lobes, then out and up as the helmet jellyfish holds them
-        m.merge(hair((.0195 * math.cos(a), .0195 * math.sin(a), .0015), (math.cos(a) * .9, math.sin(a) * .9, .05), .03, s, width=.0018, k=12, sway=.2, curl=.8, taper=.2))
+        m.merge(hair((.0218 * math.cos(a), .0218 * math.sin(a), .0010), (math.cos(a) * .9, math.sin(a) * .9, .05), .03, s, width=.0018, k=12, sway=.2, curl=.8, taper=.2))
     return m
 
 

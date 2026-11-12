@@ -30,7 +30,7 @@ public static class Tune
     public const float ShowMin = 3f, ShowMax = 7f;
     public const float JarKg = .35f, LiveKg = 1.1f, AquariumKg = 14f;
     // the owner (11-12): below −5° the jellyfish dies, from full condition in 90 minutes; in the warmth it comes back slowly
-    public const float FreezeAt = -5f, LossPerHour = 100f / 1.5f, GainPerHour = 6f, PackWarmth = 12f;
+    public const float FreezeAt = -5f, LossPerHour = 100f / 1.5f, GainPerHour = 6f, PackWarmth = 2f, InspectLeft = -.03f;
     // the owner (11-12): no more than three in one aquarium
     public const int TankMax = 3;
     public const float AquariumScale = 2.4f, HoleScale = 2.2f;
@@ -147,6 +147,15 @@ public static class Defs
         var col = sp.Colours[^1];
         foreach (var c in sp.Colours) { if (q < c.Weight) { col = c; break; } q -= c.Weight; }
         return (sp, col);
+    }
+
+    /// <summary>How hard it is to catch: 0 for the commonest (moon jellyfish, milky), 1 for the rarest (a black helmet jellyfish).
+    /// From how often it comes up: the owner (11-12), the rarer it is, the harder.</summary>
+    public static float Difficulty(Species s, Colour c)
+    {
+        float ps = (float)s.Weight / AllSpecies.Sum(x => x.Weight), pc = (float)c.Weight / s.Colours.Sum(x => x.Weight);
+        float p = Math.Max(1e-5f, ps * pc);
+        return Mathf.Clamp01((-Mathf.Log10(p) - .8f) / 1.75f);
     }
 
     public static float Rand(float a, float b) => a + (float)rnd.NextDouble() * (b - a);

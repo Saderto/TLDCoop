@@ -15,8 +15,17 @@ public static class Catch
     static Vector3 at;
     static float started, until, sinkingSince = -1f;
     static bool window;
-    /// <summary>Holes whose jellyfish is gone (taken, let go or sunk): the host refuses a late claim on them.</summary>
+    /// <summary>Holes whose jellyfish is gone (taken or let go): the host refuses a late claim on them.</summary>
     static readonly HashSet<string> ended = new();
+    /// <summary>Holes whose jellyfish sank by itself here: not shown again if told late, but a friend still catching it may claim it.</summary>
+    static readonly HashSet<string> sank = new();
+
+    // ---- the catching game (the owner, 11-12): letters to press in turn, the rarer the jellyfish the more of them and the less time each
+    static string letters = "";
+    static int at0;
+    static float letterUntil, letterTime;
+    static bool playing;
+    const string Abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     static readonly System.Random rnd = new();
     public static bool Showing => sp != null && window;
 
@@ -77,7 +86,7 @@ public static class Catch
         if (a.Length < 8) return;
         var s = Defs.SpeciesById(a[5]);
         var c = s != null ? Defs.ColourOf(s, a[6]) : null;
-        if (s == null || c == null || ended.Contains(a[0])) return;
+        if (s == null || c == null || ended.Contains(a[0]) || sank.Contains(a[0])) return;
         if (!string.Equals(a[1], GameManager.m_ActiveScene ?? "", StringComparison.OrdinalIgnoreCase)) return;
         var p = new Vector3(P(a[2]), P(a[3]), P(a[4]));
         bool near = false;
@@ -93,6 +102,15 @@ public static class Catch
         if (a[0] != id || sp == null) return;
         if (window) Say(a.Length > 1 && a[1] == "taken" ? "MSG_GONE" : "MSG_SANK");
         Sink();
+    }
+
+    /// <summary>Another player is catching the jellyfish of that hole: here it stays up a while longer, until it is taken or let go.</summary>
+    public static void RemoteKeep(string rest)
+    {
+        var a = rest.Split('|');
+        sank.Remove(a[0]);
+        if (a[0] != id || sp == null) return;
+        until = Math.Max(until, Time.time + 30f);
     }
 
     /// <summary>At the host: a friend wants the jellyfish of that hole. The first to ask gets it.</summary>
@@ -112,6 +130,7 @@ public static class Catch
     static void Show(string newId, Vector3 holeAt, Species s, Colour c, float secs, bool withWindow)
     {
         id = newId; sp = s; col = c; window = withWindow;
+        playing = false;
         at = holeAt;
         started = Time.time;
         until = started + secs;
@@ -146,9 +165,58 @@ public static class Catch
         catch (Exception e) { Safe.Log("HUD message", e); }
     }
 
-    static void TakeJar()
+    /// <summary>The jar is reached for: the letters to press come up, the jellyfish waits for the game to end.</summary>
+    static void StartGame()
     {
-        if (sp == null || col == null || Pack.EmptyJar() == null || JellyfishByEMPEROR.Remote.Waiting) return;
+        if (sp == null || col == null || playing || Pack.EmptyJar() == null || JellyfishByEMPEROR.Remote.Waiting) return;
+        if (ended.Contains(id)) { Say("MSG_GONE"); Sink(); return; }
+        float d = Defs.Difficulty(sp, col);
+        int n = 3 + Mathf.RoundToInt(d * 4f);
+        letterTime = Mathf.Lerp(1.7f, .75f, d);
+        var b = new System.Text.StringBuilder();
+        for (int i = 0; i < n; i++)
+        {
+            char ch;
+            do ch = Abc[rnd.Next(Abc.Length)]; while (b.Length > 0 && b[b.Length - 1] == ch);
+            b.Append(ch);
+        }
+        letters = b.ToString(); at0 = 0; playing = true;
+        letterUntil = Time.time + letterTime + .4f;
+        until = Time.time + 60f;
+        Safe.Info($"Catching game: {letters}, {letterTime:0.00} s a letter (difficulty {d:0.00})");
+        try { CoopApi.Send?.Invoke("holekeep|" + id); } catch (Exception e) { Safe.Log("Coop send keep", e); }
+    }
+
+    static void Escaped()
+    {
+        playing = false;
+        Say("MSG_ESCAPED");
+        Safe.Info("Slipped away in the catching game");
+        ended.Add(id);
+        try { CoopApi.Send?.Invoke("holeend|" + id + "|let"); } catch (Exception e) { Safe.Log("Coop send end", e); }
+        Sink();
+    }
+
+    static readonly KeyCode[] Keys = Enumerable.Range(0, 26).Select(i => (KeyCode)((int)KeyCode.A + i)).ToArray();
+
+    static void Game()
+    {
+        if (Time.time >= letterUntil) { Escaped(); return; }
+        foreach (var k in Keys)
+        {
+            if (!Input.GetKeyDown(k)) continue;
+            if (k - KeyCode.A != letters[at0] - 'A') { Escaped(); return; }
+            at0++;
+            GameAudioManager.PlayGUIButtonClick();
+            if (at0 >= letters.Length) { playing = false; Claim(); return; }
+            letterUntil = Time.time + letterTime;
+            return;
+        }
+    }
+
+    static void Claim()
+    {
+        if (sp == null || col == null || Pack.EmptyJar() == null) return;
         var s = sp; var c = col; string hid = id;
         if (JellyfishByEMPEROR.Remote.On)
         {
@@ -189,7 +257,7 @@ public static class Catch
     static void Sink()
     {
         if (sinkingSince < 0f) sinkingSince = Time.time;
-        sp = null; col = null;
+        sp = null; col = null; playing = false;
         if (window) Ui.BlockGameInput(false);
         window = false;
     }
@@ -197,7 +265,7 @@ public static class Catch
     static void End()
     {
         if (jelly != null) UnityEngine.Object.Destroy(jelly);
-        jelly = null; sp = null; col = null; sinkingSince = -1f;
+        jelly = null; sp = null; col = null; sinkingSince = -1f; playing = false;
         if (window) Ui.BlockGameInput(false);
         window = false;
         GameAudioManager.PlayGUIButtonClick();
@@ -228,13 +296,15 @@ public static class Catch
         {
             if (window) Say("MSG_SANK");
             Safe.Info("The jellyfish sank");
-            ended.Add(id);
+            sank.Add(id);
             Sink();
             return;
         }
         if (!window) return;
         Ui.BlockGameInput(true);
-        if (Input.GetKeyDown(KeyCode.Alpha1)) TakeJar();
+        if (playing) { Game(); return; }
+        if (JellyfishByEMPEROR.Remote.Waiting) return;
+        if (Input.GetKeyDown(KeyCode.Alpha1)) StartGame();
         else if (Input.GetKeyDown(KeyCode.Alpha2)) LetGo();
     }
 
@@ -242,20 +312,34 @@ public static class Catch
     {
         if (sp == null || col == null || !window) return;
         Ui.Begin();
-        const float W = 420f, H = 214f;
+        const float W = 420f, H = 184f;
         var r = new Rect((Ui.SW - W) / 2f, Ui.SH - H - 70f, W, H);
         Ui.Panel(r, Texts.Get("CATCH_TITLE"));
         float y = r.y + 50f;
         Ui.Icon(new Rect(r.x + 22f, y, 64f, 64f), Assets.Texture("icons/" + Defs.LiveId(sp, col) + ".png", compress: false));
         Ui.Label(new Rect(r.x + 98f, y + 6f, W - 120f, 26f), Texts.Name(sp, col));
+        if (playing)
+        {
+            Ui.Bar(new Rect(r.x + 98f, y + 40f, W - 120f, 8f), Mathf.Clamp01((letterUntil - Time.time) / letterTime), new Color(.95f, .62f, .30f, .9f));
+            y += 70f;
+            Ui.Caption(new Rect(r.x + 22f, y - 6f, W - 44f, 18f), Texts.Get("CATCH_GAME"));
+            float bs = 40f, gap = 8f, tw = letters.Length * bs + (letters.Length - 1) * gap, x0 = r.x + (W - tw) / 2f;
+            for (int i = 0; i < letters.Length; i++)
+            {
+                var b = new Rect(x0 + i * (bs + gap), y + 14f, bs, bs);
+                bool now = i == at0, done = i < at0;
+                Ui.Fill(b, now ? new Color(.95f, .62f, .30f, .35f) : new Color(0f, 0f, 0f, .45f));
+                Ui.Letter(b, letters[i].ToString(), done ? new Color(.45f, .75f, .45f, 1f) : now ? Color.white : new Color(.6f, .6f, .6f, 1f));
+            }
+            return;
+        }
         float left = Mathf.Clamp01((until - Time.time) / Math.Max(.1f, until - started));
         Ui.Bar(new Rect(r.x + 98f, y + 40f, W - 120f, 8f), left, new Color(.55f, .75f, .95f, .9f));
         y += 80f;
         int jars = Pack.JarCount();
         bool wait = JellyfishByEMPEROR.Remote.Waiting;
         float bw = (W - 52f) / 2f;
-        if (Ui.Button(new Rect(r.x + 22f, y, bw, 30f), wait ? Texts.Get("TANK_WAIT") : jars > 0 ? Texts.Get("CATCH_JAR", jars) : Texts.Get("CATCH_NOJAR"), jars > 0 && !wait)) TakeJar();
-        if (sp != null && Ui.Button(new Rect(r.x + 30f + bw, y, bw, 30f), Texts.Get("CATCH_LET"), !wait)) LetGo();
-        Ui.Caption(new Rect(r.x + 22f, r.yMax - 30f, W - 44f, 20f), Texts.Get("CATCH_KEYS"));
+        if (Ui.Button(new Rect(r.x + 22f, y, bw, 30f), wait ? Texts.Get("TANK_WAIT") : jars > 0 ? Texts.Get("CATCH_JAR", jars) : Texts.Get("CATCH_NOJAR"), jars > 0 && !wait)) StartGame();
+        if (sp != null && !playing && Ui.Button(new Rect(r.x + 30f + bw, y, bw, 30f), Texts.Get("CATCH_LET"), !wait)) LetGo();
     }
 }

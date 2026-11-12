@@ -23,6 +23,7 @@ public static class CoopApi
             {
                 case "hole": Catch.Remote(rest); break;
                 case "holeend": Catch.RemoteEnd(rest); break;
+                case "holekeep": Catch.RemoteKeep(rest); break;
                 case "tank": Tanks.Apply(rest); break;
             }
         }

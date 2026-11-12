@@ -72,6 +72,11 @@ public static partial class Items
             else { box.center = new Vector3(0f, .09f, 0f); box.size = new Vector3(.11f, .18f, .11f); }
         }
         Visual.Attach(g, def);
-        if (g.m_Inspect != null) g.m_Inspect.m_DistanceFromCamera = aquarium ? 1.1f : .45f;
+        if (g.m_Inspect != null)
+        {
+            g.m_Inspect.m_DistanceFromCamera = aquarium ? 1.1f : .45f;
+            // the owner (11-12): the jar a little to the left in the inspect view
+            if (!aquarium) g.m_Inspect.m_Offset = new Vector3(Tune.InspectLeft, 0f, 0f);
+        }
     }
 }

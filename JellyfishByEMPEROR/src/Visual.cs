@@ -186,7 +186,7 @@ public static class Visual
         }
     }
 
-    const float Floor = .051f, Surface = .387f, T = 2.2f;
+    const float Floor = .051f, Surface = .387f, T = 1.9f;
 
     static void Rebuild(TankVis v, List<Fish> fish, string sig)
     {
@@ -231,7 +231,10 @@ public static class Visual
         if (hi < lo) lo = hi = (lo + hi) / 2f;
         float t = time * .9f + ph * 3f;
         float sn = Mathf.Sin(t * 2.9f);
-        j.localPosition = new Vector3(Mathf.Sin(t * .11f + ph) * .17f, Mathf.Lerp(lo, hi, .5f + .5f * Mathf.Sin(t * .17f + ph)), Mathf.Sin(t * .13f + ph * 1.7f) * .05f);
+        // the owner (11-12): they went through one another. Each keeps its own third of the tank, front or back, and its own height band
+        float lane = (i - 1) * .17f, depth = i == 1 ? -.045f : .04f;
+        float b0 = Mathf.Lerp(lo, hi, i == 1 ? .45f : i == 0 ? 0f : .25f), b1 = Mathf.Lerp(lo, hi, i == 1 ? 1f : i == 0 ? .6f : .8f);
+        j.localPosition = new Vector3(lane + Mathf.Sin(t * .11f + ph) * .035f, Mathf.Lerp(b0, b1, .5f + .5f * Mathf.Sin(t * .17f + ph)), depth + Mathf.Sin(t * .13f + ph * 1.7f) * .02f);
         j.localRotation = Quaternion.Euler(0f, t * 9f, 0f);
         j.localScale = new Vector3(k * (1f + .06f * sn), k * (1f - .05f * sn), k * (1f + .06f * sn));
     }
