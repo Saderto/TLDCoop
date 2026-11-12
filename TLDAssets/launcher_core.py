@@ -220,6 +220,41 @@ def mod_urls(cat, mod):
     urls.append('https://github.com/%s/releases/latest/download/%s' % (cat['repo'], mod['zip']))
     return urls
 
+_SUMS = {}
+def release_sums(cat, tag=None):
+    """{file name: sha256} from SHA256SUMS.txt of the release (written by the GitHub build), {} if there is none."""
+    tag = tag or cat.get('tag')
+    key = (cat.get('repo'), tag)
+    if key not in _SUMS:
+        sums = {}
+        try:
+            url = release_asset_url(cat['repo'], 'SHA256SUMS.txt', tag)
+            with http(url, 20) as r:
+                for line in r.read().decode('utf-8', 'replace').splitlines():
+                    parts = line.split()
+                    if len(parts) == 2 and len(parts[0]) == 64: sums[parts[1].lstrip('*')] = parts[0].lower()
+        except Exception:
+            pass
+        _SUMS[key] = sums
+    return _SUMS[key]
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for b in iter(lambda: f.read(1 << 20), b''): h.update(b)
+    return h.hexdigest()
+
+def verify_download(cat, name, path, tag=None, log=lambda s: None):
+    """Checks a downloaded file against SHA256SUMS.txt of the release. Raises if it does not match."""
+    want = release_sums(cat, tag).get(name)
+    if not want:
+        log('  ' + ('нет контрольной суммы в релизе, проверка пропущена' if tld_assets.RU else 'no checksum in the release, check skipped'))
+        return
+    got = sha256(path)
+    if got != want:
+        raise RuntimeError('SHA-256 %s != %s (%s)' % (got, want, name))
+    log('  SHA-256 OK')
+
 def download_any(urls, dest, progress=None, cancel=None, log=lambda s: None):
     last = None
     for u in urls:
@@ -363,6 +398,7 @@ def install_lib(game, name, lib, tmpdir, log=lambda s: None, progress=None, cat=
     if lib.get('zip'):          # a library we ship ourselves (MIT, authors kept in Licenses/)
         z = os.path.join(tmpdir, lib['zip'])
         download_any(mod_urls(cat, lib), z, progress, log=log)
+        verify_download(cat, lib['zip'], z, lib.get('tag'), log)
         m = {'id': name, 'version': lib_version(lib), 'zip': lib['zip']}
         install_zip(game, m, z, man, log)
         man[name]['lib'] = True

@@ -419,6 +419,7 @@ class App:
                 z = os.path.join(tmp, m['zip'])
                 try:
                     core.download_any(core.mod_urls(cat, m), z, self.progress, log=self.say)
+                    core.verify_download(cat, m['zip'], z, m.get('tag'), self.say)
                 except Exception as e:
                     self.say(T('  не скачалось: ', '  download failed: ') + str(e)); continue
                 self.say(T('  ставлю…', '  installing…'))

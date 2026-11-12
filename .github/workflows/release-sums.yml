@@ -1,0 +1,30 @@
+# Rewrites SHA256SUMS.txt of a release from the files that are in it now. Run it after uploading any file to the
+# release by hand: the launcher checks every download against this list and refuses a file that does not match.
+name: Release checksums
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag"
+        type: string
+        default: v1.0
+
+permissions:
+  contents: write
+
+jobs:
+  sums:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SHA256SUMS.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -e
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" -D all
+          rm -f all/SHA256SUMS.txt
+          (cd all && sha256sum * > ../SHA256SUMS.txt)
+          cat SHA256SUMS.txt
+          gh release upload "$TAG" SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"

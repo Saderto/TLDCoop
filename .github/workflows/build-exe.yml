@@ -1,0 +1,93 @@
+# Builds TLDModsLauncher.exe and TLDAssets.exe from the public source in this repository on GitHub's own
+# Windows machine, records where they came from (GitHub build attestation) and, when asked, puts them into
+# the release together with SHA256SUMS.txt. Anyone can check a downloaded exe with:
+#   gh attestation verify TLDModsLauncher.exe --repo Saderto/TLDCoop
+name: Build exe
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Upload to the release (TLDModsLauncher.exe, TLDAssets.exe inside the mod zips, SHA256SUMS.txt)"
+        type: boolean
+        default: false
+      tag:
+        description: "Release tag"
+        type: string
+        default: v1.0
+  push:
+    branches: [main]
+    paths: ['TLDAssets/**', '.github/workflows/build-exe.yml']
+
+permissions:
+  contents: write        # upload to the release (only when publish is ticked)
+  id-token: write        # build attestation
+  attestations: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install build tools (exact versions)
+        working-directory: TLDAssets
+        run: python -m pip install --no-cache-dir -r requirements-build.txt
+      - name: Build
+        working-directory: TLDAssets
+        run: |
+          python -m PyInstaller --noconfirm TLDModsLauncher.spec
+          python -m PyInstaller --noconfirm TLDAssets.spec
+      - name: Checksums
+        working-directory: TLDAssets/dist
+        shell: bash
+        run: sha256sum TLDModsLauncher.exe TLDAssets.exe | tee exe-sha256.txt
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            TLDAssets/dist/TLDModsLauncher.exe
+            TLDAssets/dist/TLDAssets.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exe
+          path: |
+            TLDAssets/dist/TLDModsLauncher.exe
+            TLDAssets/dist/TLDAssets.exe
+            TLDAssets/dist/exe-sha256.txt
+
+      - name: Put into the release
+        if: ${{ inputs.publish }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -e
+          dist=TLDAssets/dist
+          mkdir rel && cd rel
+          # the mod zips that carry TLDAssets.exe get the exe built here
+          for z in CoopByEMPEROR.zip ShotgunByEMPEROR.zip MilitaryStimByEMPEROR.zip CrankLampByEMPEROR.zip; do
+            gh release download "$TAG" --repo "$GITHUB_REPOSITORY" -p "$z"
+            python - "$z" "../$dist/TLDAssets.exe" <<'PY'
+          import sys, zipfile, os
+          src, exe = sys.argv[1], sys.argv[2]
+          tmp = src + '.new'
+          with zipfile.ZipFile(src) as zi, zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as zo:
+              for info in zi.infolist():
+                  if info.filename.replace('\\', '/') == 'Mods/TLDAssets.exe':
+                      zo.write(exe, 'Mods/TLDAssets.exe')
+                  else:
+                      zo.writestr(info, zi.read(info.filename))
+          os.replace(tmp, src)
+          PY
+            gh release upload "$TAG" "$z" --clobber --repo "$GITHUB_REPOSITORY"
+          done
+          gh release upload "$TAG" "../$dist/TLDModsLauncher.exe" --clobber --repo "$GITHUB_REPOSITORY"
+          # checksums of every file in the release
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --skip-existing -D all
+          rm -f all/SHA256SUMS.txt
+          (cd all && sha256sum * > ../SHA256SUMS.txt)
+          cat SHA256SUMS.txt
+          gh release upload "$TAG" SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"

@@ -104,6 +104,23 @@ needs, and builds the story files itself.
 - Exe не подписан, поэтому Windows может показать «Система Windows защитила ваш компьютер»: нажмите «Подробнее» →
   «Выполнить в любом случае». Код лаунчера лежит в `TLDAssets`. / The exe is unsigned, so Windows SmartScreen may warn:
   press "More info" → "Run anyway". The launcher's source is in `TLDAssets`.
+- Каждый скачанный архив лаунчер сверяет с `SHA256SUMS.txt` из релиза и не ставит файл, который не совпал. /
+  Every archive it downloads is checked against `SHA256SUMS.txt` of the release; a file that does not match is not installed.
+
+### Как проверить exe / How to check the exe
+
+`TLDModsLauncher.exe` и `TLDAssets.exe` собирает не автор у себя на ПК, а GitHub на своей чистой машине из открытого кода
+этого репозитория ([Build exe](.github/workflows/build-exe.yml), настройки сборки `TLDAssets/*.spec`, точные версии
+`TLDAssets/requirements-build.txt`). GitHub записывает, из какого коммита и какой сборкой получен файл.
+Both exes are built not on the author's PC but by GitHub on its own clean machine from the public source here
+([Build exe](.github/workflows/build-exe.yml), `TLDAssets/*.spec`, exact versions in `TLDAssets/requirements-build.txt`);
+GitHub records which commit and which run produced each file.
+
+1. Контрольная сумма / checksum: PowerShell `Get-FileHash TLDModsLauncher.exe` → сравните с `SHA256SUMS.txt` в релизе / compare with `SHA256SUMS.txt` in the release.
+2. Происхождение / provenance: `gh attestation verify TLDModsLauncher.exe --repo Saderto/TLDCoop` (GitHub CLI) — должно
+   ответить, что файл собран в этом репозитории / must say the file was built in this repository.
+3. Антивирусы / antivirus: https://www.virustotal.com — загрузите файл или вставьте его SHA-256 / upload the file or paste its SHA-256.
+4. Без лаунчера / without the launcher: всё ставится и вручную, см. «Установка» ниже / everything can be installed by hand, see "Install" below.
 
 ## Установка / Install
 
@@ -121,8 +138,9 @@ needs, and builds the story files itself.
 Mods: .NET 6 SDK, `dotnet build -c Release -p:RefsDir=<folder with the game assemblies>` in the mod's `src`. `RefsDir`
 needs the assemblies MelonLoader generates in your `MelonLoader/Il2CppAssemblies` and `MelonLoader/net6`; they are not included.
 
-TLDAssets: Python 3.13, `pip install UnityPy==1.25.4 Pillow==12.3.0 numpy==2.5.3`, `python tld_assets.py`;
-exe: PyInstaller 6 (`--onefile`, `--add-data steps;steps --add-data own;own --collect-all UnityPy --collect-all fmod_toolkit --collect-all archspec`; без последних двух не декодируются текстуры / without the last two textures are not decoded). Лаунчер / launcher: то же плюс / the same plus `--windowed --icon icon.ico --add-data catalog.json;. --add-data icon.ico;. --add-data icon.png;. launcher.py`.
+TLDAssets и лаунчер / and the launcher: Python 3.13, в папке `TLDAssets` / in `TLDAssets`:
+`pip install -r requirements-build.txt`, затем / then `pyinstaller TLDModsLauncher.spec` и / and `pyinstaller TLDAssets.spec`
+(без exe / without an exe: `python launcher.py`, `python tld_assets.py`).
 
 ## Лицензия / License
 
