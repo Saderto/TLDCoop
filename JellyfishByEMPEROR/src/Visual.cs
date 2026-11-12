@@ -22,6 +22,7 @@ public static class Visual
         public string Sig = "";
         public readonly List<Transform> Jellies = new();
         public Light? Light;
+        public Renderer? Water;
     }
 
     public static readonly List<Live> Lives = new();
@@ -77,9 +78,9 @@ public static class Visual
             {
                 tankGlass ??= See("AquaGlass", 3003); tankWater ??= See("AquaWater", 3002);
                 Part(t, "JF_Glass", "AquaGlass", tankGlass, layer);
-                Part(t, "JF_Water", "AquaWater", tankWater, layer);
+                var tw = Part(t, "JF_Water", "AquaWater", tankWater, layer);
                 tanks.RemoveAll(x => x.G == null || x.G.Pointer == g.Pointer);
-                tanks.Add(new TankVis { G = g });
+                tanks.Add(new TankVis { G = g, Water = tw });
                 return;
             }
             glass ??= See("JarGlass", 3003); water ??= See("JarWater", 3002);
@@ -121,7 +122,9 @@ public static class Visual
         bool indoors = false, night = false;
         try { indoors = GameManager.GetWeatherComponent().IsIndoorEnvironment(); } catch { }
         try { night = GameManager.GetTimeOfDayComponent().IsNight(); } catch { }
-        light = indoors ? (night ? .22f : .55f) : night ? .15f : 1f;
+        // the owner (11-12): the aquarium's water shone in the dark. Real night is near black: only a fire or a light in the hands brings it up
+        light = indoors ? (night ? .06f : .45f) : night ? .04f : 1f;
+        if (light < .3f && LitNear()) light = .3f;
         foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, 1f);
         float j = Math.Max(.75f, light);
         foreach (var m in mats.Values) if (m != null) m.color = new Color(j, j, j, 1f);
@@ -147,8 +150,43 @@ public static class Visual
             }
             catch (Exception e) { Safe.Log("Water tint", e); }
         }
+        // an aquarium's water takes the glow of its jellyfish too, a little: dark when it is empty
+        foreach (var t in tanks)
+        {
+            if (t.Water == null) continue;
+            try
+            {
+                var c0 = Tanks.Of(t.G)?.Fish.FirstOrDefault(f => !f.Dead)?.Colour?.Glow;
+                var c = glow > 0f && c0 is { } gc ? Color.Lerp(new Color(light, light, light, 1f), gc, .3f) : new Color(light, light, light, 1f);
+                block ??= new MaterialPropertyBlock();
+                block.SetColor("_Color", c);
+                t.Water.SetPropertyBlock(block);
+            }
+            catch (Exception e) { Safe.Log("Tank water tint", e); }
+        }
         foreach (var l in Lives) if (l.Light != null) l.Light.enabled = glow > 0f && on.Contains(l.Light);
         foreach (var t in tanks) if (t.Light != null) t.Light.enabled = glow > 0f && on.Contains(t.Light);
+    }
+
+    /// <summary>A fire close by, or a lit lamp, torch or flare in the hands.</summary>
+    static bool LitNear()
+    {
+        try
+        {
+            var p = GameManager.GetPlayerTransform().position;
+            if (GameManager.GetHeatSourceManagerComponent().GetTemperatureIncrease(p) > .5f) return true;
+        }
+        catch { }
+        try
+        {
+            var h = GameManager.GetPlayerManagerComponent().m_ItemInHands;
+            if (h == null) return false;
+            if (h.m_KeroseneLampItem != null && h.m_KeroseneLampItem.IsOn()) return true;
+            if (h.m_TorchItem != null && h.m_TorchItem.IsBurning()) return true;
+            if (h.m_FlareItem != null && h.m_FlareItem.IsBurning()) return true;
+        }
+        catch { }
+        return false;
     }
 
     public static void Frame()

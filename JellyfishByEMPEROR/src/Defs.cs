@@ -30,7 +30,7 @@ public static class Tune
     public const float ShowMin = 3f, ShowMax = 7f;
     public const float JarKg = .35f, LiveKg = 1.1f, AquariumKg = 14f;
     // the owner (11-12): below −5° the jellyfish dies, from full condition in 90 minutes; in the warmth it comes back slowly
-    public const float FreezeAt = -5f, LossPerHour = 100f / 1.5f, GainPerHour = 6f, PackWarmth = 2f, InspectLeft = -.03f;
+    public const float FreezeAt = -5f, LossPerHour = 100f / 1.5f, GainPerHour = 6f, PackWarmth = 2f, InspectLeft = -.045f;
     // the owner (11-12): no more than three in one aquarium
     public const int TankMax = 3;
     public const float AquariumScale = 2.4f, HoleScale = 2.2f;

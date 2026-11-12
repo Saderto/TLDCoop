@@ -75,8 +75,38 @@ public static partial class Items
         if (g.m_Inspect != null)
         {
             g.m_Inspect.m_DistanceFromCamera = aquarium ? 1.1f : .45f;
-            // the owner (11-12): the jar a little to the left in the inspect view
-            if (!aquarium) g.m_Inspect.m_Offset = new Vector3(Tune.InspectLeft, 0f, 0f);
+            // m_Offset did nothing visible (0.2.3): left as it was, logged; the jar is moved left by InspectShift
+            Safe.Debug($"inspect offset of {g.name}: {g.m_Inspect.m_Offset}, angles {g.m_Inspect.m_Angles}");
         }
+    }
+}
+
+/// <summary>The owner (11-12): in the inspect view the jar stood right of the middle, close to the text. Moved left along the camera's right,
+/// once per placement the game makes (if the game leaves the position as it was, it is not moved again).</summary>
+[HarmonyPatch]
+internal static class InspectShift
+{
+    static Vector3 lastSet = new(float.NaN, 0f, 0f);
+
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
+    static void Set(PlayerManager __instance) { lastSet = new(float.NaN, 0f, 0f); Shift(__instance); }
+
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateGearTransformForInspection))]
+    static void Update(PlayerManager __instance) => Shift(__instance);
+
+    static void Shift(PlayerManager pm)
+    {
+        try
+        {
+            var g = pm.GearItemBeingInspected();
+            if (g == null || !Defs.Is(g, out var d) || d.Kind == Kind.Aquarium) return;
+            var t = g.transform;
+            if ((t.position - lastSet).sqrMagnitude < 1e-10f) return;
+            var cam = GameManager.GetMainCamera();
+            if (cam == null) return;
+            t.position += cam.transform.right * Tune.InspectLeft;
+            lastSet = t.position;
+        }
+        catch (Exception e) { Safe.Log("Inspect shift", e); }
     }
 }

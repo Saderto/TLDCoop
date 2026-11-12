@@ -694,7 +694,8 @@ def jar():
         for j in range(ribs * 2):
             a = 2 * math.pi * j / (ribs * 2); r = .0458 + (.0007 if j % 2 == 0 else 0)
             P.append((r * math.cos(a), r * math.sin(a), z)); UV.append((j / (ribs * 2), .58 + .34 * i))
-    lid.merge(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False))
+    # two-sided: the game's material culls back faces and this side came out see-through in 0.2.3 (seen from the front, only the far inside)
+    lid.merge(two_sided(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False)))
     lid.merge(two_sided(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .54))))
     # the top: flat discs built like the centre cap, which the game draws (a lathe-built dome came out see-through in the game, 0.2.1-0.2.2)
     lid.merge(disc(.0468, .1790, 72, True, (.5, .25), .22))
@@ -704,8 +705,8 @@ def jar():
         for j in range(72):
             a_ = 2 * math.pi * j / 72
             rimP.append((rr * math.cos(a_), rr * math.sin(a_), z)); rimUV.append((j / 72, .93 + .03 * i))
-    lid.merge(surface(np.array(rimP), np.array(rimUV), 2, 72, True, flip=False))
-    lid.merge(disc(.0458, .1615, 72, False, (.5, .25), .22))
+    lid.merge(two_sided(surface(np.array(rimP), np.array(rimUV), 2, 72, True, flip=False)))
+    # no bottom disc: seen through the glass it read as a second lid plane (the owner, 11-12)
     return glass, water, lid
 
 
@@ -713,7 +714,8 @@ def glass_tex(n=256):
     """RGBA: almost clear, two vertical highlights, the thick bottom and the shoulder denser."""
     y, x = (np.mgrid[0:n, 0:n] + .5) / n
     a = np.full((n, n), .045)
-    for u0, w, k in ((.11, .018, .55), (.135, .006, .35), (.61, .010, .28), (.36, .04, .06)):
+    # the owner (11-12): the glints read as murky stripes on both sides: one faint thin glint left
+    for u0, w, k in ((.12, .008, .16), (.61, .006, .07)):
         d = np.minimum(np.abs(x - u0), 1 - np.abs(x - u0))
         a += k * np.exp(-(d / w) ** 2) * smooth(.04, .2, y) * smooth(.97, .8, y)
     a += .22 * smooth(.08, .0, y) + .16 * smooth(.86, .97, y)
