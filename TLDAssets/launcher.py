@@ -21,9 +21,22 @@ def system_ru():
         return (locale.getlocale()[0] or '').lower().startswith(('ru', 'uk', 'be'))
 
 RU = system_ru()
+
+def dpi_scale():
+    """Draw the window at the screen's real pixel size (Windows display scaling), so the text stays sharp."""
+    try:
+        import ctypes
+        try: ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        except Exception: ctypes.windll.user32.SetProcessDPIAware()
+        k = ctypes.windll.user32.GetDpiForSystem() / 96.0
+        sh = ctypes.windll.user32.GetSystemMetrics(1)          # screen height in pixels
+        return max(1.0, min(k, (sh - 90) / 780.0))             # never taller than the screen
+    except Exception:
+        return 1.0
 def T(ru, en): return ru if RU else en
 
-W, H = 1060, 780
+W, H = 1060, 780                            # window units; SW, SH are its real pixels
+SW, SH = W, H
 PX, PY, PW, PH = 30, 18, 1000, 744          # the window panel
 L, R = PX + 40, PX + PW - 40                # content edges
 LIST_Y, LIST_H = 236, 340                   # the mod list viewport
@@ -42,7 +55,7 @@ class App:
         self.logs = []; self.areas = []; self.skin_dir = None
         self.st = None; self.rows = {}; self.pending = False
         root.title(T('Моды Seagull для The Long Dark', "Seagull's mods for The Long Dark"))
-        root.geometry('%dx%d' % (W, H)); root.resizable(False, False)
+        root.geometry('%dx%d' % (SW, SH)); root.resizable(False, False)
         try:   # own icon (icon.ico/png next to the script or inside the exe)
             if os.name == 'nt': root.iconbitmap(default=os.path.join(core.HERE, 'icon.ico'))
         except Exception: pass
@@ -50,7 +63,7 @@ class App:
             self._icon = ImageTk.PhotoImage(Image.open(os.path.join(core.HERE, 'icon.png')))
             root.iconphoto(True, self._icon)
         except Exception: pass
-        self.cv = tk.Canvas(root, width=W, height=H, highlightthickness=0, background='#1b2024')
+        self.cv = tk.Canvas(root, width=SW, height=SH, highlightthickness=0, background='#1b2024')
         self.cv.pack()
         self.img_id = self.cv.create_image(0, 0, anchor='nw')
         self.cv.bind('<Motion>', self.on_move)
@@ -67,11 +80,11 @@ class App:
     def make_skin(self):
         ui.clear_caches(); self.rows = {}; self._list = None; self._frame = None
         self.skin = ui.Skin(self.skin_dir, RU)
-        bg = ui.scene(W, H)
+        bg = ui.scene(SW, SH)
         p = ui.Painter(self.skin, bg)
         p.spr('vignetteFullscreen', W / 2, H / 2, W + 6, H + 4, (0, 0, 0, 0.6))
         ui.window(p, PX, PY, PW, PH)
-        p.rect(PX + 8, PY + 8, PW - 16, PH - 16, (0.03, 0.04, 0.045, 0.62))   # calm, dark ground under the text
+        p.rect(PX + 8, PY + 8, PW - 16, PH - 16, (0.035, 0.04, 0.045, 0.90))   # calm, dark ground under the text
         self.base = bg
         self.render()
 
@@ -276,7 +289,7 @@ class App:
         if prev is not None and getattr(self, 'photo', None) is not None:
             box = ImageChops.difference(prev, frame).getbbox()
             if box is None: return
-            if (box[2] - box[0]) * (box[3] - box[1]) < W * H // 2:
+            if (box[2] - box[0]) * (box[3] - box[1]) < SW * SH // 2:
                 part = ImageTk.PhotoImage(frame.crop(box))
                 self.root.tk.call(str(self.photo), 'copy', str(part), '-to', box[0], box[1])
                 return
@@ -288,7 +301,7 @@ class App:
         key = (self.scroll, frozenset(self.checked), hov, id(self.st), RU, self.game, len(self.mods()), self.busy)
         c = getattr(self, '_list', None)
         if c and c[0] == key:
-            p.im.alpha_composite(c[1], (L, LIST_Y)); self.areas += c[2]; return
+            p.im.alpha_composite(c[1], (int(L * ui.K), int(LIST_Y * ui.K))); self.areas += c[2]; return
         n0 = len(self.areas)
         sub = self._draw_list(p)
         if sub is not None: self._list = (key, sub, self.areas[n0:])
@@ -300,9 +313,9 @@ class App:
         for m in mods:
             d, e, h = self.row_layout(p, m); lay.append((m, d, e, h, total)); total += h
         self.scroll = max(0, min(self.scroll, max(0, total - LIST_H)))
-        sub = Image.new('RGBA', (ROW_W, LIST_H))
+        sub = Image.new('RGBA', (int(ROW_W * ui.K), int(LIST_H * ui.K)))
         sp = ui.Painter(self.skin, sub)
-        sp.rect(0, 0, ROW_W, LIST_H, (0.05, 0.06, 0.065, 0.88))
+        sp.rect(0, 0, ROW_W, LIST_H, (0.03, 0.035, 0.04, 0.95))
         for m, desc, extra, h, top in lay:
             y0 = top - self.scroll
             if y0 + h < 0 or y0 > LIST_H: continue
@@ -331,7 +344,7 @@ class App:
         if total > LIST_H:     # scroll bar
             bh = max(30, LIST_H * LIST_H / total); by = (LIST_H - bh) * self.scroll / (total - LIST_H)
             sp.rect(ROW_W - 5, by, 3, bh, (1, 1, 1, 0.35))
-        p.im.alpha_composite(sub, (L, LIST_Y))
+        p.im.alpha_composite(sub, (int(L * ui.K), int(LIST_Y * ui.K)))
         return sub
 
     # ---------- input ----------
@@ -342,10 +355,10 @@ class App:
     def set_hover(self, k):
         if k != self.hover: self.hover = k; self.later()
     def on_move(self, e):
-        k, _ = self.hit(e.x, e.y); self.set_hover(k)
+        k, _ = self.hit(e.x / ui.K, e.y / ui.K); self.set_hover(k)
         self.cv.configure(cursor='hand2' if k else '')
     def on_click(self, e):
-        k, fn = self.hit(e.x, e.y)
+        k, fn = self.hit(e.x / ui.K, e.y / ui.K)
         if fn: fn()
     def on_wheel(self, d):
         self.scroll += d * 60; self.later()
@@ -458,6 +471,8 @@ def main():
         import ctypes
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('Seagull.TLDModsLauncher')
     except Exception: pass
+    global SW, SH
+    ui.K = dpi_scale(); SW, SH = int(W * ui.K), int(H * ui.K)
     root = tk.Tk()
     App(root)
     root.mainloop()

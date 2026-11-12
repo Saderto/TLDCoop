@@ -92,7 +92,7 @@ class Skin:
                 self.atlas = None; self.sp = {}
         self._fonts = {}; self._crops = {}
     def font(self, size, t='', display=False):
-        size = max(6, int(size))
+        size = max(6, int(round(size)))
         if not display and self.body_path: path = self.body_path
         else: path = self.cyr_path if self.cyr_path and any('\u0400' <= ch <= '\u04ff' for ch in t) else self.font_path
         k = (size, path)
@@ -126,6 +126,10 @@ def _slice9(skin, n, w, h):
             out.paste(im.crop((a0, c0, a1, c1)).resize((b1 - b0, d1 - d0), Image.LANCZOS), (b0, d0))
     return out
 
+# K: screen pixels per window unit (Windows display scaling, 1.25 at 125%); the window is drawn at its real
+# pixel size so Windows does not stretch a small picture (that made all the text blurry).
+K = 1.0
+
 # caches: the window is redrawn on every hover, so sprites, text and widths are made once
 _SPR, _TXT, _TW = {}, {}, {}
 
@@ -144,6 +148,7 @@ class Painter:
     def __init__(self, skin, im):
         self.s = skin; self.im = im
     def spr(self, n, cx, cy, w, h, c=(1, 1, 1, 1), sliced=False, fallback=None):
+        if self.s.has(n): cx, cy, w, h = cx * K, cy * K, w * K, h * K
         w, h = max(1, int(w)), max(1, int(h))
         if self.s.has(n):
             k = (n, w, h, tuple(c), sliced)
@@ -157,6 +162,7 @@ class Painter:
         elif fallback:
             fallback(self, cx, cy, w, h, c)
     def rect(self, x, y, w, h, c, outline=None):
+        x, y, w, h = x * K, y * K, w * K, h * K
         k = ('rect', max(1, int(w)), max(1, int(h)), tuple(c), tuple(outline) if outline else None)
         lay = _SPR.get(k)
         if lay is None:
@@ -169,7 +175,7 @@ class Painter:
         k = (t, size, display)
         if k not in _TW:
             if len(_TW) > 5000: _TW.clear()
-            b = self.s.font(size, t, display).getbbox(t); _TW[k] = b[2] - b[0]
+            b = self.s.font(size * K, t, display).getbbox(t); _TW[k] = (b[2] - b[0]) / K
         return _TW[k]
     def text(self, t, x, y, size, c=(1, 1, 1, 1), al='l', shadow=True, display=False):
         """y is the vertical centre of the line. display=True: the game's own font (titles)."""
@@ -177,17 +183,18 @@ class Painter:
         if al == 'c': x -= w / 2
         elif al == 'r': x -= w
         yy = y - size * 0.62
+        shadow = shadow and size >= 20     # a 1-pixel shadow under small text only makes it look doubled
         k = (t, size, tuple(c), shadow, display)
         lay = _TXT.get(k)
         if lay is None:
-            f = self.s.font(size, t, display); b = f.getbbox(t)
+            f = self.s.font(size * K, t, display); b = f.getbbox(t)
             lay = Image.new('RGBA', (max(1, b[2] + 4), max(1, b[3] + 4)))
             d = ImageDraw.Draw(lay)
             if shadow: d.text((2, 2), t, font=f, fill=(0, 0, 0, int(140 * c[3])))
             d.text((1, 1), t, font=f, fill=tuple(int(v * 255) for v in c))
             if len(_TXT) > 3000: _TXT.clear()
             _TXT[k] = lay
-        _comp(self.im, lay, int(round(x)) - 1, int(round(yy)) - 1)
+        _comp(self.im, lay, int(round(x * K)) - 1, int(round(yy * K)) - 1)
         return w
     def wrap(self, t, size, width):
         words = t.split(); lines = []; cur = ''
@@ -199,8 +206,9 @@ class Painter:
         return lines
 
 # ---------------- pieces, like the game's own windows ----------------
-TEAL = (0.62, 0.74, 0.71, 1); WHITE = (1, 1, 1, 1); GREY = (0.90, 0.90, 0.90, 1)
-DIM = (0.74, 0.76, 0.75, 1); GREEN = (0.55, 0.80, 0.58, 1); AMBER = (0.93, 0.72, 0.35, 1); BLUE = (0.55, 0.72, 0.90, 1)
+# bright colours on the dark ground (the game's own teal/grey were too dim to read)
+TEAL = (0.70, 0.88, 0.82, 1); WHITE = (1, 1, 1, 1); GREY = (0.95, 0.95, 0.95, 1)
+DIM = (0.86, 0.87, 0.87, 1); GREEN = (0.56, 0.90, 0.60, 1); AMBER = (1.0, 0.78, 0.38, 1); BLUE = (0.66, 0.84, 1.0, 1)
 RED = (0.85, 0.40, 0.40, 1)
 
 def _fb_panel(p, cx, cy, w, h, c):
@@ -230,9 +238,9 @@ def _fb_btn(p, cx, cy, w, h, c):
 
 def button(p, t, cx, cy, w, h, state='n', size=15):
     """state: n normal, h hover, d disabled."""
-    if state == 'h': fill = (0.43, 0.51, 0.49, 0.30); outer = (0.98, 0.98, 0.98, 0.78); lab = (0.98, 0.98, 0.98, 0.95)
-    elif state == 'd': fill = (0, 0, 0, 0.12); outer = (0.98, 0.98, 0.98, 0.15); lab = (0.98, 0.98, 0.98, 0.25)
-    else: fill = (0, 0, 0, 0.45); outer = (0.98, 0.98, 0.98, 0.39); lab = (0.98, 0.98, 0.98, 0.70)
+    if state == 'h': fill = (0.43, 0.51, 0.49, 0.30); outer = (0.98, 0.98, 0.98, 0.78); lab = (1, 1, 1, 1)
+    elif state == 'd': fill = (0, 0, 0, 0.12); outer = (0.98, 0.98, 0.98, 0.18); lab = (0.98, 0.98, 0.98, 0.40)
+    else: fill = (0, 0, 0, 0.45); outer = (0.98, 0.98, 0.98, 0.45); lab = (0.98, 0.98, 0.98, 0.92)
     p.spr('menuButtonCenter_fill', cx, cy, w, h, fill, fallback=_fb_btn)
     p.spr('menuButtonCenter_outer', cx, cy, w * 1.24, h * 2.13, outer)
     p.text(t, cx, cy - 1, size, lab, al='c')
