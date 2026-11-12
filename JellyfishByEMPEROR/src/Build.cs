@@ -82,17 +82,18 @@ public static partial class Items
 }
 
 /// <summary>The owner (11-12): in the inspect view the jar stood right of the middle, close to the text: moved left along the camera's right.
-/// The game moves the item from where it stands while it is turned (0.2.6 added the shift every frame and the jar flew off to the left),
-/// so the shift is taken back before each of the game's steps and put again after it.</summary>
+/// The game turns the item from where it stands, outside the methods patched here: a shift left in place was turned with it and added up
+/// (0.2.6, 0.2.7: the jar flew off to the left). So before each of the game's own steps the item is put back exactly where the game last had it,
+/// and only after the step is it moved left again.</summary>
 [HarmonyPatch]
 internal static class InspectShift
 {
     static GearItem? shifted;
-    static Vector3 by;
+    static Vector3 gamePos;
 
     static void Undo()
     {
-        try { if (shifted != null) shifted.transform.position -= by; } catch { }
+        try { if (shifted != null && shifted.transform != null) shifted.transform.position = gamePos; } catch { }
         shifted = null;
     }
 
@@ -104,8 +105,8 @@ internal static class InspectShift
             if (g == null || !Defs.Is(g, out var d) || d.Kind == Kind.Aquarium) return;
             var cam = GameManager.GetMainCamera();
             if (cam == null) return;
-            by = cam.transform.right * Tune.InspectLeft;
-            g.transform.position += by;
+            gamePos = g.transform.position;
+            g.transform.position = gamePos + cam.transform.right * Tune.InspectLeft;
             shifted = g;
         }
         catch (Exception e) { Safe.Log("Inspect shift", e); }
@@ -116,9 +117,9 @@ internal static class InspectShift
     [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
     static void SetAfter(PlayerManager __instance) => Apply(__instance);
 
-    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateGearTransformForInspection))]
+    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateInspectGear))]
     static void UpdateBefore() => Undo();
-    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateGearTransformForInspection))]
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateInspectGear))]
     static void UpdateAfter(PlayerManager __instance) => Apply(__instance);
 
     [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.ExitInspectGearMode))]

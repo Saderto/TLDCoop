@@ -21,7 +21,8 @@ public static class Visual
         public GearItem G = null!;
         public string Sig = "";
         public readonly List<Transform> Jellies = new();
-        public Light? Light;
+        /// <summary>One light per jellyfish, each its own colour, moving with it (the owner, 11-12: not only the first one's glow).</summary>
+        public readonly List<Light> Lights = new();
         public Renderer? Water;
     }
 
@@ -135,7 +136,7 @@ public static class Visual
         foreach (var l in Lives)
             if (l.Light != null && Standing(l.G) && !Dead(l.G)) lit.Add(((l.G.transform.position - me).sqrMagnitude, l.Light, 1f));
         foreach (var t in tanks)
-            if (t.Light != null && Standing(t.G) && (Tanks.Of(t.G)?.Fish.Any(f => !f.Dead) ?? false)) lit.Add(((t.G.transform.position - me).sqrMagnitude, t.Light, 1.6f));
+            if (Standing(t.G)) foreach (var tl in t.Lights) if (tl != null) lit.Add(((tl.transform.position - me).sqrMagnitude, tl, .9f));
         var on = new HashSet<Light>(lit.OrderBy(x => x.d).Take(6).Select(x => x.l));
         foreach (var x in lit) x.l.intensity = glow * x.k;
         // the water of a lit jar takes the colour of its jellyfish's glow
@@ -159,7 +160,6 @@ public static class Visual
             {
                 var c0 = Mix(Tanks.Of(t.G));
                 var c = glow > 0f && c0 is { } gc ? Color.Lerp(new Color(light, light, light, 1f), gc, .3f) : new Color(light, light, light, 1f);
-                if (t.Light != null && c0 is { } lc) t.Light.color = lc;
                 block ??= new MaterialPropertyBlock();
                 block.SetColor("_Color", c);
                 t.Water.SetPropertyBlock(block);
@@ -167,7 +167,7 @@ public static class Visual
             catch (Exception e) { Safe.Log("Tank water tint", e); }
         }
         foreach (var l in Lives) if (l.Light != null) l.Light.enabled = glow > 0f && on.Contains(l.Light);
-        foreach (var t in tanks) if (t.Light != null) t.Light.enabled = glow > 0f && on.Contains(t.Light);
+        foreach (var t in tanks) foreach (var tl in t.Lights) if (tl != null) tl.enabled = glow > 0f && on.Contains(tl);
     }
 
     /// <summary>A lit lamp, torch or flare in the hands (a fire's warmth reaches through walls and lit the aquarium in a dark room, 0.2.6).</summary>
@@ -237,23 +237,16 @@ public static class Visual
         v.Sig = sig;
         foreach (var j in v.Jellies) if (j != null) UnityEngine.Object.Destroy(j.gameObject);
         v.Jellies.Clear();
+        v.Lights.Clear();
         int layer = v.G.gameObject.layer;
         foreach (var f in fish)
         {
             if (f.Species is not { } s || f.Colour is not { } c) continue;
             var r = Part(v.G.transform, "JF_Fish", "Jelly_" + s.Id, Mat("Jelly_" + s.Id + "_" + c.Id, 3000), layer);
-            if (r != null) v.Jellies.Add(r.transform);
+            if (r == null) continue;
+            v.Jellies.Add(r.transform);
+            if (!f.Dead) v.Lights.Add(Glow(r.transform, c.Glow, 1.1f));
         }
-        var first = fish.FirstOrDefault(f => f.Colour != null);
-        if (v.Light == null && first != null)
-        {
-            var lgo = new GameObject("JF_Light") { layer = layer };
-            lgo.transform.SetParent(v.G.transform, false);
-            lgo.transform.localPosition = new Vector3(0f, .22f, 0f);
-            v.Light = lgo.AddComponent<Light>();
-            v.Light.type = LightType.Point; v.Light.range = 1.6f; v.Light.shadows = LightShadows.None; v.Light.intensity = 0f; v.Light.enabled = false;
-        }
-        if (v.Light != null && first?.Colour != null) v.Light.color = first.Colour.Glow;
         nextLook = 0f;
     }
 
