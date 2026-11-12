@@ -52,7 +52,7 @@
    "id": "TLDCoop",
    "zip": "CoopByEMPEROR.zip",
    "version": "0.19.68",
-   "size": 0,
+   "size": 32636250,
    "detect": "Mods/CoopByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDCoop.dll",
@@ -73,7 +73,7 @@
    "id": "TLDShotgun",
    "zip": "ShotgunByEMPEROR.zip",
    "version": "0.1.35",
-   "size": 0,
+   "size": 32891019,
    "detect": "Mods/ShotgunByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDShotgun.dll",
@@ -99,7 +99,7 @@
    "id": "TLDMilitaryStim",
    "zip": "MilitaryStimByEMPEROR.zip",
    "version": "0.1.6",
-   "size": 0,
+   "size": 32183357,
    "detect": "Mods/MilitaryStimByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDMilitaryStim.dll",
@@ -123,7 +123,7 @@
    "id": "TLDCrankLamp",
    "zip": "CrankLampByEMPEROR.zip",
    "version": "0.4.2",
-   "size": 0,
+   "size": 32200230,
    "detect": "Mods/CrankLampByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDCrankLamp.dll",
@@ -147,7 +147,7 @@
    "id": "SmokesBySeagull",
    "zip": "SmokesByEMPEROR.zip",
    "version": "0.1.125",
-   "size": 0,
+   "size": 143263871,
    "detect": "Mods/SmokesByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokesBySeagull.dll",
@@ -176,7 +176,7 @@
    "id": "SmokehouseBySeagull",
    "zip": "SmokehouseByEMPEROR.zip",
    "version": "0.2.7",
-   "size": 0,
+   "size": 11942441,
    "detect": "Mods/SmokehouseByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokehouseBySeagull.dll",
@@ -196,7 +196,7 @@
    "id": "FeatsBySeagull",
    "zip": "FeatsByEMPEROR.zip",
    "version": "0.2.2",
-   "size": 0,
+   "size": 2896891,
    "detect": "Mods/FeatsByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FeatsBySeagull.dll",
@@ -219,7 +219,7 @@
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
    "version": "1.1.1",
-   "size": 0,
+   "size": 374084102,
    "detect": "Mods/FoodPackByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodPackBySeagull.dll",
@@ -250,7 +250,7 @@
    "id": "FoodBalanceBySeagull",
    "zip": "FoodBalanceByEMPEROR.zip",
    "version": "1.0.1",
-   "size": 0,
+   "size": 16544,
    "detect": "Mods/FoodBalanceByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodBalanceBySeagull.dll",
@@ -279,7 +279,7 @@
    "id": "ContainerLabelsBySeagull",
    "zip": "ContainerLabelsByEMPEROR.zip",
    "version": "0.6.1",
-   "size": 0,
+   "size": 7641,
    "detect": "Mods/ContainerLabelsByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/ContainerLabelsBySeagull.dll",
@@ -302,7 +302,7 @@
    "id": "InventorySearchBySeagull",
    "zip": "InventorySearchByEMPEROR.zip",
    "version": "0.6.1",
-   "size": 0,
+   "size": 5993,
    "detect": "Mods/InventorySearchByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/InventorySearchBySeagull.dll",
@@ -322,7 +322,7 @@
    "id": "MarkersBySeagull",
    "zip": "MarkersByEMPEROR.zip",
    "version": "0.4.6",
-   "size": 0,
+   "size": 107681,
    "detect": "Mods/MarkersByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/MarkersBySeagull.dll",
@@ -342,7 +342,7 @@
    "id": "TLDTrainer",
    "zip": "TrainerByEMPEROR.zip",
    "version": "2.5.26",
-   "size": 0,
+   "size": 66345431,
    "detect": "Mods/TrainerByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDTrainer.dll",
