@@ -15,12 +15,16 @@ and glows. It gives no food, bait or other benefit: it is just a beautiful thing
 - Только на морском льду: Coastal Highway, Desolation Point, Bleak Inlet, Forsaken Airfield. В озёрах и реках медуз нет.
 - В новой лунке медуза всплывает с шансом 30% и держится 3–7 секунд. Внизу экрана окно: «Зачерпнуть банкой» (1, нужна пустая
   банка в рюкзаке) или «Отпустить» (2).
+- Чтобы зачерпнуть, надо нажать показанные клавиши W A S D по порядку и вовремя. У обычной медузы их 3, у самой редкой 7 и времени
+  меньше. Ошибся или не успел: медуза уходит на дно.
 - Ночью бывает редкая шлемовидная медуза.
 - Пустые банки лежат в контейнерах (около 4%, на побережье 10%).
 
 - Only on sea ice: Coastal Highway, Desolation Point, Bleak Inlet, Forsaken Airfield. Lakes and rivers have none.
 - A new hole gets a jellyfish with a 30% chance; it stays for 3–7 seconds. A panel at the bottom of the screen offers
   "Scoop with a jar" (1, needs an empty jar in the pack) or "Let go" (2).
+- To scoop it up, press the shown W A S D keys in order and in time: 3 keys for a common jellyfish, 7 and less time for the
+  rarest. A wrong key or too slow, and the jellyfish sinks.
 - At night a rare helmet jellyfish can come up.
 - Empty jars are found in containers (about 4%, 10% on the coast).
 
@@ -29,15 +33,15 @@ and glows. It gives no food, bait or other benefit: it is just a beautiful thing
 - Банку с медузой ставят из рюкзака кнопкой «Поставить». Медуза плавает, ночью и в помещении светится (светятся до 6 ближайших).
 - Аквариум делается на верстаке: 4 пустые банки, 8 металлолома, 4 старые доски, 8 часов. В нём до 3 медуз; переливают из банки
   и забирают обратно банкой в окне аквариума. Забрать или сдвинуть аквариум можно только пустым.
-- Ниже −5° вода стынет, и медуза теряет состояние: с полного погибает за 90 игровых минут. В тепле (выше +2°) восстанавливается,
-  в рюкзаке ей на 12° теплее, костры и печи рядом греют. Погибшая медуза пропадает, банка остаётся пустой.
+- Ниже −5° вода замерзает, и медуза теряет состояние: с полного погибает за 90 игровых минут. В тепле (выше +2°) восстанавливается,
+  в рюкзаке ей всего на 2° теплее, чем вокруг тебя, костры и печи рядом греют. Погибшая медуза пропадает, банка остаётся пустой.
 - Что плавает в аквариумах, хранится по мирам в `Mods/JellyfishByEMPEROR/saves`.
 
 - Place a jar with a jellyfish from the pack with "Place". The jellyfish swims and glows at night and indoors (the 6 nearest glow).
 - The aquarium is made at a workbench: 4 empty jars, 8 scrap metal, 4 reclaimed wood, 8 hours. It holds up to 3 jellyfish;
   pour them in from a jar and take them back with an empty jar in the aquarium window. Only an empty aquarium can be picked up or moved.
 - Below −5° the water freezes and the jellyfish loses condition: from full it dies in 90 game minutes. In warmth (above +2°) it
-  recovers; in the pack it is 12° warmer, and nearby fires and stoves count. A dead jellyfish disappears and the jar is left empty.
+  recovers; in the pack it is only 2° warmer than the air around you, and nearby fires and stoves count. A dead jellyfish disappears and the jar is left empty.
 - What swims in which aquarium is saved per world in `Mods/JellyfishByEMPEROR/saves`.
 
 Шесть видов, 20 окрасов, у каждого своя иконка / Six species, 20 colourings, each with its own icon: ушастая аурелия / moon
@@ -47,10 +51,10 @@ comb jelly, шлемовидная медуза / helmet jellyfish (только
 ## Кооп / Co-op
 
 Нужен **CoopByEMPEROR 0.19.69** или новее, у обоих игроков одни и те же версии. Медузу в лунке видят все рядом, окно ловли
-получает каждый в пределах 6 м, забирает нажавший первым (решает хост). Аквариумы у всех одинаковые; действия друга идут через хоста.
+получает каждый в пределах 6 м, забирает первый, кто прошёл игру с клавишами (решает хост); пока кто-то ловит, медуза у остальных не тонет. Аквариумы у всех одинаковые; действия друга идут через хоста.
 
 Needs **CoopByEMPEROR 0.19.69** or newer, both players on the same versions. Everyone nearby sees the jellyfish in the hole, everyone
-within 6 m gets the catch panel, and the first to press gets it (the host decides). Aquariums are the same for everyone; the friend's
+within 6 m gets the catch panel, and the first to finish the key game gets it (the host decides); while someone is catching, it does not sink for the others. Aquariums are the same for everyone; the friend's
 actions go through the host.
 
 ## Настройки / Settings
