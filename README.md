@@ -25,6 +25,7 @@ does it when updating. Game saves are kept: their keys did not change.
 | `SmokesByEMPEROR` | Сигареты, сигары, трубки, зажигалки / Cigarettes, cigars, pipes, lighters |
 | `SmokehouseByEMPEROR` | Коптильня для мяса и рыбы / Smokehouse for meat and fish |
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
+| `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |
 | `TrainerByEMPEROR` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
 | `FoodPackByEMPEROR` | Новая еда и напитки с эффектами / New food and drinks with effects |
 | `FoodBalanceByEMPEROR` | Ползунки: сколько еды разных модов на картах и в контейнерах / Sliders: how much food of each food mod spawns on maps and in containers |

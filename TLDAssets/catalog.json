@@ -52,8 +52,8 @@
   {
    "id": "TLDCoop",
    "zip": "CoopByEMPEROR.zip",
-   "version": "0.19.68",
-   "size": 34151092,
+   "version": "0.19.69",
+   "size": 34146930,
    "detect": "Mods/CoopByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDCoop.dll",
@@ -214,6 +214,21 @@
    "desc": {
     "ru": "Новые подвиги со своими значками.",
     "en": "New feats with their own badges."
+   }
+  },
+  {
+   "id": "JellyfishByEMPEROR",
+   "zip": "JellyfishByEMPEROR.zip",
+   "version": "0.2.1",
+   "size": 5933662,
+   "detect": "Mods/JellyfishByEMPEROR.dll",
+   "title": {
+    "ru": "Медузы",
+    "en": "Jellyfish"
+   },
+   "desc": {
+    "ru": "Медузы северного моря: всплывают в лунках на морском льду, живут в банке или аквариуме, плавают и светятся. Для коопа нужен кооп 0.19.69+.",
+    "en": "Jellyfish of the northern sea: they float up in holes on sea ice and live in a jar or an aquarium, swimming and glowing. Co-op needs Co-op 0.19.69+."
    }
   },
   {
