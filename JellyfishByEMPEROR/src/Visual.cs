@@ -29,7 +29,7 @@ public static class Visual
     static readonly List<TankVis> tanks = new();
     static readonly Dictionary<string, Material> mats = new();
     static Material? glass, water, tankGlass, tankWater;
-    static float light = 1f, nextLook;
+    static float light = 1f, nextLook, lastLight = -1f;
     static MaterialPropertyBlock? block;
     static readonly System.Random rnd = new();
 
@@ -123,8 +123,9 @@ public static class Visual
         try { indoors = GameManager.GetWeatherComponent().IsIndoorEnvironment(); } catch { }
         try { night = GameManager.GetTimeOfDayComponent().IsNight(); } catch { }
         // the owner (11-12): the aquarium's water shone in the dark. Real night is near black: only a fire or a light in the hands brings it up
-        light = indoors ? (night ? .06f : .45f) : night ? .04f : 1f;
-        if (light < .3f && LitNear()) light = .3f;
+        light = indoors ? (night ? .03f : .45f) : night ? .025f : 1f;
+        if (light < .2f && LitNear()) light = .2f;
+        if (Math.Abs(light - lastLight) > .001f) { Safe.Debug($"glass light {light:0.000} (indoors {indoors}, night {night})"); lastLight = light; }
         foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, 1f);
         float j = Math.Max(.75f, light);
         foreach (var m in mats.Values) if (m != null) m.color = new Color(j, j, j, 1f);
@@ -156,8 +157,9 @@ public static class Visual
             if (t.Water == null) continue;
             try
             {
-                var c0 = Tanks.Of(t.G)?.Fish.FirstOrDefault(f => !f.Dead)?.Colour?.Glow;
+                var c0 = Mix(Tanks.Of(t.G));
                 var c = glow > 0f && c0 is { } gc ? Color.Lerp(new Color(light, light, light, 1f), gc, .3f) : new Color(light, light, light, 1f);
+                if (t.Light != null && c0 is { } lc) t.Light.color = lc;
                 block ??= new MaterialPropertyBlock();
                 block.SetColor("_Color", c);
                 t.Water.SetPropertyBlock(block);
@@ -168,15 +170,9 @@ public static class Visual
         foreach (var t in tanks) if (t.Light != null) t.Light.enabled = glow > 0f && on.Contains(t.Light);
     }
 
-    /// <summary>A fire close by, or a lit lamp, torch or flare in the hands.</summary>
+    /// <summary>A lit lamp, torch or flare in the hands (a fire's warmth reaches through walls and lit the aquarium in a dark room, 0.2.6).</summary>
     static bool LitNear()
     {
-        try
-        {
-            var p = GameManager.GetPlayerTransform().position;
-            if (GameManager.GetHeatSourceManagerComponent().GetTemperatureIncrease(p) > .5f) return true;
-        }
-        catch { }
         try
         {
             var h = GameManager.GetPlayerManagerComponent().m_ItemInHands;
@@ -187,6 +183,16 @@ public static class Visual
         }
         catch { }
         return false;
+    }
+
+    /// <summary>The glow of an aquarium: all its live jellyfish together (the owner, 11-12: not only the first one's colour).</summary>
+    static Color? Mix(TankState? st)
+    {
+        var cs = st?.Fish.Where(f => !f.Dead).Select(f => f.Colour?.Glow).OfType<Color>().ToList();
+        if (cs == null || cs.Count == 0) return null;
+        var sum = cs.Aggregate(new Color(0f, 0f, 0f, 0f), (a, b) => a + b) / cs.Count;
+        float m = Math.Max(sum.r, Math.Max(sum.g, sum.b));
+        return m > .01f ? new Color(sum.r / m, sum.g / m, sum.b / m, 1f) : sum;
     }
 
     public static void Frame()

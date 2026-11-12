@@ -81,32 +81,46 @@ public static partial class Items
     }
 }
 
-/// <summary>The owner (11-12): in the inspect view the jar stood right of the middle, close to the text. Moved left along the camera's right,
-/// once per placement the game makes (if the game leaves the position as it was, it is not moved again).</summary>
+/// <summary>The owner (11-12): in the inspect view the jar stood right of the middle, close to the text: moved left along the camera's right.
+/// The game moves the item from where it stands while it is turned (0.2.6 added the shift every frame and the jar flew off to the left),
+/// so the shift is taken back before each of the game's steps and put again after it.</summary>
 [HarmonyPatch]
 internal static class InspectShift
 {
-    static Vector3 lastSet = new(float.NaN, 0f, 0f);
+    static GearItem? shifted;
+    static Vector3 by;
 
-    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
-    static void Set(PlayerManager __instance) { lastSet = new(float.NaN, 0f, 0f); Shift(__instance); }
+    static void Undo()
+    {
+        try { if (shifted != null) shifted.transform.position -= by; } catch { }
+        shifted = null;
+    }
 
-    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateGearTransformForInspection))]
-    static void Update(PlayerManager __instance) => Shift(__instance);
-
-    static void Shift(PlayerManager pm)
+    static void Apply(PlayerManager pm)
     {
         try
         {
             var g = pm.GearItemBeingInspected();
             if (g == null || !Defs.Is(g, out var d) || d.Kind == Kind.Aquarium) return;
-            var t = g.transform;
-            if ((t.position - lastSet).sqrMagnitude < 1e-10f) return;
             var cam = GameManager.GetMainCamera();
             if (cam == null) return;
-            t.position += cam.transform.right * Tune.InspectLeft;
-            lastSet = t.position;
+            by = cam.transform.right * Tune.InspectLeft;
+            g.transform.position += by;
+            shifted = g;
         }
         catch (Exception e) { Safe.Log("Inspect shift", e); }
     }
+
+    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
+    static void SetBefore() => Undo();
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
+    static void SetAfter(PlayerManager __instance) => Apply(__instance);
+
+    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateGearTransformForInspection))]
+    static void UpdateBefore() => Undo();
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UpdateGearTransformForInspection))]
+    static void UpdateAfter(PlayerManager __instance) => Apply(__instance);
+
+    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.ExitInspectGearMode))]
+    static void Exit() => Undo();
 }
