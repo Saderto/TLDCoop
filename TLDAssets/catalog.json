@@ -46,6 +46,12 @@
    "tag": "3.0.1",
    "path": "Mods/AlcoholMod.dll",
    "note": "3.0.1 No3371, original ds5678 (MIT); pinned: newer versions only after a check with our mods"
+  },
+  "SmokesAudioOn": {
+   "zip": "SmokesAudioOnByEMPEROR.zip",
+   "path": "Plugins/SmokesAudioOnByEMPEROR.dll",
+   "note": "1.0.0 EMPEROR: Unity sound on (smokes, smokehouse kettle)",
+   "version": "1.0.0"
   }
  },
  "mods": [
@@ -191,7 +197,10 @@
    "desc": {
     "ru": "Бочка-коптильня, котёл для консервов и стол для колбас: копчёное мясо и рыба, 5 видов консервов, 24 вида колбас.",
     "en": "A barrel smokehouse, a canning kettle and a sausage table: smoked meat and fish, 5 kinds of cans, 24 kinds of sausage."
-   }
+   },
+   "needs": [
+    "SmokesAudioOn"
+   ]
   },
   {
    "id": "FeatsBySeagull",
