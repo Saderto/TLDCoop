@@ -72,6 +72,76 @@ public static partial class Items
             else { box.center = new Vector3(0f, .09f, 0f); box.size = new Vector3(.11f, .18f, .11f); }
         }
         Visual.Attach(g, def);
-        if (g.m_Inspect != null) g.m_Inspect.m_DistanceFromCamera = aquarium ? 1.1f : .45f;
+        if (g.m_Inspect != null)
+        {
+            g.m_Inspect.m_DistanceFromCamera = aquarium ? 1.1f : .45f;
+            // m_Offset did nothing visible (0.2.3): left as it was, logged; the jar is moved left by InspectShift
+            Safe.Debug($"inspect offset of {g.name}: {g.m_Inspect.m_Offset}, angles {g.m_Inspect.m_Angles}");
+        }
     }
+}
+
+/// <summary>The owner (11-12): in the inspect view the jar stood right of the middle and, when turned, went off to the side and nearer/further.
+/// The game turns an item about its own point, and a jar's point is at its bottom: the jar swung round it. While a jar is looked at, everything
+/// it is made of is lowered by half its height, so it turns about its middle and stays in the middle of the view (0.2.6–0.2.9 moved the item
+/// itself, which the game's turning undid or added up).</summary>
+[HarmonyPatch]
+internal static class InspectCenter
+{
+    const float Half = .09f;
+    static GearItem? cur;
+    static readonly List<(Transform t, Vector3 lp)> moved = new();
+
+    static Vector3 off;
+
+    public static Vector3 Drop(GearItem g)
+    {
+        try { return cur != null && g != null && cur.Pointer == g.Pointer ? off : Vector3.zero; } catch { return Vector3.zero; }
+    }
+
+    /// <summary>Every frame while a jar is looked at: its parts sit half its height lower (it turns about its middle) and a little left and up
+    /// on the screen (the owner, 11-12), worked out in the jar's own space so the game's turning cannot add it up.</summary>
+    public static void Tick()
+    {
+        if (cur == null) return;
+        try
+        {
+            var cam = GameManager.GetMainCamera();
+            var t = cur.transform;
+            off = new Vector3(0f, -Half, 0f);
+            if (cam != null) off += t.InverseTransformVector(cam.transform.right * Tune.InspectLeft + cam.transform.up * Tune.InspectUp);
+            foreach (var (c, lp) in moved) if (c != null) c.localPosition = lp + off;
+        }
+        catch (Exception e) { Safe.Log("Inspect centre tick", e); cur = null; }
+    }
+
+    static void Restore()
+    {
+        foreach (var (t, lp) in moved) try { if (t != null) t.localPosition = lp; } catch { }
+        moved.Clear();
+        cur = null;
+    }
+
+    [HarmonyPostfix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.SetGearTransformForInspection))]
+    static void Set(PlayerManager __instance)
+    {
+        try
+        {
+            Restore();
+            var g = __instance.GearItemBeingInspected();
+            if (g == null || !Defs.Is(g, out var d) || d.Kind == Kind.Aquarium) return;
+            var t = g.transform;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                var c = t.GetChild(i);
+                moved.Add((c, c.localPosition));
+            }
+            cur = g;
+            Tick();
+        }
+        catch (Exception e) { Safe.Log("Inspect centre", e); }
+    }
+
+    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.ExitInspectGearMode))]
+    static void Exit() => Restore();
 }

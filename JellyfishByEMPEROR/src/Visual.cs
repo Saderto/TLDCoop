@@ -21,14 +21,17 @@ public static class Visual
         public GearItem G = null!;
         public string Sig = "";
         public readonly List<Transform> Jellies = new();
-        public Light? Light;
+        /// <summary>One light per jellyfish, each its own colour, moving with it (the owner, 11-12: not only the first one's glow).</summary>
+        public readonly List<Light> Lights = new();
+        public Renderer? Water;
     }
 
     public static readonly List<Live> Lives = new();
     static readonly List<TankVis> tanks = new();
     static readonly Dictionary<string, Material> mats = new();
     static Material? glass, water, tankGlass, tankWater;
-    static float light = 1f, nextLook;
+    static float light = 1f, nextLook, lastLight = -1f;
+    static MaterialPropertyBlock? block;
     static readonly System.Random rnd = new();
 
     static Shader? Sh() => Shader.Find("Sprites/Default") ?? Shader.Find("Legacy Shaders/Particles/Alpha Blended");
@@ -76,9 +79,9 @@ public static class Visual
             {
                 tankGlass ??= See("AquaGlass", 3003); tankWater ??= See("AquaWater", 3002);
                 Part(t, "JF_Glass", "AquaGlass", tankGlass, layer);
-                Part(t, "JF_Water", "AquaWater", tankWater, layer);
+                var tw = Part(t, "JF_Water", "AquaWater", tankWater, layer);
                 tanks.RemoveAll(x => x.G == null || x.G.Pointer == g.Pointer);
-                tanks.Add(new TankVis { G = g });
+                tanks.Add(new TankVis { G = g, Water = tw });
                 return;
             }
             glass ??= See("JarGlass", 3003); water ??= See("JarWater", 3002);
@@ -120,8 +123,17 @@ public static class Visual
         bool indoors = false, night = false;
         try { indoors = GameManager.GetWeatherComponent().IsIndoorEnvironment(); } catch { }
         try { night = GameManager.GetTimeOfDayComponent().IsNight(); } catch { }
-        light = indoors ? (night ? .3f : .55f) : night ? .25f : 1f;
-        foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, 1f);
+        // the owner (11-12): the aquarium's water shone in the dark. Real night is near black: only a fire or a light in the hands brings it up
+        // 0.2.9: still lighter than the dark room (the game's eye adapts to the dark). The scene's own ambient light is the measure now:
+        // at night the glass is never brighter than the ambient says, and it also gets thinner (less of it covers what is behind)
+        light = indoors ? (night ? .012f : .45f) : night ? .01f : 1f;
+        float amb = -1f;
+        try { var a = RenderSettings.ambientLight; amb = Math.Max(a.r, Math.Max(a.g, a.b)); } catch { }
+        if (night && amb >= 0f) light = Math.Min(light, Mathf.Clamp(amb * 2f, .003f, 1f));
+        if (light < .15f && LitNear()) light = .15f;
+        float alpha = night ? .5f : 1f;
+        if (Math.Abs(light - lastLight) > .001f) { Safe.Debug($"glass light {light:0.000} (indoors {indoors}, night {night}, ambient {amb:0.000})"); lastLight = light; }
+        foreach (var m in new[] { glass, water, tankGlass, tankWater }) if (m != null) m.color = new Color(light, light, light, alpha);
         float j = Math.Max(.75f, light);
         foreach (var m in mats.Values) if (m != null) m.color = new Color(j, j, j, 1f);
         var me = GameManager.GetPlayerTransform()?.position ?? Vector3.zero;
@@ -130,11 +142,65 @@ public static class Visual
         foreach (var l in Lives)
             if (l.Light != null && Standing(l.G) && !Dead(l.G)) lit.Add(((l.G.transform.position - me).sqrMagnitude, l.Light, 1f));
         foreach (var t in tanks)
-            if (t.Light != null && Standing(t.G) && (Tanks.Of(t.G)?.Fish.Any(f => !f.Dead) ?? false)) lit.Add(((t.G.transform.position - me).sqrMagnitude, t.Light, 1.6f));
+            if (Standing(t.G)) foreach (var tl in t.Lights) if (tl != null) lit.Add(((tl.transform.position - me).sqrMagnitude, tl, .9f));
         var on = new HashSet<Light>(lit.OrderBy(x => x.d).Take(6).Select(x => x.l));
         foreach (var x in lit) x.l.intensity = glow * x.k;
+        // the water of a lit jar takes the colour of its jellyfish's glow
+        foreach (var l in Lives)
+        {
+            if (l.Water == null || l.Def.Colour == null) continue;
+            try
+            {
+                var c = glow > 0f ? Color.Lerp(new Color(light, light, light, alpha), l.Def.Colour.Glow, .45f) : new Color(light, light, light, alpha);
+                c.a = alpha;
+                block ??= new MaterialPropertyBlock();
+                block.SetColor("_Color", c);
+                l.Water.SetPropertyBlock(block);
+            }
+            catch (Exception e) { Safe.Log("Water tint", e); }
+        }
+        // an aquarium's water takes the glow of its jellyfish too, a little: dark when it is empty
+        foreach (var t in tanks)
+        {
+            if (t.Water == null) continue;
+            try
+            {
+                var c0 = Mix(Tanks.Of(t.G));
+                var c = glow > 0f && c0 is { } gc ? Color.Lerp(new Color(light, light, light, alpha), gc, .12f) : new Color(light, light, light, alpha);
+                c.a = alpha;
+                block ??= new MaterialPropertyBlock();
+                block.SetColor("_Color", c);
+                t.Water.SetPropertyBlock(block);
+            }
+            catch (Exception e) { Safe.Log("Tank water tint", e); }
+        }
         foreach (var l in Lives) if (l.Light != null) l.Light.enabled = glow > 0f && on.Contains(l.Light);
-        foreach (var t in tanks) if (t.Light != null) t.Light.enabled = glow > 0f && on.Contains(t.Light);
+        foreach (var t in tanks) foreach (var tl in t.Lights) if (tl != null) tl.enabled = glow > 0f && on.Contains(tl);
+    }
+
+    /// <summary>A lit lamp, torch or flare in the hands (a fire's warmth reaches through walls and lit the aquarium in a dark room, 0.2.6).</summary>
+    static bool LitNear()
+    {
+        try
+        {
+            var h = GameManager.GetPlayerManagerComponent().m_ItemInHands;
+            if (h == null) return false;
+            if (h.m_KeroseneLampItem != null && h.m_KeroseneLampItem.IsOn()) return true;
+            if (h.m_TorchItem != null && h.m_TorchItem.IsBurning()) return true;
+            if (h.m_FlareItem != null && h.m_FlareItem.IsBurning()) return true;
+        }
+        catch { }
+        return false;
+    }
+
+    /// <summary>The glow of an aquarium: all its live jellyfish together (the owner, 11-12: not only the first one's colour).</summary>
+    static Color? Mix(TankState? st)
+    {
+        var cs = st?.Fish.Where(f => !f.Dead).Select(f => f.Colour?.Glow).OfType<Color>().ToList();
+        if (cs == null || cs.Count == 0) return null;
+        var sum = cs.Aggregate(new Color(0f, 0f, 0f, 0f), (a, b) => a + b) / cs.Count;
+        float m = Math.Max(sum.r, Math.Max(sum.g, sum.b));
+        return m > .01f ? new Color(sum.r / m, sum.g / m, sum.b / m, 1f) : sum;
     }
 
     public static void Frame()
@@ -157,7 +223,7 @@ public static class Visual
             if (dead) continue;
             float t = time * .9f + l.Phase;
             float s = Mathf.Sin(t * 2.9f);
-            j.localPosition = new Vector3(0f, sp.Y + Mathf.Sin(t * .7f) * .004f, 0f);
+            j.localPosition = new Vector3(0f, sp.Y + Mathf.Sin(t * .7f) * .004f, 0f) + InspectCenter.Drop(l.G);
             j.localRotation = Quaternion.Euler(0f, t * 7f, 0f);
             j.localScale = new Vector3(k * (1f + .06f * s), k * (1f - .05f * s), k * (1f + .06f * s));
         }
@@ -172,30 +238,23 @@ public static class Visual
         }
     }
 
-    const float Floor = .051f, Surface = .387f, T = 2.2f;
+    const float Floor = .051f, Surface = .387f, T = 1.9f;
 
     static void Rebuild(TankVis v, List<Fish> fish, string sig)
     {
         v.Sig = sig;
         foreach (var j in v.Jellies) if (j != null) UnityEngine.Object.Destroy(j.gameObject);
         v.Jellies.Clear();
+        v.Lights.Clear();
         int layer = v.G.gameObject.layer;
         foreach (var f in fish)
         {
             if (f.Species is not { } s || f.Colour is not { } c) continue;
             var r = Part(v.G.transform, "JF_Fish", "Jelly_" + s.Id, Mat("Jelly_" + s.Id + "_" + c.Id, 3000), layer);
-            if (r != null) v.Jellies.Add(r.transform);
+            if (r == null) continue;
+            v.Jellies.Add(r.transform);
+            if (!f.Dead) v.Lights.Add(Glow(r.transform, c.Glow, 1.1f));
         }
-        var first = fish.FirstOrDefault(f => f.Colour != null);
-        if (v.Light == null && first != null)
-        {
-            var lgo = new GameObject("JF_Light") { layer = layer };
-            lgo.transform.SetParent(v.G.transform, false);
-            lgo.transform.localPosition = new Vector3(0f, .22f, 0f);
-            v.Light = lgo.AddComponent<Light>();
-            v.Light.type = LightType.Point; v.Light.range = 1.6f; v.Light.shadows = LightShadows.None; v.Light.intensity = 0f; v.Light.enabled = false;
-        }
-        if (v.Light != null && first?.Colour != null) v.Light.color = first.Colour.Glow;
         nextLook = 0f;
     }
 
@@ -217,7 +276,10 @@ public static class Visual
         if (hi < lo) lo = hi = (lo + hi) / 2f;
         float t = time * .9f + ph * 3f;
         float sn = Mathf.Sin(t * 2.9f);
-        j.localPosition = new Vector3(Mathf.Sin(t * .11f + ph) * .17f, Mathf.Lerp(lo, hi, .5f + .5f * Mathf.Sin(t * .17f + ph)), Mathf.Sin(t * .13f + ph * 1.7f) * .05f);
+        // the owner (11-12): they went through one another. Each keeps its own third of the tank, front or back, and its own height band
+        float lane = (i - 1) * .17f, depth = i == 1 ? -.045f : .04f;
+        float b0 = Mathf.Lerp(lo, hi, i == 1 ? .45f : i == 0 ? 0f : .25f), b1 = Mathf.Lerp(lo, hi, i == 1 ? 1f : i == 0 ? .6f : .8f);
+        j.localPosition = new Vector3(lane + Mathf.Sin(t * .11f + ph) * .035f, Mathf.Lerp(b0, b1, .5f + .5f * Mathf.Sin(t * .17f + ph)), depth + Mathf.Sin(t * .13f + ph * 1.7f) * .02f);
         j.localRotation = Quaternion.Euler(0f, t * 9f, 0f);
         j.localScale = new Vector3(k * (1f + .06f * sn), k * (1f - .05f * sn), k * (1f + .06f * sn));
     }

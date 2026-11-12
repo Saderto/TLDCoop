@@ -151,6 +151,15 @@ elif MODE == 'species':
     camera(sc, (.15, -1.0, -.25 - .12), (.15, 0, -.25), 50, ortho=.62)
     sc.render.resolution_x, sc.render.resolution_y = 1000, 1450
     sc.render.filepath = os.path.join(OUT, 'sheet_species.png'); bpy.ops.render.render(write_still=True)
+elif MODE == 'close':
+    sc = reset(); lights(sc); sc.cycles.samples = 48
+    T = os.path.join(OUT, 'textures')
+    for c, sp in enumerate(['LionsMane', 'Aurelia', 'SeaNettle', 'Crystal']):
+        col = info['colours'][sp][0]
+        put(mesh(f'c{c}', 'Jelly_' + sp), mat_jelly(os.path.join(T, f'Jelly_{sp}_{col}.png')), (c * .09, 0, 0), 1.0, .5)
+    camera(sc, (.135, -.6, -.30), (.135, 0, -.01), 50, ortho=.38)
+    sc.render.resolution_x, sc.render.resolution_y = 1400, 700
+    sc.render.filepath = os.path.join(OUT, 'sheet_close.png'); bpy.ops.render.render(write_still=True)
 elif MODE == 'show':
     sc = reset(); lights(sc, night=True); floor(sc); sc.cycles.samples = 64
     glow = info['glow']

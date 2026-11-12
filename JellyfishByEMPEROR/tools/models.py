@@ -388,6 +388,25 @@ def bell(R, H, power=.8, lobes=0, depth=0.0, sub=0, subdepth=0.0, thick=.25, wav
     return m
 
 
+def under_z(R, H, rr, power=.8, thick=.25, flat=0.0, rim_drop=0.0):
+    """Height of the bell's underside (subumbrella) at radius rr, lobes ignored: where tentacles and arms are rooted."""
+    best = None
+    for i in range(401):
+        f = i / 400
+        r = R * math.sin(f * math.pi / 2) ** power * (1 - .06 * (1 - f))
+        z = H * (math.cos(f * math.pi / 2) ** (1 + flat)) - rim_drop * f ** 3 - thick * H * math.sin(min(1.0, (1 - f) * 3) * math.pi / 2) * (1 - f * .3)
+        if best is None or abs(r - rr) < best[0]: best = (abs(r - rr), z)
+    return best[1]
+
+
+def stalk(z_top, z_bot, r_top, r_bot, n=32):
+    """The manubrium: a soft stalk hanging from the middle of the underside, the mouth arms grow from its end."""
+    fr = np.linspace(0, 1, 10)
+    r = np.concatenate([[.0002], r_top * (1.25 - .25 * fr) + (r_bot - r_top) * fr ** 1.5, [r_bot * .55]])
+    z = np.concatenate([[z_top + .0006], z_top - (z_top - z_bot) * fr, [z_bot - .0008]])
+    return lathe(r, z, n, lambda f, a: (.6 + .3 * a / 6.28, .55 + .1 * f))
+
+
 def frill(path, width, cols=9, amp=.35, freq=60.0, seed=0, uv=(.52, .98, .52, .98), normal_hint=(0, 0, 1.0)):
     """A ruffled arm: rows along the path, columns across; the further from the middle line, the deeper the waves."""
     path = np.asarray(path, float); k = len(path)
@@ -425,6 +444,7 @@ def hair(start, direction, length, seed, width=.0005, k=26, sway=.5, curl=0.0, t
 def lionsmane():
     m = M(); R, H = .033, .019
     m.merge(bell(R, H, power=.75, lobes=8, depth=.22, sub=32, subdepth=.10, thick=.45, wave=.04))
+    m.merge(stalk(under_z(R, H, 0, .75, .45), -.0035, .0075, .0058))
     # the huge folded curtain of oral arms: four ruffled arms hanging and turning
     for q in range(4):
         a = q * math.pi / 2 + .4
@@ -437,13 +457,14 @@ def lionsmane():
         for t in range(18):
             a = a0 + (t - 8.5) * .018; rr = R * (.70 + .06 * (t % 3)); s += 1
             ln = .05 + .035 * ((t * 37 + c * 11) % 7) / 6
-            m.merge(hair((rr * math.cos(a), rr * math.sin(a), -.002), (math.cos(a) * .10, math.sin(a) * .10, -1), ln, s, width=.00045, sway=.55))
+            m.merge(hair((rr * math.cos(a), rr * math.sin(a), under_z(R, H, rr, .75, .45) - .0002), (math.cos(a) * .10, math.sin(a) * .10, -1), ln, s, width=.00045, sway=.55))
     return m
 
 
 def aurelia():
     m = M(); R, H = .036, .0085
     m.merge(bell(R, H, power=.6, lobes=8, depth=.035, thick=.9, wave=.015, flat=.3))
+    m.merge(stalk(under_z(R, H, 0, .6, .9, .3), -.0026, .0045, .0035))
     s = 0
     for j in range(140):
         a = 2 * math.pi * j / 140; s += 1
@@ -461,15 +482,16 @@ def crystal():
     s = 0
     for j in range(90):
         a = 2 * math.pi * (j + .3) / 90; s += 1
-        m.merge(hair((R * .985 * math.cos(a), R * .985 * math.sin(a), -.0006), (math.cos(a) * .3, math.sin(a) * .3, -1), .018 + .016 * ((j * 7) % 5) / 4, s, width=.0003, k=12, sway=.45))
+        m.merge(hair((R * .985 * math.cos(a), R * .985 * math.sin(a), under_z(R, H, R * .985, .65, .8, .2) - .0002), (math.cos(a) * .3, math.sin(a) * .3, -1), .018 + .016 * ((j * 7) % 5) / 4, s, width=.0003, k=12, sway=.45))
     # the stomach: a short tube with a frilled mouth
-    m.merge(lathe(np.array([.0001, .0045, .0055, .0055, .0065, .0045]), np.array([.0005, -.0005, -.004, -.008, -.0105, -.012]), 32, lambda f, a: (.6 + .3 * a / 6.28, .55 + .1 * f)))
+    m.merge(lathe(np.array([.0001, .0065, .0055, .0055, .0065, .0045]), np.array([under_z(R, H, 0, .65, .8, .2) + .0004, under_z(R, H, 0, .65, .8, .2), -.004, -.008, -.0105, -.012]), 32, lambda f, a: (.6 + .3 * a / 6.28, .55 + .1 * f)))
     return m
 
 
 def seanettle():
     m = M(); R, H = .028, .021
     m.merge(bell(R, H, power=.85, lobes=16, depth=.10, thick=.45, wave=.03, rim_drop=.001))
+    m.merge(stalk(under_z(R, H, 0, .85, .45, 0, .001), -.0035, .0065, .0048))
     for q in range(4):
         a = q * math.pi / 2
         pts = []
@@ -480,7 +502,7 @@ def seanettle():
     s = 100
     for j in range(32):
         a = 2 * math.pi * (j + .5) / 32; s += 1
-        m.merge(hair((R * .93 * math.cos(a), R * .93 * math.sin(a), -.001), (math.cos(a) * .07, math.sin(a) * .07, -1), .065 + .02 * (j % 4) / 3, s, width=.0006, sway=.45))
+        m.merge(hair((R * .93 * math.cos(a), R * .93 * math.sin(a), under_z(R, H, R * .93, .85, .45, 0, .001) - .0002), (math.cos(a) * .07, math.sin(a) * .07, -1), .065 + .02 * (j % 4) / 3, s, width=.0006, sway=.45))
     return m
 
 
@@ -494,7 +516,7 @@ def periphylla():
     for j in range(12):
         a = 2 * math.pi * (j + .5) / 12; s += 1
         # rooted on the inside of the margin, between two lobes, then out and up as the helmet jellyfish holds them
-        m.merge(hair((.0195 * math.cos(a), .0195 * math.sin(a), .0015), (math.cos(a) * .9, math.sin(a) * .9, .05), .03, s, width=.0018, k=12, sway=.2, curl=.8, taper=.2))
+        m.merge(hair((.0218 * math.cos(a), .0218 * math.sin(a), .0010), (math.cos(a) * .9, math.sin(a) * .9, .05), .03, s, width=.0018, k=12, sway=.2, curl=.8, taper=.2))
     return m
 
 
@@ -657,10 +679,12 @@ def disc(r, z, n=48, up=True, uvc=(.5, .5), uvr=.5):
 
 def jar():
     # glass: two walls (outer and inner) so the edges read denser, like real glass seen edge-on; a thick bottom
-    prof = [(0, .0015), (.046, .0012), (.053, .004), (.0555, .012), (.0555, .135), (.0525, .148), (.0445, .156), (.0425, .158), (.0425, .1665)]
+    prof = [(0, .0015), (.046, .0012), (.053, .004), (.0555, .012), (.0555, .135), (.0525, .148), (.0450, .156), (.0450, .1665)]
     glass = lathe(np.array([p[0] for p in prof]), np.array([p[1] for p in prof]), 64, lambda f, a: (a / 6.283, f))
     inner = [(p[0] - .0022 if p[0] > .01 else p[0], p[1] + (.004 if p[1] < .01 else 0)) for p in prof]
     glass.merge(lathe(np.array([p[0] for p in inner]), np.array([p[1] for p in inner]), 64, lambda f, a: (a / 6.283, f), flip=True))
+    # the rim: the two walls joined at the top (the owner, 11-12: seen from below the glass doubled there, with a gap); the neck fills the lid
+    glass.merge(lathe(np.array([.0450, .0428]), np.array([.1665, .1665]), 64, lambda f, a: (a / 6.283, .99)))
     # sea water up to the shoulder; its surface has its own place on the texture (upper half)
     water = lathe(np.array([0, .0505, .0528, .0528]), np.array([.0058, .0058, .012, .128]), 48, lambda f, a: (a / 6.283, f * .5))
     water.merge(disc(.0528, .128, 48, True, (.5, .75), .24))
@@ -668,15 +692,17 @@ def jar():
     lid = M()
     ribs = 36
     P = []; UV = []
-    for i, z in enumerate((.1615, .1775)):
+    for i, z in enumerate((.1615, .1792)):
         for j in range(ribs * 2):
             a = 2 * math.pi * j / (ribs * 2); r = .0458 + (.0007 if j % 2 == 0 else 0)
             P.append((r * math.cos(a), r * math.sin(a), z)); UV.append((j / (ribs * 2), .58 + .34 * i))
-    lid.merge(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False))
-    lid.merge(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .54)))
-    lid.merge(lathe(np.array([.0465, .0468, .045, .040, .030, .015]), np.array([.1775, .1790, .1805, .1815, .1822, .1826]), 72, lambda f, a: (.5 + .22 * (1 - f) * math.cos(a), .25 + .22 * (1 - f) * math.sin(a))))
-    lid.merge(disc(.015, .1826, 72, True, (.5, .25), .22 * .015 / .0465 * 3))
-    lid.merge(disc(.0458, .1615, 72, False, (.5, .25), .22))
+    # two-sided: the game's material culls back faces and this side came out see-through in 0.2.3 (seen from the front, only the far inside)
+    lid.merge(two_sided(surface(np.array(P), np.array(UV), 2, ribs * 2, True, flip=False)))
+    # the rolled bottom edge, painted red like the rest (the owner, 11-12: it was a white ring)
+    lid.merge(two_sided(lathe(np.array([.0455, .0476, .0478, .0476, .0458]), np.array([.1585, .1590, .1600, .1612, .1618]), 72, lambda f, a: (a / 6.283, .70))))
+    # the top (the owner, 11-12): ONE plate, seen from above and from below, sitting right on the ribs with no gap;
+    # no second plane above or under it, no bevel (earlier: a raised disc, a bevel, an inner plate, an underside: read as a double bottom and slits)
+    lid.merge(two_sided(disc(.0469, .1790, 72, True, (.5, .25), .22)))
     return glass, water, lid
 
 
@@ -684,7 +710,8 @@ def glass_tex(n=256):
     """RGBA: almost clear, two vertical highlights, the thick bottom and the shoulder denser."""
     y, x = (np.mgrid[0:n, 0:n] + .5) / n
     a = np.full((n, n), .045)
-    for u0, w, k in ((.11, .018, .55), (.135, .006, .35), (.61, .010, .28), (.36, .04, .06)):
+    # the owner (11-12): the glints read as murky stripes on both sides: one faint thin glint left
+    for u0, w, k in ((.12, .008, .16), (.61, .006, .07)):
         d = np.minimum(np.abs(x - u0), 1 - np.abs(x - u0))
         a += k * np.exp(-(d / w) ** 2) * smooth(.04, .2, y) * smooth(.97, .8, y)
     a += .22 * smooth(.08, .0, y) + .16 * smooth(.86, .97, y)
@@ -796,7 +823,7 @@ def aquarium():
             vv[:, 0] *= lob[j] * 1.25; vv[:, 1] *= lob[j]
             vv[:, 2] = vv[:, 2] * .8 + base + .010
             vv[:, 0] += x; vv[:, 1] += y
-        frame.merge(st)
+        frame.merge(two_sided(st))
     # kelp: wavy blades from the sand, seen from both sides
     for k, (x, y, h) in enumerate([(-.22, .10, .27), (-.20, .12, .21), (-.17, .11, .30), (.19, .11, .24), (.23, .08, .19), (.02, .13, .17)]):
         pts = [(x + .012 * math.sin(t * 9 + k), y + .006 * math.cos(t * 7 + k), base + .014 + t * h) for t in np.linspace(0, 1, 18)]

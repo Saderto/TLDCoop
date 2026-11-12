@@ -2,11 +2,11 @@ namespace JellyfishByEMPEROR;
 
 /// <summary>A live jellyfish's condition is the jar's own condition (saved by the game); one in an aquarium has it in the aquarium's state.
 /// The owner (11-12): where its water is below −5° it dies, from full condition in 90 minutes; in the warmth it comes back slowly.
-/// In the pack the body keeps it some degrees warmer. Dead, a standing jar shows it lying on the bottom; in the pack (or picked up) only the
+/// In the pack it has the air where the player stands, the body only 2 degrees warmer (the owner, 11-12: it must freeze there too). Dead, a standing jar shows it lying on the bottom; in the pack (or picked up) only the
 /// empty jar is left. A dead one in an aquarium lies on the sand until it is removed in the aquarium's window.</summary>
 public static class Life
 {
-    static float lastHours = -1f, next;
+    static float lastHours = -1f, next, nextNote;
 
     static float Hours()
     {
@@ -22,7 +22,7 @@ public static class Life
     }
 
     public static float TempAt(GearItem g) =>
-        g.m_InPlayerInventory ? GameManager.GetWeatherComponent().GetCurrentTemperature() + Tune.PackWarmth : TempAt(g.transform.position);
+        g.m_InPlayerInventory ? TempAt(GameManager.GetPlayerTransform().position) + Tune.PackWarmth : TempAt(g.transform.position);
 
     /// <summary>Condition in % after dh hours at temperature t.</summary>
     static float Step(float pct, float t, float dh)
@@ -42,6 +42,7 @@ public static class Life
         float dh = h - lastHours;
         lastHours = h;
         if (dh <= 0f) return;
+        bool note = Time.unscaledTime >= nextNote;
         foreach (var l in Visual.Lives.ToArray())
         {
             var g = l.G;
@@ -56,6 +57,7 @@ public static class Life
                 }
                 float t = TempAt(g);
                 float pct = Step(g.CurrentHP / max * 100f, t, dh);
+                if (Time.unscaledTime >= nextNote) Safe.Debug($"{l.Def.Id}: {(g.m_InPlayerInventory ? "in the pack" : "standing")}, {t:0.0} C, {pct:0.0}%");
                 g.CurrentHP = pct / 100f * max;
                 if (pct <= 0.001f)
                 {
@@ -67,6 +69,7 @@ public static class Life
             }
             catch (Exception e) { Safe.Log("Life", e); }
         }
+        if (note) nextNote = Time.unscaledTime + 60f;
         // the aquariums of this place (one somewhere else is not there to be measured: it waits, as the place itself does)
         try
         {

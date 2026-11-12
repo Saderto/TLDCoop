@@ -155,5 +155,10 @@ internal static class Ui
 
     public static void Caption(Rect r, string text) => Text(r, text.ToUpperInvariant(), 12f, Theme.Caption, TextAnchor.MiddleLeft);
 
+    /// <summary>One big letter of the catching game, centred in its box.</summary>
+    public static void Letter(Rect r, string text, Color c) => Text(r, text, 26f, c, TextAnchor.MiddleCenter);
+
+    public static void Fill(Rect r, Color c) => Theme.Fill(R(r), c);
+
     public static void Centered(Rect r, string text) => Text(r, text, 14f, Color.white, TextAnchor.MiddleCenter);
 }

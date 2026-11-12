@@ -48,7 +48,8 @@ public static class Texts
         Add("CATCH_JAR", "Зачерпнуть банкой ({0})", "Scoop up with a jar ({0})");
         Add("CATCH_NOJAR", "Нет пустой банки", "No empty jar");
         Add("CATCH_LET", "Отпустить", "Let it go");
-        Add("CATCH_KEYS", "1: банкой   2: отпустить", "1: jar   2: let go");
+        Add("CATCH_GAME", "Жми W A S D по порядку", "Press W A S D in order");
+        Add("MSG_ESCAPED", "Медуза выскользнула и ушла на дно", "The jellyfish slipped away to the bottom");
         Add("MSG_SANK", "Медуза ушла под воду", "The jellyfish sank out of sight");
         Add("MSG_JAR", "Медуза в банке: {0}", "Jellyfish in the jar: {0}");
         Add("MSG_GONE", "Медузу уже забрали", "Someone already took the jellyfish");
@@ -74,7 +75,7 @@ public static class Texts
         Add("TANK_WAIT", "Жду ответа хоста…", "Waiting for the host…");
         Add("HOVER_TANK", "Медуз: {0} из {1}", "Jellyfish: {0} of {1}");
         Add("ACT_PLACE", "Поставить", "Place");
-        Add("HOVER_COLD", "Вода стынет!", "The water is freezing!");
+        Add("HOVER_COLD", "Вода замерзает!", "The water is freezing!");
         Add("HOVER_COND", "Состояние {0}%", "Condition {0}%");
     }
 
