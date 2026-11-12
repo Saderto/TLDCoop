@@ -41,10 +41,11 @@
    "path": "Mods/ModComponent.dll"
   },
   "AlcoholMod": {
-   "zip": "AlcoholMod.zip",
+   "repo": "No3371/AlcoholMod",
+   "asset": "AlcoholMod.dll",
+   "tag": "3.0.1",
    "path": "Mods/AlcoholMod.dll",
-   "note": "3.0.1 No3371, original ds5678 (MIT)",
-   "version": "3.0.1"
+   "note": "3.0.1 No3371, original ds5678 (MIT); pinned: newer versions only after a check with our mods"
   }
  },
  "mods": [

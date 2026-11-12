@@ -81,12 +81,11 @@ is kept next to it as `globalgamemanagers.smokes_bak`).
 - `ComplexLogger.zip`: ComplexLogger 1.0.10, исправлен для игры 2.58+ и MelonLoader 0.7 (EMPEROR); оригинал The Illusion,
   https://github.com/Arkhorse/Complex-Logger, MIT / fixed for game 2.58+ and MelonLoader 0.7; original by The Illusion, MIT.
 - `ModSettings.zip`: ModSettings 2.2.5 без изменений, авторы Digitalzombie и zeobviouslyfakeacc, MIT / unchanged, MIT.
-- `AlcoholMod.zip`: AlcoholMod 3.0.1 без изменений, авторы ds5678 (оригинал) и No3371, https://github.com/No3371/AlcoholMod, MIT /
-  unchanged, by ds5678 (original) and No3371, MIT.
 
-AfflictionComponent (https://github.com/TLD-Mods/AfflictionComponent), ModData (https://github.com/dommrogers/ModData) и ModComponent
-(https://github.com/dommrogers/ModComponent)
-берите у авторов; лаунчер скачивает их оттуда сам / get them from their authors; the launcher downloads them from there.
+AfflictionComponent (https://github.com/TLD-Mods/AfflictionComponent), ModData (https://github.com/dommrogers/ModData), ModComponent
+(https://github.com/dommrogers/ModComponent) и AlcoholMod (https://github.com/No3371/AlcoholMod, версия 3.0.1 / version 3.0.1)
+берите у авторов; лаунчер скачивает их оттуда сам и не трогает библиотеку, поставленную вами вручную /
+get them from their authors; the launcher downloads them from there and never replaces a library you installed yourself.
 
 ## Лаунчер / Launcher
 
