@@ -3,10 +3,11 @@
 
 namespace SmokehouseByEMPEROR;
 
-/// <summary>A barrel smokehouse made at the workbench: hot and cold smoked meat and fish that keep long and are eaten with no fire.</summary>
+/// <summary>A barrel smokehouse made at the workbench: hot and cold smoked meat and fish that keep long and are eaten with no fire.
+/// Since 0.3.0 also a canning kettle (cans, boiled sausage) and a sausage table (raw sausage, dry-cured in the barrel).</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.2.7";
+    public const string VersionText = "0.4.18";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SmokehouseByEMPEROR");
 
@@ -39,16 +40,29 @@ public class Mod : MelonMod
         try { Window.Update(); } catch (Exception e) { Safe.Log("Window update", e); }
         try { Place.Tick(); } catch (Exception e) { Safe.Log("Place tick", e); }
         try { Items.Tick(); } catch (Exception e) { Safe.Log("Items tick", e); }
+        Crafting.Tick();
         try { Barrels.Tick(); } catch (Exception e) { Safe.Log("Barrels tick", e); }
         try { Fx.Frame(); } catch (Exception e) { Safe.Log("Smoke", e); }
+        if (testKeys.Value && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F9)) { try { Fx.NextBoilLevel(); } catch (Exception e) { Safe.Log("Boil test", e); } }
         if (testKeys.Value && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F8))
         {
             try
             {
                 var pm = GameManager.GetPlayerManagerComponent();
-                pm.InstantiateItemInPlayerInventory(Defs.Prefix + Defs.Barrel, 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
-                foreach (var n in new[] { "GEAR_Softwood", "GEAR_Softwood", "GEAR_Softwood", "GEAR_Hardwood", "GEAR_Hardwood", "GEAR_RawMeatDeer", "GEAR_RawMeatWolf", "GEAR_RawCohoSalmon", "GEAR_RawRainbowTrout", "GEAR_Salt", "GEAR_PackMatches" })
-                    pm.InstantiateItemInPlayerInventory(n, 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
+                foreach (var st in new[] { Defs.Barrel, Defs.Kettle, Defs.Table })
+                    pm.InstantiateItemInPlayerInventory(Defs.Prefix + st, 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
+                // 11-12 owner: one press gives everything there is to check
+                foreach (var own in new[] { "CanDeer", "CanMoose", "CanBear", "CanFish", "CanPate", "SausHuntRaw", "SausTaigaRaw", "SausFishRaw", "SausGreatBearRaw", "SausHuntHot", "SausHuntDry", "SausCohoHot", "HotDeer", "ColdDeer_S", "HotCoho", "ColdBass" })
+                {
+                    try { pm.InstantiateItemInPlayerInventory(Defs.Prefix + own, 1, 1f, PlayerManager.InventoryInstantiateFlags.None); } catch (Exception e) { Safe.Log("Test give " + own, e); }
+                }
+                foreach (var (n, count) in new[] { ("GEAR_RecycledCan", 6), ("GEAR_Gut", 6), ("GEAR_Salt", 6), ("GEAR_Softwood", 4), ("GEAR_Hardwood", 10), ("GEAR_PackMatches", 1), ("GEAR_Hacksaw", 1),
+                    ("GEAR_RawMeatDeer", 3), ("GEAR_RawMeatMoose", 2), ("GEAR_RawMeatBear", 2), ("GEAR_RawMeatWolf", 2), ("GEAR_RawMeatRabbit", 2), ("GEAR_RawMeatPtarmigan", 2),
+                    ("GEAR_RawCohoSalmon", 2), ("GEAR_RawRainbowTrout", 2), ("GEAR_RawSmallMouthBass", 1), ("GEAR_WaterSupplyPotable", 1) })
+                    for (int i = 0; i < count; i++)
+                    {
+                        try { pm.InstantiateItemInPlayerInventory(n, 1, 1f, PlayerManager.InventoryInstantiateFlags.None); } catch (Exception e) { Safe.Log("Test give " + n, e); }
+                    }
                 Safe.Info("Test items given");
             }
             catch (Exception e) { Safe.Log("Test give", e); }

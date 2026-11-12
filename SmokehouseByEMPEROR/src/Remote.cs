@@ -7,6 +7,7 @@ public class Op
 {
     public string Key = "";        // one per action: a repeat after a lost answer is not done twice
     public string Scene = "";
+    public string Station = "";    // the state's kind: "" barrel, "Kettle"
     public float X, Y, Z;
     public string Kind = "";       // mode, put, take, light, out, wood, pickup
     public bool Cold;              // mode
@@ -21,6 +22,7 @@ public class Op
 public class Reply
 {
     public string Kind = "";
+    public string Station = "";
     public BarrelState? Barrel;    // null: the barrel has no state left (taken, or never used)
     public Slot? Piece;
     public bool Done, Cold;
@@ -54,14 +56,15 @@ public static partial class Barrels
     {
         float now = Now;
         var pos = new Vector3(op.X, op.Y, op.Z);
-        var b = Find(op.Scene, pos);
-        var reply = new Reply { Kind = op.Kind };
+        op.Station ??= "";
+        var b = Find(op.Scene, pos, op.Station);
+        var reply = new Reply { Kind = op.Kind, Station = op.Station };
         if (b == null)
         {
             // an empty cold barrel has no state: it can be taken, nothing can be taken out of it
             if (op.Kind == "pickup") return JsonSerializer.Serialize(reply, Json);
             if (op.Kind == "take" || op.Kind == "out") return "";
-            b = new BarrelState { Scene = op.Scene, X = op.X, Y = op.Y, Z = op.Z, Last = now };
+            b = new BarrelState { Scene = op.Scene, Kind = op.Station, X = op.X, Y = op.Y, Z = op.Z, Last = now };
             State.Barrels.Add(b);
         }
         Step(b, now);
@@ -78,6 +81,7 @@ public static partial class Barrels
             {
                 int i = Array.FindIndex(b.Slots, s => s == null);
                 if (i < 0 || op.Piece == null) return "";
+                if (Defs.SpeciesById(op.Piece.Species) is not { } kindOfPiece || !Defs.Takes(b.Kind, kindOfPiece)) return "";
                 op.Piece.Hours = 0f;
                 b.Slots[i] = op.Piece;
                 break;
@@ -132,7 +136,7 @@ public static partial class Barrels
     internal static void Take(Reply r, Op op)
     {
         if (r.Barrel != null) { Apply(Encode(r.Barrel)); return; }
-        var b = Find(op.Scene, new Vector3(op.X, op.Y, op.Z));
+        var b = Find(op.Scene, new Vector3(op.X, op.Y, op.Z), op.Station);
         if (b != null) State.Barrels.Remove(b);
     }
 }
@@ -162,7 +166,7 @@ public static partial class Window
     {
         if (waiting != null) return;
         op.Key = $"{++opCount}-{rnd.Next():x}-{rnd.Next():x}";
-        op.Scene = b.Scene; op.X = b.X; op.Y = b.Y; op.Z = b.Z;
+        op.Scene = b.Scene; op.Station = b.Kind ?? ""; op.X = b.X; op.Y = b.Y; op.Z = b.Z;
         var p = new Pending { Op = op, Json = JsonSerializer.Serialize(op, Barrels.Json), Gear = gear, Born = Time.unscaledTime };
         if (!Post(p)) Barrels.Say("MSG_NO_HOST");
     }
@@ -222,9 +226,10 @@ public static partial class Window
             case "put":
                 if (g != null) GameManager.GetInventoryComponent().DestroyGear(g.gameObject);
                 if (op.Piece != null && op.Piece.Salted) TakeSalt();
+                if (op.Piece != null && op.Piece.Can) { TakeNamed(Defs.Can); TakeWater(); Portion(op.Piece.Raw, Tune.CanMeatKg, true, out _, out _, out _); }
                 break;
             case "take":
-                if (r.Piece != null && !Give(r.Piece, r.Done, r.Cold)) MelonLogger.Error("Smokehouse: the piece the host gave out could not be created");
+                if (r.Piece != null && !Give(r.Piece, r.Done, r.Cold, op.Station)) MelonLogger.Error("Smokehouse: the piece the host gave out could not be created");
                 break;
             case "light":
                 if (g != null) Strike(g);

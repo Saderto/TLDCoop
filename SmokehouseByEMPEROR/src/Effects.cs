@@ -45,9 +45,24 @@ internal static class Effects
     {
         try
         {
-            if (normalizedValue <= 0f || !Defs.Is(__instance, out var def) || def.Species == null) return;
+            if (normalizedValue <= 0f || !Defs.Is(__instance, out var def) || (def.Species == null && def.Fx.Length == 0 && def.Kind == null)) return;
             Look();
             string cause = "SMOKEHOUSE_" + def.Id + "_NAME";
+            if (def.Kind != null)
+            {
+                // a smoked sausage: the smoked piece's fullness and its kind's own effects, longer after cold smoke
+                float hours = (def.Hot ? Tune.SausHotFxHours : Tune.SausDryFxHours) * def.Kind.Hours;
+                Start("LongFullness", .10f, hours, cause, normalizedValue);
+                foreach (var (id, value) in def.Kind.Fx) Start(id, value, hours, cause, normalizedValue);
+                return;
+            }
+            if (def.Species == null)
+            {
+                // cans and sausages: as the plain smoked piece of the same kind
+                if (def.Fx == "fish") Start("DeepRest", .10f, 6f, cause, normalizedValue);
+                else Start("LongFullness", .10f, 4f, cause, normalizedValue);
+                return;
+            }
             // 11-11 owner: a salted piece has the salt's effects only, not the plain piece's as well
             if (def.Salted)
             {

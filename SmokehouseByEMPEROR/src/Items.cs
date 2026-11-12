@@ -52,20 +52,33 @@ public static class Items
             data.m_LocalizedName = new LocalizedString { m_LocalizationID = "SMOKEHOUSE_" + def.Id + "_NAME" };
             data.m_LocalizedDescription = new LocalizedString { m_LocalizationID = "SMOKEHOUSE_" + def.Id + "_DESC" };
             data.m_PrefabReference = new AssetReferenceGearItem(Defs.RefPrefix + def.Id);
-            if (def.IsBarrel)
+            if (def.Bulky)
             {
-                data.m_BaseWeight = ItemWeight.FromKilograms(Tune.BarrelKg);
+                data.m_BaseWeight = ItemWeight.FromKilograms(def.Kg);
                 data.m_DailyHPDecay = 0f;
                 data.m_Type = GearType.Tool;
             }
-            else data.m_DailyHPDecay *= def.DecayFactor;
+            else data.m_DailyHPDecay *= def.Decay;
+            if (def.Empty == Defs.Can)
+            {
+                // 11-12 owner: our cans sounded like raw meat when picked up. The sounds of the game's own tinned food instead
+                try
+                {
+                    var tin = GearItem.InstantiateGearItem("GEAR_PinnacleCanPeaches");
+                    var td = tin != null ? tin.m_GearItemData : null;
+                    if (td != null) { data.m_PickupAudio = td.m_PickupAudio; data.m_StowAudio = td.m_StowAudio; data.m_PutBackAudio = td.m_PutBackAudio; }
+                    if (tin != null) UnityEngine.Object.Destroy(tin.gameObject);
+                    MelonLogger.Msg($"Can {def.Id}: sounds of the game's tin {(td != null ? "taken" : "not found")}");
+                }
+                catch (Exception e) { Safe.Log("Can sounds", e); }
+            }
             dataByName[name] = data;
         }
         g.m_GearItemData = data;
 
-        if (def.IsBarrel)
+        if (def.Bulky)
         {
-            g.WeightKG = ItemWeight.FromKilograms(Tune.BarrelKg);
+            g.WeightKG = ItemWeight.FromKilograms(def.Kg);
             if (!restored)
             {
                 g.m_StartCondition = GearStartCondition.Perfect;
@@ -90,9 +103,12 @@ public static class Items
         }
         else Food(g, def, restored);
 
-        var tex = Assets.Texture("textures/" + def.Texture + ".png");
-        var mesh = Assets.LoadMesh("meshes/" + def.Mesh + ".fpmesh", def.IsBarrel);
-        SingleMesh(g, mesh, tex);
+        // Our own dark paintings (stations, cans, sausages) stay uncompressed: the game's DXT packing keeps 5-6 bits per colour and turned dark browns
+        // into red and green grain (11-12 owner: «как текстура из хоррора на телефон»). The smoked pieces of the game's own meat pack well.
+        bool pieces = def.Species != null && def.Kind == null && !def.Bulky;
+        var tex = Assets.Texture("textures/" + def.Texture + ".png", compress: pieces);
+        var mesh = Assets.LoadMesh("meshes/" + def.Mesh + ".fpmesh", def.Bulky);      // stations are seen from all sides and from inside: every face is drawn from behind too
+        SingleMesh(g, mesh, tex, def.Bulky);
         RefreshRenderers(g);
     }
 
@@ -103,11 +119,19 @@ public static class Items
     {
         var fi = g.m_FoodItem;
         if (fi == null) return;
-        float f = def.WeightFactor;
-        fi.m_DailyHPDecayInside *= def.DecayFactor;
-        fi.m_DailyHPDecayOutside *= def.DecayFactor;
+        float f = def.Weight;
+        fi.m_DailyHPDecayInside *= def.Decay;
+        fi.m_DailyHPDecayOutside *= def.Decay;
         fi.m_HeatPercent = 0f;
-        if (def.Hot && fi.m_ParasiteRiskPercentIncrease is { } risk && risk.Length > 0)
+        try
+        {
+            // a raw sausage is smoked, never fried into a steak
+            if (def.NoCook && g.m_Cookable != null) { UnityEngine.Object.DestroyImmediate(g.m_Cookable); g.m_Cookable = null; }
+            // a sealed tin does not smell
+            if (def.NoScent && g.m_Scent != null) { UnityEngine.Object.DestroyImmediate(g.m_Scent); g.m_Scent = null; }
+        }
+        catch (Exception e) { Safe.Log("Food parts " + def.Id, e); }
+        if (def.NoParasites && fi.m_ParasiteRiskPercentIncrease is { } risk && risk.Length > 0)
         {
             // the same length, all zero: the game indexes it by how many pieces were eaten
             var none = new Il2CppStructArray<float>(risk.Length);
@@ -129,7 +153,7 @@ public static class Items
         {
             // a piece made out of nothing (console, trader): the middle of the game's range; one out of the barrel is set after this by what went in
             float cal = perKg > 0f ? perKg * rawKg : fi.m_CaloriesTotal;
-            SetFood(g, rawKg * f, cal);
+            SetFood(g, rawKg * f + def.Tare, cal);
             g.m_StartCondition = GearStartCondition.Perfect;
             g.CurrentHP = MaxHP(g);
         }
@@ -152,7 +176,31 @@ public static class Items
     }
 
     /// <summary>One model and one texture in place of the source item's parts. The model is in the item's own space as the game's was, so nothing is moved.</summary>
-    static void SingleMesh(GearItem g, Mesh? mesh, Texture2D? tex)
+    static readonly HashSet<string> plainLogged = new();
+
+    /// <summary>Our painting alone on the source item's material: whatever other pictures it carries (a detail, a relief, a mask laid out for the source
+    /// model) are taken off. On our own layout they showed as red and green grain all over the table (11-12 owner).</summary>
+    static void Plain(Material m, string name)
+    {
+        try
+        {
+            var main = m.mainTexture;
+            var names = m.GetTexturePropertyNames();
+            var said = new List<string>();
+            foreach (var n in names)
+            {
+                var t = m.GetTexture(n);
+                if (t == null) continue;
+                said.Add(n + "=" + t.name);
+                if (t.Pointer != main.Pointer) m.SetTexture(n, null);
+            }
+            if (plainLogged.Add(name)) MelonLogger.Msg($"material of {name}: shader {m.shader?.name}, colour {(m.HasProperty("_Color") ? m.color.ToString() : "none")}, textures {string.Join(", ", said)}, keywords {string.Join(" ", m.shaderKeywords)}");
+        }
+        catch (Exception e) { Safe.Log("Plain material " + name, e); }
+    }
+
+    static readonly HashSet<string> inspectLogged = new();
+    static void SingleMesh(GearItem g, Mesh? mesh, Texture2D? tex, bool plain = false)
     {
         if (g.GetComponent<LODGroup>() is { } lod) UnityEngine.Object.DestroyImmediate(lod);
         var filters = g.GetComponentsInChildren<MeshFilter>(true);
@@ -177,7 +225,12 @@ public static class Items
                 if (r.sharedMaterial != null)
                 {
                     r.sharedMaterials = new Il2CppReferenceArray<Material>(new[] { r.sharedMaterial });
-                    if (tex != null) r.material.mainTexture = tex;
+                    if (tex != null)
+                    {
+                        var m = r.material;
+                        m.mainTexture = tex;
+                        if (plain) Plain(m, g.name);
+                    }
                 }
             }
             else
@@ -189,8 +242,21 @@ public static class Items
         }
         if (mesh != null && g.m_Inspect != null)
         {
-            float after = mesh.bounds.size.magnitude;
-            if (before > 0f && after > before * 1.1f) g.m_Inspect.m_DistanceFromCamera *= after / before;
+            // some fish are shown in the inspect view by a second, larger model or scaled up: ours is one model, shown as it lies
+            try
+            {
+                var ins = g.m_Inspect;
+                // 0.4.5 set the scale to one, yet the game's own is 0.5 for every item (log 11-12): everything was shown twice its size and a big fish
+                // filled the screen (11-12 owner). The game's scale stays; the distance is what the model's size asks for.
+                ins.m_InspectModeMesh = null;
+                ins.m_NormalMesh = null;
+                float k = Mathf.Max(.1f, Mathf.Abs(ins.m_Scale.x));
+                float world = Mathf.Max(.05f, Mathf.Abs(g.transform.lossyScale.x));
+                float want = mesh.bounds.size.magnitude * world * k * 3.6f;
+                if (inspectLogged.Add(g.name)) MelonLoader.MelonLogger.Msg($"inspect {g.name}: size {mesh.bounds.size.magnitude:0.00} m, item scale {world:0.00}, inspect scale {k:0.00}, distance {ins.m_DistanceFromCamera:0.00} -> {Mathf.Max(want, ins.m_DistanceFromCamera):0.00}");
+                if (want > ins.m_DistanceFromCamera) ins.m_DistanceFromCamera = want;
+            }
+            catch (Exception e) { Safe.Log("inspect " + g.name, e); }
         }
         // the collider fits the new model
         if (mesh != null && g.GetComponent<BoxCollider>() is { } box)
@@ -415,4 +481,34 @@ internal static class IconPatches
 
     [HarmonyPostfix, HarmonyPatch(typeof(Utils), nameof(Utils.GetInventoryIconTextureFromPrefabName))]
     static void ByName(string prefabName, ref Texture2D __result) => __result = Icon(prefabName) ?? __result;
+}
+
+/// <summary>A can eaten to the end leaves its empty tin in the pack (our cans are copies of cooked meat, which leaves nothing).</summary>
+[HarmonyPatch]
+internal static class EmptyTin
+{
+    static IntPtr last;
+    static int lastFrame;
+
+    static void Check(GameObject? go)
+    {
+        try
+        {
+            var g = go != null ? go.GetComponent<GearItem>() : null;
+            if (g == null || !Defs.Is(g, out var def) || def.Empty.Length == 0 || !g.m_InPlayerInventory || Items.IsTemplate(g)) return;
+            var fi = g.m_FoodItem;
+            if (fi == null || fi.m_CaloriesRemaining > 1f) return;
+            if (g.Pointer == last && Time.frameCount - lastFrame < 5) return;
+            last = g.Pointer; lastFrame = Time.frameCount;
+            GameManager.GetPlayerManagerComponent().InstantiateItemInPlayerInventory(def.Empty, 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
+            Safe.Debug("Empty tin left by " + def.Id);
+        }
+        catch (Exception e) { Safe.Log("Empty tin", e); }
+    }
+
+    [HarmonyPrefix, HarmonyPatch(typeof(Inventory), nameof(Inventory.DestroyGear), new[] { typeof(GameObject) })]
+    static void ByObject(GameObject go) => Check(go);
+
+    [HarmonyPrefix, HarmonyPatch(typeof(Inventory), nameof(Inventory.DestroyGear), new[] { typeof(GearItem) })]
+    static void ByItem(GearItem gi) => Check(gi != null ? gi.gameObject : null);
 }

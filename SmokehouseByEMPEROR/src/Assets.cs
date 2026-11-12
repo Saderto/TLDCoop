@@ -17,12 +17,13 @@ public static class Assets
         if (textures.TryGetValue(relativePath, out var known))
             return known;
         var path = Path.Combine(Mod.Root, relativePath);
-        if (!File.Exists(path))
+        var bytes = FromPack(relativePath);
+        if (bytes == null && !File.Exists(path))
         {
             MelonLogger.Error("Missing texture: " + path);
             return null;
         }
-        var bytes = File.ReadAllBytes(path);
+        bytes ??= File.ReadAllBytes(path);
         // The PNG's colour type: 2 is RGB without alpha; 4, 6 and a palette may have it.
         bool alpha = bytes.Length <= 25 || bytes[25] != 2;
         var t = new Texture2D(2, 2, alpha ? TextureFormat.RGBA32 : TextureFormat.RGB24, mipmaps);
@@ -39,7 +40,7 @@ public static class Assets
         t.name = Path.GetFileNameWithoutExtension(path);
         t.filterMode = mipmaps ? FilterMode.Trilinear : FilterMode.Bilinear;
         t.anisoLevel = 8;
-        t.mipMapBias = -.5f;
+        t.mipMapBias = compress ? -.5f : 0f;
         t.hideFlags = HideFlags.HideAndDontSave;
         if (compress)
         {
@@ -55,6 +56,43 @@ public static class Assets
         }
         if (textures.Count == 0) MelonLogger.Msg($"Texture {t.name}: {t.width}x{t.height} {t.format}, readable {t.isReadable}");
         return textures[relativePath] = t;
+    }
+
+    static Dictionary<string, (string File, long At, int Size)>? pack;
+    const string PackName = "sausages*.pak";
+
+    /// <summary>The sausages' textures and icons come in one file (0.4.1: 144 small files became one): a count, then name, size and bytes of each.
+    /// What the pack holds wins over a loose file of the same name.</summary>
+    static byte[]? FromPack(string relativePath)
+    {
+        try
+        {
+            if (pack == null)
+            {
+                pack = new(StringComparer.OrdinalIgnoreCase);
+                foreach (var file in Directory.GetFiles(Mod.Root, PackName))
+                {
+                    using var r = new BinaryReader(File.OpenRead(file));
+                    int n = r.ReadInt32();
+                    for (int i = 0; i < n; i++)
+                    {
+                        string name = r.ReadString();
+                        int size = r.ReadInt32();
+                        pack[name] = (file, r.BaseStream.Position, size);
+                        r.BaseStream.Seek(size, SeekOrigin.Current);
+                    }
+                }
+                MelonLogger.Msg($"Smokehouse pack: {pack.Count} files");
+            }
+            if (!pack.TryGetValue(relativePath.Replace('\\', '/'), out var e)) return null;
+            using var f = File.OpenRead(e.File);
+            f.Seek(e.At, SeekOrigin.Begin);
+            var bytes = new byte[e.Size];
+            int got = 0;
+            while (got < e.Size) { int k = f.Read(bytes, got, e.Size - got); if (k <= 0) break; got += k; }
+            return got == e.Size ? bytes : null;
+        }
+        catch (Exception e) { Safe.Log("Pack " + relativePath, e); return null; }
     }
 
     /// <summary>inside: every face also drawn from behind (the barrel is seen from inside when the camera comes close or it is looked into).</summary>

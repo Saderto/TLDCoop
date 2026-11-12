@@ -10,6 +10,7 @@ public class Slot
     public float Kg, RawCal, Cal, Cond;
     public float Hours;            // smoked so far
     public bool Salted;
+    public bool Can;               // the kettle: a tin and water went in with it
 }
 
 /// <summary>A log in the firebox: what it was and how much of it is left. A log the fire has not touched can be taken back.</summary>
@@ -24,6 +25,7 @@ public class Log
 public class BarrelState
 {
     public string Scene = "";
+    public string Kind = "";       // "": the barrel, "Kettle": the canning kettle
     public float X, Y, Z;
     public bool Cold;
     public bool Lit;
@@ -33,7 +35,10 @@ public class BarrelState
     public Slot?[] Slots = new Slot?[Tune.Slots];
 
     [JsonIgnore] public float Need => Cold ? Tune.ColdHours : Tune.HotHours;
-    public bool Done(Slot s) => s.Hours >= Need - .001f;
+    [JsonIgnore] public bool Kettle => Kind == Defs.Kettle;
+    /// <summary>Hours this thing takes here: a can 24 and a sausage an hour in the kettle; in the barrel everything by the way of smoking.</summary>
+    public float NeedOf(Slot s) => Kettle ? Tune.KettleHours : Need;
+    public bool Done(Slot s) => s.Hours >= NeedOf(s) - .001f;
     [JsonIgnore] public int Count => Slots.Count(s => s != null);
     [JsonIgnore] public int DoneCount => Slots.Count(s => s != null && Done(s));
     [JsonIgnore] public bool Started => Slots.Any(s => s != null && s.Hours > 0f);
@@ -77,27 +82,29 @@ public static partial class Barrels
 
     public static string SceneName => GameManager.m_ActiveScene ?? "";
 
-    public static BarrelState? Find(string scene, Vector3 pos)
+    public static BarrelState? Find(string scene, Vector3 pos, string? kind)
     {
         BarrelState? best = null;
         float d = Near;
+        kind ??= "";
         foreach (var b in State.Barrels)
         {
-            if (b.Scene != scene) continue;
+            if (b.Scene != scene || (b.Kind ?? "") != kind) continue;
             float x = Vector3.Distance(b.Pos, pos);
             if (x < d) { d = x; best = b; }
         }
         return best;
     }
 
-    public static BarrelState? Of(GearItem g) => g == null ? null : Find(SceneName, g.transform.position);
+    /// <summary>The state of a standing barrel or kettle (the table has none).</summary>
+    public static BarrelState? Of(GearItem g) => g != null && Defs.IsStation(g, out var d) && d.Station != Defs.Table ? Find(SceneName, g.transform.position, Defs.KindOf(d)) : null;
 
     public static BarrelState Ensure(GearItem g)
     {
         var b = Of(g);
         if (b != null) return b;
         var p = g.transform.position;
-        b = new BarrelState { Scene = SceneName, X = p.x, Y = p.y, Z = p.z, Last = Now };
+        b = new BarrelState { Scene = SceneName, Kind = Defs.Is(g, out var d) ? Defs.KindOf(d) : "", X = p.x, Y = p.y, Z = p.z, Last = Now };
         State.Barrels.Add(b);
         return b;
     }
@@ -121,7 +128,7 @@ public static partial class Barrels
             if (l.Hours <= .0005f) b.Logs.RemoveAt(0);
         }
         foreach (var s in b.Slots)
-            if (s != null) s.Hours = Math.Min(b.Need, s.Hours + burn);
+            if (s != null) s.Hours = Math.Min(b.NeedOf(s), s.Hours + burn);
         if (b.Fuel <= .0005f)
         {
             b.Fuel = 0f;
@@ -155,8 +162,8 @@ public static partial class Barrels
             bool wentOut = Step(b, now);
             if (b.Scene == scene)
             {
-                if (wentOut) Say("MSG_OUT");
-                else if (!allDone && b.Count > 0 && b.DoneCount == b.Count) Say("MSG_READY");
+                if (wentOut) Say(b.Kettle ? "K_MSG_OUT" : "MSG_OUT");
+                else if (!allDone && b.Count > 0 && b.DoneCount == b.Count) Say(b.Kettle ? "K_MSG_READY" : "MSG_READY");
             }
             if (b.Idle && b.Fuel <= 0f && !Window.IsOpenOn(b)) State.Barrels.RemoveAt(i);
         }
@@ -202,7 +209,8 @@ public static partial class Barrels
         if (b == null) return;
         if (b.Slots == null || b.Slots.Length != Tune.Slots) Array.Resize(ref b.Slots, Tune.Slots);
         b.Last = Now;
-        var old = Find(b.Scene, b.Pos);
+        b.Kind ??= "";
+        var old = Find(b.Scene, b.Pos, b.Kind);
         if (old != null)
         {
             // in place: an open window keeps looking at the same object
@@ -254,6 +262,7 @@ public static partial class Barrels
     public static void Load()
     {
         Window.Close();
+        LoadJobs();
         try
         {
             // coop, same world, a change came in during the loading screen: the file was written before it, memory is newer
@@ -294,6 +303,7 @@ public static partial class Barrels
             Directory.CreateDirectory(Folder);
             File.WriteAllText(FileOf(key), JsonSerializer.Serialize(State, Json));
             remoteSinceSave = false;
+            SaveJobs();
         }
         catch (Exception e)
         {
@@ -304,6 +314,7 @@ public static partial class Barrels
     public static void Reset()
     {
         State = new WorldState();
+        Jobs = new();
         loadedKey = null;
         remoteSinceSave = false;
         Window.Close();
@@ -337,7 +348,7 @@ internal static class BarrelUse
     {
         try
         {
-            if (!Defs.IsBarrel(__instance) || __instance.m_InPlayerInventory || Window.IsTaking(__instance)) return true;
+            if (!Defs.IsStation(__instance) || __instance.m_InPlayerInventory || Window.IsTaking(__instance)) return true;
             Window.Open(__instance);
             __result = true;
             return false;
@@ -351,7 +362,7 @@ internal static class BarrelUse
 
     static bool Busy(GearItem g)
     {
-        if (!Defs.IsBarrel(g) || g.m_InPlayerInventory) return false;
+        if (!Defs.IsStation(g) || g.m_InPlayerInventory) return false;
         var b = Barrels.Of(g);
         return b != null && !b.Idle;
     }
@@ -379,7 +390,7 @@ internal static class BarrelUse
     {
         try
         {
-            if (item == null || !Defs.IsBarrel(item) || item.m_InPlayerInventory || Window.IsTaking(item)) return true;
+            if (item == null || !Defs.IsStation(item) || item.m_InPlayerInventory || Window.IsTaking(item)) return true;
             Window.Open(item);
             __result = true;
             return false;
@@ -396,12 +407,12 @@ internal static class BarrelUse
     {
         try
         {
-            if (!Defs.IsBarrel(__instance) || __instance.m_InPlayerInventory) return;
+            if (!Defs.IsStation(__instance, out var def) || __instance.m_InPlayerInventory) return;
             var b = Barrels.Of(__instance);
-            string s = Texts.Get("Barrel_NAME");
+            string s = Texts.Get(def.Id + "_NAME");
             if (b != null && !b.Idle)
             {
-                s += "\n" + Texts.Get(b.Lit ? "LIT" : "UNLIT");
+                s += "\n" + Texts.Get(b.Lit ? (b.Kettle ? "K_LIT" : "LIT") : "UNLIT");
                 if (b.Count > 0) s += ", " + Texts.Get("HOVER_ITEMS", b.DoneCount, b.Count);
             }
             __result = s;

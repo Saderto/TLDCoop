@@ -19,6 +19,7 @@
     <Reference Include="$(RefsDir)\*.dll" Private="false" />
     <Reference Include="..\..\smokes\refs-extra\UnityEngine.IMGUIModule.dll" Private="false" />
     <Reference Include="..\..\smokes\refs-extra\UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="..\..\smokes\refs-extra\UnityEngine.AudioModule.dll" Private="false" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Il2Cpp" />

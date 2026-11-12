@@ -2,20 +2,32 @@
 Writes mod/SmokehouseByEMPEROR/meshes/Barrel.fpmesh, textures/Barrel.png, bake/Barrel.npz. python3 build_barrel.py"""
 import bpy, bmesh, math, random, sys, os, struct
 import numpy as np
-R = './'
+R = '/mnt/project-files/smokehouse/'
 src = open(R + 'blender/scene.py').read()
 sys.argv = ['x', '--', '/tmp/none', 'none']
 exec(src[:src.index('# ---------- environment')])       # materials and primitives of the approved scene
 C['barrel'].hide_render = False
+# 11-12 owner: the barrel's painting as rich as the kettle's. The worn materials of the stations scene in place of the flat ones
+from mathutils import noise as MN
+_s2 = open(R + 'blender/stations2.py').read()
+exec(_s2[_s2.index('def mat_rich'):_s2.index('M_iron=')])
+_bc = [(0.28, (0.05, 0.09, 0.10)), (0.48, (0.11, 0.17, 0.18)), (0.60, (0.30, 0.14, 0.055)), (0.78, (0.45, 0.21, 0.08))]
+M_barrel = mat_rich('barrel2', _bc, scale=6, rough=0.75, bump=1.0, grime=0.9, fine=60, soot_below=(0.0, 0.22))
+M_lid = mat_rich('lid2', _bc, scale=6, rough=0.75, bump=1.0, grime=0.8, fine=60)
+M_rust = mat_rich('rust2', [(0.3, (0.05, 0.03, 0.02)), (0.55, (0.20, 0.09, 0.04)), (0.78, (0.36, 0.18, 0.08))], scale=9, rough=0.85, bump=1.0, grime=0.9, fine=70)
+M_steel = mat_rich('steel2', [(0.35, (0.03, 0.03, 0.034)), (0.7, (0.14, 0.13, 0.12))], scale=18, rough=0.6, bump=0.5, grime=0.9)
+M_sts = [mat_rich('hs%d' % i, [(0.28, tuple(x * k for x in (0.10, 0.10, 0.105))), (0.5, tuple(x * k for x in (0.30, 0.295, 0.285))), (0.72, tuple(x * k for x in (0.50, 0.48, 0.45)))],
+                  scale=7, rough=0.95, bump=1.4, grime=1.0, fine=55) for i, k in enumerate((1.0, 0.72, 0.9, 0.6))]
 random.seed(11)
 Z0 = 0.13
 parts = []
 for i in range(4):
     a = math.pi / 4 + i * math.pi / 2
-    bm = bmesh.new(); bmesh.ops.create_icosphere(bm, subdivisions=2, radius=0.11)
+    bm = bmesh.new(); bmesh.ops.create_icosphere(bm, subdivisions=3, radius=0.11); ph = Vector((i * 9.1, 3.3, 7.7))
     for v in bm.verts:
-        k = 1 + random.uniform(-0.18, 0.18); v.co = Vector((v.co.x * k, v.co.y * k, v.co.z * 0.6 * k))
-    parts.append(add(bm_mesh(bm, 'st'), 'st', 'barrel', (0.25 * math.cos(a), 0.25 * math.sin(a), 0.05), (0, 0, random.uniform(0, 6)), smooth=True, mat=M_stone))
+        d = v.co.normalized(); k = 1 + 0.16 * MN.noise(d * 1.6 + ph) + 0.07 * MN.noise(d * 4.5 + ph) + 0.025 * MN.noise(d * 12 + ph)
+        v.co = Vector((v.co.x * k, v.co.y * k, max(-0.05, v.co.z * 0.6 * k)))     # flat on the ground
+    parts.append(add(bm_mesh(bm, 'st'), 'st', 'barrel', (0.25 * math.cos(a), 0.25 * math.sin(a), 0.05), (0, 0, random.uniform(0, 6)), smooth=True, mat=M_sts[i]))
 prof = [(0, 0), (0.28, 0), (0.285, 0.012), (0.285, 0.27), (0.296, 0.285), (0.296, 0.30), (0.285, 0.315), (0.285, 0.565), (0.296, 0.58), (0.296, 0.595), (0.285, 0.61), (0.285, 0.868), (0.292, 0.88)]
 parts.append(lathe('barrel', 'barrel', prof, (0, 0, Z0), M_barrel, seg=32))
 # firebox door, shut: a plate bent to the wall, frame strips, hinges and a latch
@@ -40,7 +52,7 @@ M_slot = mat_simple('slot', (0.01, 0.008, 0.007), 0.9)
 for k in (-1, 0, 1):
     parts.append(bent_plate('slot', 0.2985, mid - 0.03 + k * 0.16, mid + 0.03 + k * 0.16, Z0 + 0.07, Z0 + 0.13, M_slot, seg=2))
 # lid, pipe and its cap
-parts.append(lathe('lid', 'barrel', [(0, 0.012), (0.27, 0.012), (0.30, 0.0), (0.305, -0.02), (0.297, -0.02)], (0, 0, Z0 + 0.895), M_barrel, seg=32))
+parts.append(lathe('lid', 'barrel', [(0, 0.012), (0.27, 0.012), (0.30, 0.0), (0.305, -0.02), (0.297, -0.02)], (0, 0, Z0 + 0.895), M_lid, seg=32))
 parts.append(lathe('pipe', 'barrel', [(0.045, 0.0), (0.045, 0.22), (0.05, 0.225), (0.038, 0.225), (0.038, 0.16)], (0.12, 0.05, Z0 + 0.905), M_rust, seg=14))
 parts.append(lathe('cap', 'barrel', [(0, 0.30), (0.08, 0.26), (0, 0.262)], (0.12, 0.05, Z0 + 0.905), M_rust, seg=14))
 for dx in (-0.03, 0.03):
@@ -64,13 +76,24 @@ bpy.context.view_layer.objects.active = parts[4]
 # object-space noise is per part: bake each part on its own island set after one common unwrap
 bpy.ops.object.convert(target='MESH')
 for o in parts:
-    o.data.uv_layers.new(name='UV')
+    o.data.uv_layers.new(name='UV'); o.data.uv_layers.active = o.data.uv_layers['UV']
 bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.012, scale_to_bounds=False)
+bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.008, scale_to_bounds=False)
+bpy.ops.object.mode_set(mode='OBJECT')
+for o in parts:      # stones: six whole sides each, not crumbs (they shimmered on the kettle)
+    if o.name.split('.')[0] != 'st': continue
+    me = o.data; uvd = me.uv_layers['UV'].data
+    for p in me.polygons:
+        n = p.center; ax = max(range(3), key=lambda i: abs(n[i])); side = ax * 2 + (1 if n[ax] > 0 else 0)
+        for li in p.loop_indices:
+            c = me.vertices[me.loops[li].vertex_index].co; q = [c[i] for i in range(3) if i != ax]
+            uvd[li].uv = (q[0] + side * 10.0, q[1])
+bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.select_all(action='SELECT')
+bpy.ops.uv.average_islands_scale(); bpy.ops.uv.pack_islands(margin=0.008)
 bpy.ops.object.mode_set(mode='OBJECT')
 SZ = 1024
 img = bpy.data.images.new('bake', SZ, SZ); ao = bpy.data.images.new('ao', SZ, SZ)
-sc.render.engine = 'CYCLES'; sc.cycles.samples = 24; sc.render.bake.margin = 8
+sc.render.engine = 'CYCLES'; sc.cycles.samples = 24; sc.render.bake.margin = 6
 def target(image):
     for m in bpy.data.materials:
         if not m.use_nodes: continue

@@ -18,7 +18,7 @@ internal static class Place
     {
         try
         {
-            if (!Defs.IsBarrel(gi)) return;
+            if (!Defs.IsStation(gi)) return;
             if (__instance.m_MouseButtonEquip != null) __instance.m_MouseButtonEquip.SetActive(true);
             if (__instance.m_Label_MouseButtonEquip != null) __instance.m_Label_MouseButtonEquip.text = Texts.Get("ACT_PLACE");
             if (__instance.m_UIButton_ButtonEquip != null)
@@ -36,7 +36,7 @@ internal static class Place
         GearItem? gi = null;
         try { gi = __instance.GetCurrentlySelectedItem()?.m_GearItem; }
         catch (Exception e) { Safe.Log("Selected item", e); }
-        if (!Defs.IsBarrel(gi)) return true;
+        if (!Defs.IsStation(gi)) return true;
         try
         {
             Safe.Info("Inventory button: place the barrel");
@@ -54,7 +54,7 @@ internal static class Place
         try
         {
             var g = __result != null ? __result : __instance;
-            if (!Defs.IsBarrel(g)) return;
+            if (!Defs.IsStation(g)) return;
             float yaw = GameManager.GetPlayerTransform().eulerAngles.y + 180f;      // the firebox door towards the player
             var rot = Quaternion.Euler(0f, yaw, 0f);
             g.transform.rotation = rot;
@@ -134,12 +134,12 @@ internal static class Place
         if (Time.unscaledTime >= nextLook)
         {
             nextLook = Time.unscaledTime + .5f;
-            try { var held = pm.m_ItemInHands; if (held != null && Defs.IsBarrel(held)) OutOfHands(pm, held); } catch { }
+            try { var held = pm.m_ItemInHands; if (held != null && Defs.IsStation(held)) OutOfHands(pm, held); } catch { }
             near.Clear();
             foreach (var c in Physics.OverlapSphere(me + Vector3.up * .5f, 2.5f))
             {
                 var g = c != null ? c.GetComponentInParent<GearItem>() : null;
-                if (g != null && Defs.IsBarrel(g) && !g.m_InPlayerInventory && !near.Any(n => n.Pointer == g.Pointer)) near.Add(g);
+                if (g != null && Defs.IsStation(g) && !g.m_InPlayerInventory && !near.Any(n => n.Pointer == g.Pointer)) near.Add(g);
             }
         }
         if (near.Count == 0 || pm.IsInPlacementMode() || Window.IsOpen) return;
@@ -151,6 +151,18 @@ internal static class Place
             if (!ok) continue;
             var p = g!.transform.position;
             if (me.y - p.y > 1.3f || p.y - me.y > 1.6f) continue;
+            if (Defs.Is(g, out var def) && def.HalfX > 0f)
+            {
+                // a table: a box turned with the item, the player's own half-width added
+                const float body = .3f;
+                var local = g.transform.InverseTransformPoint(new Vector3(me.x, p.y, me.z));
+                float px = def.HalfX + body - Math.Abs(local.x), pz = def.HalfZ + body - Math.Abs(local.z);
+                if (px <= 0f || pz <= 0f) continue;
+                var outLocal = px < pz ? new Vector3(Math.Sign(local.x == 0f ? 1f : local.x) * px, 0f, 0f) : new Vector3(0f, 0f, Math.Sign(local.z == 0f ? 1f : local.z) * pz);
+                var o = g.transform.TransformVector(outLocal); o.y = 0f;
+                push += o;
+                continue;
+            }
             var d = new Vector3(me.x - p.x, 0f, me.z - p.z);
             float dist = d.magnitude;
             if (dist >= Gap) continue;

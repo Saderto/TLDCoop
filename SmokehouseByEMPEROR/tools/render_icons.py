@@ -3,7 +3,7 @@ import sys, os, math, glob
 import numpy as np
 import bpy
 from mathutils import Vector, Euler
-R = './'
+R = '/mnt/project-files/smokehouse/'
 B, TEX, OUT = R + 'bake/', R + 'mod/SmokehouseByEMPEROR/textures/', R + 'mod/SmokehouseByEMPEROR/icons/'
 def scene():
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -41,5 +41,8 @@ only = sys.argv[1:]
 for f in sorted(glob.glob(B + '*.npz')):
     n = os.path.basename(f)[:-4]
     if only and n not in only: continue
-    if n == 'Barrel': render(n, 0.75, elev=22, turn=-30)
+    if n in ('Barrel', 'Kettle'): render(n, 0.75, elev=22, turn=-30)
+    elif n == 'Table': render(n, 0.8, elev=24, turn=-28)
+    elif n.startswith('Can'): render(n, 0.5, elev=30, turn=8)
+    elif n.startswith('Saus'): render(n, 0.5, elev=58, turn=-25)
     else: render(n, 0.4 if n.startswith('Hot') else 0.7)

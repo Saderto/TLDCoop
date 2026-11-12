@@ -5,7 +5,7 @@ python3 build_items.py"""
 import os, struct, math
 import numpy as np
 from PIL import Image
-R = './'
+R = '/mnt/project-files/smokehouse/'
 G, T, MOD, BAKE = R + 'game_models/', R + 'tex/', R + 'mod/SmokehouseByEMPEROR/', R + 'bake/'
 # id, cooked obj, raw obj (None: fish or no raw mesh), texture base, is fish
 SPECIES = [

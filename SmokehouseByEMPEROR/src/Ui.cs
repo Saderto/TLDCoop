@@ -143,6 +143,16 @@ internal static class Ui
 
     public static void Label(Rect r, string text) => Text(r, text, 14f, Color.white, TextAnchor.MiddleLeft);
 
+    /// <summary>One line that must stay inside its place: a long one is set smaller (the width is reckoned from the letter count, tags left out).</summary>
+    public static void Fit(Rect r, string text)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        int n = System.Text.RegularExpressions.Regex.Replace(text, "<[^>]+>", "").Length;
+        float size = 14f;
+        if (n * size * .49f > r.width) size = Math.Max(9.5f, r.width / (n * .49f));
+        Text(r, text, size, Color.white, TextAnchor.MiddleLeft);
+    }
+
     public static void Caption(Rect r, string text) => Text(r, text.ToUpperInvariant(), 12f, Theme.Caption, TextAnchor.MiddleLeft);
 
     public static void Centered(Rect r, string text) => Text(r, text, 14f, Color.white, TextAnchor.MiddleCenter);

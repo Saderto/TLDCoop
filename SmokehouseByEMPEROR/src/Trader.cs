@@ -21,8 +21,9 @@ public static class TraderSmoked
 
     static readonly Slot[] Slots =
     {
-        new("hot", 100, d => !d.IsBarrel && d.Hot && !d.Salted, 2, new[] { new Ask(G.Cloth, 2), new Ask(G.Crow, 2) }),
-        new("cold", 200, d => !d.IsBarrel && !d.Hot && !d.Salted, 1, new[] { new Ask(G.Hides, 1, true), new Ask(G.Gut, 2) }),
+        new("hot", 100, d => d.Species != null && d.Hot && !d.Salted, 2, new[] { new Ask(G.Cloth, 2), new Ask(G.Crow, 2) }),
+        new("cold", 200, d => d.Species != null && !d.Hot && !d.Salted, 1, new[] { new Ask(G.Hides, 1, true), new Ask(G.Gut, 2) }),
+        // «Заготовки» (cans, sausages) are not sold: the owner took the trader out of that chain (11-12)
     };
 
     static readonly Dictionary<string, TradeExchangeData> built = new();

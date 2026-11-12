@@ -1,6 +1,6 @@
 namespace SmokehouseByEMPEROR;
 
-/// <summary>The barrel's window: what hangs inside, the fire and its wood, and what in the pack can go in.</summary>
+/// <summary>The window of a barrel or a kettle: what is inside, the fire and its wood, and what in the pack can go in. The sausage table's window is in Table.cs.</summary>
 public static partial class Window
 {
     static GearItem? item;
@@ -13,24 +13,31 @@ public static partial class Window
         try { return taking != null && Time.unscaledTime < takingUntil && taking.Pointer == g.Pointer; }
         catch { return false; }
     }
+    /// <summary>11-12 owner: salt is told in its weight, not in portions.</summary>
+    static string SaltKgText => (saltCount * Tune.SaltKg).ToString("0.0");
     static bool salt;
     static int page;
     static int blockFrames;
     static float nextScan, openedAt;
 
-    record RawEntry(GearItem G, Species S, string Label);
+    record RawEntry(GearItem G, Species S, string Label, float Total = 0f);
     record WoodEntry(GearItem G, string Label, int Count, float Hours);
     static readonly List<RawEntry> raws = new();
     static readonly List<WoodEntry> woods = new();
-    static int saltCount;
+    static int saltCount, canCount, gutCount;
+    static float waterL;
+    static bool table;
+    static readonly Dictionary<string, float> meatKg = new();
+    static string Kind => state?.Kind ?? "";
 
-    public static bool IsOpen => item != null && state != null;
+    public static bool IsOpen => item != null && (state != null || table);
     public static bool IsOpenOn(BarrelState b) => state == b;
 
     public static void Open(GearItem g)
     {
         item = g;
-        state = Barrels.Ensure(g);
+        table = Defs.Is(g, out var def) && def.Station == Defs.Table;
+        state = table ? null : Barrels.Ensure(g);
         page = 0;
         nextScan = 0f;
         openedAt = Time.unscaledTime;
@@ -42,12 +49,14 @@ public static partial class Window
         if (item != null) blockFrames = 3;
         item = null;
         state = null;
+        table = false;
     }
 
     public static void Update()
     {
         Ui.Capture();
         RemoteTick();
+        TableTick();
         if (!IsOpen)
         {
             if (blockFrames > 0) { blockFrames--; Ui.BlockGameInput(true); }
@@ -93,7 +102,10 @@ public static partial class Window
         nextScan = Time.unscaledTime + .5f;
         raws.Clear();
         woods.Clear();
-        saltCount = 0;
+        meatKg.Clear();
+        saltCount = canCount = gutCount = 0;
+        waterL = Water();
+        string kind = Kind;
         var inv = GameManager.GetInventoryComponent();
         if (inv == null) return;
         var woodByName = new Dictionary<string, WoodEntry>();
@@ -104,12 +116,32 @@ public static partial class Window
             if (g == null) continue;
             string n = Defs.Clean(g.name);
             if (n == "GEAR_Salt") { saltCount += Units(g); continue; }
+            if (n == Defs.Can) { canCount += Units(g); continue; }
+            if (n == "GEAR_Gut" || n == "GEAR_GutDried") { gutCount += Units(g); continue; }
             // the 10 kg bag of the curing salt: a powder container, a pinch per piece
             if (IsSaltBag(g)) { saltCount += (int)Math.Floor(g.m_PowderItem.m_Weight.ToQuantity(1f) / Tune.SaltKg + .001f); continue; }
             var sp = Defs.ByRaw(n);
             if (sp != null && g.m_FoodItem != null && !g.IsWornOut())
             {
                 float kg = g.GetItemWeightKG().ToQuantity(1f);
+                if (table)
+                {
+                    // the table: how much of each raw meat the pack holds, the recipes count on it
+                    if (Defs.ForSausage(sp)) meatKg[n] = (meatKg.TryGetValue(n, out float have) ? have : 0f) + kg;
+                    continue;
+                }
+                if (!Defs.Takes(kind, sp)) continue;
+                if (kind == Defs.Kettle)
+                {
+                    // the kettle: one line per kind of meat, a can takes its portion of whatever pieces there are
+                    float portion = Tune.CanMeatKg;
+                    int at = raws.FindIndex(r => r.S == sp && r.Total > 0f && Defs.Clean(r.G.name) == n);
+                    float total = kg + (at >= 0 ? raws[at].Total : 0f);
+                    string name = Texts.Russian ? sp.Ru : char.ToUpperInvariant(sp.En[0]) + sp.En.Substring(1);
+                    var entry = new RawEntry(at >= 0 ? raws[at].G : g, sp, $"{name}   {Texts.Get("K_PORTION", portion.ToString("0.00"), total.ToString("0.00"))}", total);
+                    if (at >= 0) raws[at] = entry; else raws.Add(entry);
+                    continue;
+                }
                 raws.Add(new RawEntry(g, sp, $"{g.DisplayName}   {Texts.Get("KG", kg.ToString("0.00"))}   {(int)Math.Round(g.GetNormalizedCondition() * 100f)}%"));
                 continue;
             }
@@ -128,6 +160,85 @@ public static partial class Window
         if (g.m_StackableItem != null && g.m_StackableItem.m_Units > 1) inv.RemoveUnits(g, 1);
         else inv.DestroyGear(g.gameObject);
         nextScan = 0f;
+    }
+
+    static bool TakeNamed(params string[] names)
+    {
+        var inv = GameManager.GetInventoryComponent();
+        foreach (var name in names)
+            foreach (var o in inv.m_Items)
+            {
+                var g = o?.m_GearItem;
+                if (g == null || Defs.Clean(g.name) != name) continue;
+                TakeOne(g);
+                return true;
+            }
+        return false;
+    }
+
+    /// <summary>Drinkable water in the pack, litres.</summary>
+    static float Water()
+    {
+        try { return GameManager.GetPlayerManagerComponent().GetTotalLiters(LiquidType.GetPotableWater()).ToQuantity(1f); }
+        catch (Exception e) { Safe.Log("Water count", e); }
+        try { return GameManager.GetInventoryComponent().GetPotableWaterSupply().m_WaterSupply.m_VolumeInLiters.ToQuantity(1f); }
+        catch { return 0f; }
+    }
+
+    static void TakeWater()
+    {
+        try { GameManager.GetPlayerManagerComponent().DeductWaterFromInventory(ItemLiquidVolume.FromLiters(Tune.CanWater), LiquidQuality.Potable); }
+        catch (Exception e) { Safe.Log("Water for the can", e); }
+        nextScan = 0f;
+    }
+
+    /// <summary>A portion of raw meat or fish of one kind out of the pack, the lightest pieces first. take false: only what it would be.
+    /// False if the pack holds less than the portion.</summary>
+    static bool Portion(string raw, float kg, bool take, out float cal, out float cond, out float ratio) => Portion(new[] { raw }, kg, take, out cal, out cond, out ratio);
+
+    /// <summary>The same out of any of several kinds (a recipe's «заяц или куропатка», any fish). ratio: cooked calories to raw ones, by weight of what was taken.</summary>
+    static bool Portion(ICollection<string> raws, float kg, bool take, out float cal, out float cond, out float ratio)
+    {
+        cal = 0f; cond = 1f; ratio = 1f;
+        var inv = GameManager.GetInventoryComponent();
+        var pieces = new List<(GearItem g, float kg)>();
+        foreach (var o in inv.m_Items)
+        {
+            var g = o?.m_GearItem;
+            if (g == null || g.m_FoodItem == null || !raws.Contains(Defs.Clean(g.name)) || g.IsWornOut()) continue;
+            pieces.Add((g, g.GetItemWeightKG().ToQuantity(1f)));
+        }
+        if (pieces.Sum(p => p.kg) < kg - .001f) return false;
+        float left = kg, condSum = 0f, ratioSum = 0f;
+        foreach (var (g, w) in pieces.OrderBy(p => p.kg))
+        {
+            if (left <= .0005f) break;
+            float part = Math.Min(left, w), all = g.m_FoodItem.m_CaloriesRemaining, c = w > 0f ? all * part / w : 0f;
+            cal += c;
+            condSum += g.GetNormalizedCondition() * part;
+            left -= part;
+            float one = 1f;
+            try
+            {
+                var cooked = g.m_Cookable != null ? g.m_Cookable.m_CookedPrefab : null;
+                var cw = cooked != null ? cooked.GetComponent<FoodWeight>() : null;
+                if (cw != null && g.m_FoodWeight != null && g.m_FoodWeight.m_CaloriesPerKG > 0f) one = cw.m_CaloriesPerKG / g.m_FoodWeight.m_CaloriesPerKG;
+            }
+            catch (Exception ex) { Safe.Log("Cooked ratio", ex); }
+            ratioSum += one * c;
+            if (!take) continue;
+            if (w - part < .02f) inv.DestroyGear(g.gameObject);
+            else
+            {
+                // what is left of the piece: lighter, with its share of the calories
+                g.m_FoodItem.m_CaloriesRemaining = all - c;
+                g.WeightKG = ItemWeight.FromKilograms(w - part);
+            }
+        }
+        cond = condSum / kg;
+        if (cal > 0f) ratio = ratioSum / cal;
+        if (take) nextScan = 0f;
+        return true;
     }
 
     static bool TakeSalt()
@@ -187,9 +298,23 @@ public static partial class Window
         }
         catch (Exception ex) { Safe.Log("Cooked ratio", ex); }
         var slot = new Slot { Raw = Defs.Clean(g.name), Species = e.S.Id, Kg = kg, RawCal = rawCal, Cal = rawCal * Mathf.Clamp(ratio, .5f, 2f), Cond = g.GetNormalizedCondition() };
-        if (Remote) { slot.Salted = salt && saltCount > 0; Ask(b, new Op { Kind = "put", Piece = slot }, g); return; }
-        if (salt && saltCount > 0) slot.Salted = TakeSalt();
-        GameManager.GetInventoryComponent().DestroyGear(g.gameObject);
+        bool sausage = Defs.IsSausage(e.S), can = b.Kettle && !sausage;
+        if (can)
+        {
+            if (!Portion(slot.Raw, Tune.CanMeatKg, false, out float pc, out float pcond, out float pr)) { Barrels.Say("MSG_NEED_MEAT", Tune.CanMeatKg.ToString("0.00")); return; }
+            slot.Kg = Tune.CanMeatKg; slot.RawCal = pc; slot.Cal = pc * Mathf.Clamp(pr, .5f, 2f); slot.Cond = pcond;
+            // a can: an empty tin, a quarter litre of water and salt go in with the piece
+            if (canCount <= 0) { Barrels.Say("MSG_NEED_CAN"); return; }
+            if (waterL < Tune.CanWater - .001f) { Barrels.Say("MSG_NEED_WATER"); return; }
+            if (saltCount <= 0) { Barrels.Say("MSG_NEED_SALT"); return; }
+            slot.Can = slot.Salted = true;
+        }
+        else slot.Salted = !sausage && salt && saltCount > 0;
+        if (Remote) { Ask(b, new Op { Kind = "put", Piece = slot }, can ? null : g); return; }
+        if (can) { TakeNamed(Defs.Can); TakeWater(); }
+        if (slot.Salted) slot.Salted = TakeSalt() || can;
+        if (can) Portion(slot.Raw, Tune.CanMeatKg, true, out _, out _, out _);
+        else GameManager.GetInventoryComponent().DestroyGear(g.gameObject);
         b.Slots[i] = slot;
         nextScan = 0f;
         Barrels.Changed(b);
@@ -201,28 +326,36 @@ public static partial class Window
         var s = b.Slots[i];
         if (s == null) return;
         if (Remote) { Ask(b, new Op { Kind = "take", Slot = i, Raw = s.Raw, Kg = s.Kg }, null); return; }
-        if (!Give(s, b.Done(s), b.Cold)) return;
+        if (!Give(s, b.Done(s), b.Cold, b.Kind)) return;
         b.Slots[i] = null;
         nextScan = 0f;
         Barrels.Changed(b);
     }
 
-    /// <summary>The piece comes out of the barrel into the pack: smoked if it is done, raw as it went in otherwise.</summary>
-    static bool Give(Slot s, bool done, bool cold)
+    /// <summary>The piece comes out into the pack: smoked, canned or boiled if it is done, raw as it went in otherwise (an unused tin comes back with it).</summary>
+    static bool Give(Slot s, bool done, bool cold, string? kind)
     {
         var sp = Defs.SpeciesById(s.Species);
+        var def = done && sp != null ? Defs.Result(kind ?? "", sp, cold, s.Salted) : null;
         GearItem? got;
-        if (done && sp != null)
+        if (def != null)
         {
-            var def = Defs.ById(Defs.OutId(sp, !cold, s.Salted))!;
-            got = Items.GiveFood(Defs.Prefix + def.Id, s.Kg * def.WeightFactor, s.Cal, Math.Min(1f, s.Cond + Tune.ConditionGain));
+            got = Items.GiveFood(Defs.Prefix + def.Id, s.Kg * def.Weight + def.Tare, s.Cal, Math.Min(1f, s.Cond + Tune.ConditionGain));
             if (got != null)
             {
                 try { GameManager.GetSkillsManager().IncrementPointsAndNotify(SkillType.Cooking, 1, SkillsManager.PointAssignmentMode.AssignOnlyInSandbox); }
                 catch (Exception e) { Safe.Log("Cooking skill", e); }
             }
         }
-        else got = Items.GiveFood(s.Raw, s.Kg, s.RawCal, s.Cond);
+        else
+        {
+            got = Items.GiveFood(s.Raw, s.Kg, s.RawCal, s.Cond);
+            if (got != null && s.Can)
+            {
+                try { GameManager.GetPlayerManagerComponent().InstantiateItemInPlayerInventory(Defs.Can, 1, 1f, PlayerManager.InventoryInstantiateFlags.None); }
+                catch (Exception e) { Safe.Log("Tin back", e); }
+            }
+        }
         nextScan = 0f;
         return got != null;
     }
@@ -247,7 +380,7 @@ public static partial class Window
         if (b.Fuel <= 0f) { Barrels.Say("MSG_NO_FUEL"); return; }
         bool indoors = false;
         try { indoors = GameManager.GetWeatherComponent().IsIndoorEnvironment(); } catch { }
-        if (indoors) { Barrels.Say("MSG_INDOORS"); return; }
+        if (indoors) { Barrels.Say(b.Kettle ? "K_MSG_INDOORS" : "MSG_INDOORS"); return; }     // 11-12 owner: the kettle too is lit outdoors only
         var st = Starter();
         if (st == null) { Barrels.Say("MSG_NO_STARTER"); return; }
         if (Remote) { Ask(b, new Op { Kind = "light" }, st); return; }
@@ -310,7 +443,7 @@ public static partial class Window
 
     static void PickUp(BarrelState b)
     {
-        if (!b.Idle) { Barrels.Say("MSG_BUSY"); return; }
+        if (!b.Idle) { Barrels.Say(b.Kettle ? "K_MSG_BUSY" : "MSG_BUSY"); return; }
         var g = item;
         if (Remote) { Ask(b, new Op { Kind = "pickup" }, g); return; }
         GiveLogs(Barrels.TakeLogs(b));
@@ -322,7 +455,7 @@ public static partial class Window
         Lift(g);
     }
 
-    static void Lift(GearItem? g)
+    internal static void Lift(GearItem? g)
     {
         if (g == null) return;
         // straight into the pack, no inspect screen; the game's pick-up is let through only for this call
@@ -343,30 +476,100 @@ public static partial class Window
     // ---- drawing
 
     const float W = 640f, Pad = 22f, RowH = 28f;
+    const float CanRow = 46f;
+    static readonly (string id, string need)[] CanKinds = { ("CanDeer", "K_M_DEER"), ("CanMoose", "K_M_MOOSE"), ("CanBear", "K_M_BEAR"), ("CanFish", "K_M_FISH"), ("CanPate", "K_M_PATE") };
 
     static bool Btn(Rect r, string text, bool enabled = true, bool selected = false) => Ui.Button(r, text, enabled && !Waiting, selected) && !Waiting;
+
+    const float RecW = 430f;
+
+    /// <summary>11-12 owner: the smokehouse shows its recipes too, so that the player sees at once what smoking takes.</summary>
+    static void Recipes(Rect r, BarrelState b)
+    {
+        Ui.Panel(r, Texts.Get("R_TITLE"));
+        float lx = r.x + 16f, cw = r.width - 32f, cy = r.y + 52f;
+        float meat = 0f, fish = 0f; int saus = 0;
+        foreach (var e in raws)
+        {
+            float kg = 0f;
+            try { kg = e.G != null ? e.G.GetItemWeightKG().ToQuantity(1f) : 0f; } catch { }
+            if (Defs.IsSausage(e.S)) saus++; else if (e.S.Fish) fish += kg; else meat += kg;
+        }
+        float fuel = b.Fuel;
+        string Have(bool ok, string t) => Ui.Colored(t, ok ? Ui.Dim : Ui.Fire);
+        void Row(string icon, string name, string need, string have, bool ok)
+        {
+            const float rh = 62f;
+            Ui.Row(new Rect(lx, cy, cw, rh));
+            Ui.Icon(new Rect(lx + 4f, cy + 6f, 50f, 50f), Assets.Texture("icons/" + icon + ".png", compress: false));
+            Ui.Fit(new Rect(lx + 62f, cy, cw - 66f, 22f), name);
+            Ui.Fit(new Rect(lx + 62f, cy + 20f, cw - 66f, 22f), need);
+            Ui.Fit(new Rect(lx + 62f, cy + 40f, cw - 66f, 22f), Have(ok, have));
+            cy += rh + 3f;
+        }
+        Row(b.Cold ? "ColdDeer" : "HotDeer", Texts.Get("R_MEAT"), Texts.Get("R_MEAT_NEED"), Texts.Get("K_HAVE", meat.ToString("0.00")), meat > 0f);
+        Row(b.Cold ? "ColdCoho" : "HotCoho", Texts.Get("R_FISH"), Texts.Get("R_FISH_NEED"), Texts.Get("K_HAVE", fish.ToString("0.00")), fish > 0f);
+        Row(b.Cold ? "SausDry" : "SausHot", Texts.Get("R_SAUS"), Texts.Get("R_SAUS_NEED"), Texts.Get("R_HAVE_N", saus), saus > 0);
+        cy += 8f;
+        Ui.Caption(new Rect(lx, cy, cw, 22f), Texts.Get("R_ALSO"));
+        cy += 24f;
+        float need = b.Cold ? Tune.ColdHours : Tune.HotHours;
+        foreach (var line in new[]
+        {
+            (fuel >= need - .01f ? "" : "!") + Texts.Get("R_WOOD", need.ToString("0"), Texts.Time(fuel)),
+            Texts.Get("R_SALT", SaltKgText),
+            Texts.Get("R_SLOTS", Tune.Slots),
+        })
+        {
+            bool warn = line.StartsWith("!");
+            Ui.Fit(new Rect(lx, cy, cw, 22f), warn ? Ui.Colored(line.Substring(1), Ui.Fire) : line);
+            cy += 23f;
+        }
+        cy += 8f;
+        Ui.Caption(new Rect(lx, cy, cw, 22f), Texts.Get("R_WAYS"));
+        cy += 24f;
+        foreach (var k in new[] { "R_HOT", "R_HOT2", "R_COLD", "R_COLD2" })
+        {
+            bool mine = (k.StartsWith("R_COLD")) == b.Cold;
+            Ui.Fit(new Rect(lx, cy, cw, 22f), mine ? Texts.Get(k) : Ui.Colored(Texts.Get(k), Ui.Dim));
+            cy += 23f;
+        }
+    }
 
     public static void Draw()
     {
         if (!IsOpen) return;
+        if (table) { DrawTable(); return; }
         var b = state!;
+        bool kt = b.Kettle;
         Ui.Begin();
         const int perPage = 4;
         int pages = Math.Max(1, (raws.Count + perPage - 1) / perPage);
         if (page >= pages) page = 0;
         int shown = Math.Min(perPage, Math.Max(0, raws.Count - page * perPage));
-        float h = 52f + 34f + 30f + Tune.Slots * (RowH + 3f) + 12f + 34f + 30f + 34f + 12f + 28f + Math.Max(1, shown) * (RowH + 3f) + 34f + 44f + 10f;
-        float x = (Ui.SW - W) / 2f, y = Math.Max(14f, (Ui.SH - h) / 2f);
-        Ui.Panel(new Rect(x, y, W, h), Texts.Get("TITLE") + (Waiting ? "   " + Texts.Get("WAIT_HOST") : ""));
+        float h = 52f + 34f + 30f + Tune.Slots * (RowH + 3f) + 12f + 34f + 30f + 34f + 12f + 28f + (kt ? CanKinds.Length * (CanRow + 3f) - 28f : Math.Max(1, shown) * (RowH + 3f) + 34f) + 44f + 10f;
+        float x = kt ? (Ui.SW - W) / 2f : Math.Max(8f, (Ui.SW - W - RecW - 10f) / 2f), y = Math.Max(14f, (Ui.SH - h) / 2f);
+        if (!kt) Recipes(new Rect(x + W + 10f, y, RecW, h), b);
+        Ui.Panel(new Rect(x, y, W, h), Texts.Get(kt ? "K_TITLE" : "TITLE") + (Waiting ? "   " + Texts.Get("WAIT_HOST") : ""));
         float lx = x + Pad, cw = W - Pad * 2f, cy = y + 52f;
 
         // the way of smoking
-        if (Btn(new Rect(lx, cy, cw / 2f - 4f, 28f), Texts.Get("MODE_HOT"), true, !b.Cold)) SetMode(b, false);
-        if (Btn(new Rect(lx + cw / 2f + 4f, cy, cw / 2f - 4f, 28f), Texts.Get("MODE_COLD"), true, b.Cold)) SetMode(b, true);
+        if (kt)
+        {
+            // what one can takes, and how much of it the pack holds
+            string Have(bool ok, string t) => ok ? t : Ui.Colored(t, Ui.Fire);
+            Ui.Label(new Rect(lx, cy, cw, 28f), Texts.Get("K_NEED") + "  " + Have(canCount > 0, Texts.Get("K_CANS", canCount)) + ",  "
+                + Have(waterL >= Tune.CanWater - .001f, Texts.Get("K_WATER", waterL.ToString("0.00"))) + ",  " + Have(saltCount > 0, Texts.Get("K_SALT", SaltKgText)));
+        }
+        else
+        {
+            if (Btn(new Rect(lx, cy, cw / 2f - 4f, 28f), Texts.Get("MODE_HOT"), true, !b.Cold)) SetMode(b, false);
+            if (Btn(new Rect(lx + cw / 2f + 4f, cy, cw / 2f - 4f, 28f), Texts.Get("MODE_COLD"), true, b.Cold)) SetMode(b, true);
+        }
         cy += 34f;
 
         // the fire
-        string fire = b.Lit ? Ui.Colored(Texts.Get("LIT"), Ui.Fire) : Texts.Get("UNLIT");
+        string fire = b.Lit ? Ui.Colored(Texts.Get(kt ? "K_LIT" : "LIT"), Ui.Fire) : Texts.Get("UNLIT");
         string fuel = b.Fuel > .004f ? Texts.Get("FUEL", Texts.Time(b.Fuel)) : Texts.Get("NOFUEL");
         Ui.Label(new Rect(lx, cy, cw - 330f, 26f), fire + ".  " + fuel);
         if (Btn(new Rect(lx + cw - 322f, cy, 156f, 26f), Texts.Get("TAKE_WOOD"), !b.Lit && b.Logs != null && b.Logs.Any(l => l.Whole))) TakeWood(b);
@@ -388,13 +591,14 @@ public static partial class Window
             {
                 var sp = Defs.SpeciesById(s.Species);
                 bool done = b.Done(s);
-                var def = sp != null ? Defs.ById(Defs.OutId(sp, !b.Cold, false)) : null;
+                var def = sp != null ? Defs.Result(b.Kind, sp, b.Cold, false) : null;
+                float need = b.NeedOf(s);
                 if (def != null) Ui.Icon(new Rect(lx + 4f, cy + 1f, RowH - 2f, RowH - 2f), Assets.Texture(def.Icon, compress: false));
                 string name = sp == null ? s.Raw : Texts.Russian ? sp.Ru : char.ToUpperInvariant(sp.En[0]) + sp.En.Substring(1);
-                if (s.Salted) name += ", " + Texts.Get("SALTED");
+                if (s.Salted && !kt) name += ", " + Texts.Get("SALTED");
                 Ui.Label(new Rect(lx + RowH + 8f, cy, 250f, RowH), name + "   " + Ui.Colored(Texts.Get("KG", s.Kg.ToString("0.00")), Ui.Dim));
-                Ui.Bar(new Rect(lx + 300f, cy + RowH - 6f, 170f, 3f), s.Hours / b.Need, done ? Ui.Good : Ui.Accent);
-                Ui.Label(new Rect(lx + 300f, cy - 2f, 170f, RowH), done ? Ui.Colored(Texts.Get("DONE"), Ui.Good) : Texts.Get("LEFT", Texts.Time(b.Need - s.Hours)));
+                Ui.Bar(new Rect(lx + 300f, cy + RowH - 6f, 170f, 3f), s.Hours / need, done ? Ui.Good : Ui.Accent);
+                Ui.Label(new Rect(lx + 300f, cy - 2f, 170f, RowH), done ? Ui.Colored(Texts.Get("DONE"), Ui.Good) : Texts.Get("LEFT", Texts.Time(need - s.Hours)));
                 if (Btn(new Rect(lx + cw - 112f, cy + 2f, 110f, RowH - 4f), Texts.Get(done ? "TAKE" : "TAKE_RAW"))) TakeOut(b, i);
             }
             cy += RowH + 3f;
@@ -408,30 +612,62 @@ public static partial class Window
         int nw = Math.Min(3, woods.Count);
         for (int i = 0; i < nw; i++)
         {
+            if (i >= woods.Count) break;
             var w = woods[i];
             float bw = (cw - (nw - 1) * 6f) / Math.Max(nw, 2);
-            if (Btn(new Rect(bx, cy, bw, 28f), $"{w.Label} ×{w.Count}  (+{Texts.Time(w.Hours)})")) AddWood(b, w);
+            if (Btn(new Rect(bx, cy, bw, 28f), $"{w.Label} ×{w.Count}  (+{Texts.Time(w.Hours)})")) { AddWood(b, w); break; }
             bx += bw + 6f;
         }
         cy += 34f + 12f;
 
+        if (kt)
+        {
+            // the recipes, as at the sausage table (11-12 owner): what each can is made of, and a button to set one to boil
+            Ui.Label(new Rect(lx, cy, cw, 26f), Texts.Get("K_PUT_IN"));
+            cy += 28f;
+            bool room = b.Slots.Any(s => s == null);
+            foreach (var (id, need) in CanKinds)
+            {
+                RawEntry? pick = null; float have = 0f;
+                foreach (var e in raws)
+                {
+                    if (Defs.CanOf(e.S) != id) continue;
+                    have += e.Total;
+                    if (pick == null && e.Total >= Tune.CanMeatKg - .001f) pick = e;
+                }
+                Ui.Row(new Rect(lx, cy, cw, CanRow));
+                Ui.Icon(new Rect(lx + 4f, cy + 3f, CanRow - 6f, CanRow - 6f), Assets.Texture("icons/" + id + ".png", compress: false));
+                string meat = Texts.Get(need) + " " + Texts.Get("KG", Tune.CanMeatKg.ToString("0.00"));
+                Ui.Fit(new Rect(lx + CanRow + 6f, cy - 1f, cw - CanRow - 136f, 24f), Texts.Get(id + "_NAME") + ":   " + (pick != null ? meat : Ui.Colored(meat, Ui.Fire)));
+                Ui.Fit(new Rect(lx + CanRow + 6f, cy + 20f, cw - CanRow - 136f, 24f), Ui.Colored(Texts.Get("K_HAVE", have.ToString("0.00")) + "  " + Texts.Get("K_ROW"), Ui.Dim));
+                bool can = pick != null && room && canCount > 0 && saltCount > 0 && waterL >= Tune.CanWater - .001f;
+                if (Btn(new Rect(lx + cw - 124f, cy + 8f, 120f, CanRow - 16f), Texts.Get("K_DO"), can)) { PutIn(b, pick!); break; }
+                cy += CanRow + 3f;
+            }
+            cy += 6f;
+            if (Btn(new Rect(lx, cy, 200f, 32f), Texts.Get("K_PICK_UP"), b.Idle)) { PickUp(b); return; }
+            if (Ui.Button(new Rect(lx + cw - 200f, cy, 200f, 32f), Texts.Get("CLOSE"))) Close();
+            return;
+        }
+
         // the pack
-        Ui.Label(new Rect(lx, cy, 300f, 26f), raws.Count > 0 ? Texts.Get("PUT_IN") : Ui.Colored(Texts.Get("NO_RAW"), Ui.Dim));
+        Ui.Label(new Rect(lx, cy, 300f, 26f), raws.Count > 0 ? Texts.Get(kt ? "K_PUT_IN" : "PUT_IN") : Ui.Colored(Texts.Get(kt ? "K_NO_RAW" : "NO_RAW"), Ui.Dim));
         if (pages > 1 && Btn(new Rect(lx + cw - 150f, cy, 150f, 24f), Texts.Get("MORE", $"{page + 1}/{pages}"))) page = (page + 1) % pages;
         cy += 28f;
         for (int k = 0; k < Math.Max(1, shown); k++)
         {
             if (k < shown)
             {
+                if (page * perPage + k >= raws.Count) break;
                 var e = raws[page * perPage + k];
                 if (Btn(new Rect(lx, cy, cw, RowH), e.Label)) { PutIn(b, e); break; }
             }
             cy += RowH + 3f;
         }
-        salt = Ui.Toggle(new Rect(lx, cy, cw, 28f), salt && saltCount > 0, Texts.Get("SALT", saltCount));
+        if (!kt) salt = Ui.Toggle(new Rect(lx, cy, cw, 28f), salt && saltCount > 0, Texts.Get("SALT", SaltKgText));
         cy += 34f;
 
-        if (Btn(new Rect(lx, cy, 200f, 32f), Texts.Get("PICK_UP"), b.Idle)) { PickUp(b); return; }
+        if (Btn(new Rect(lx, cy, 200f, 32f), Texts.Get(kt ? "K_PICK_UP" : "PICK_UP"), b.Idle)) { PickUp(b); return; }
         if (Ui.Button(new Rect(lx + cw - 200f, cy, 200f, 32f), Texts.Get("CLOSE"))) Close();
     }
 }

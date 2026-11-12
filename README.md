@@ -23,7 +23,7 @@ does it when updating. Game saves are kept: their keys did not change.
 | `MilitaryStimByEMPEROR` | Военный стимулятор из WINTERMUTE / The WINTERMUTE military stim |
 | `CrankLampByEMPEROR` | Фонарь с ручкой (динамо) из WINTERMUTE / The WINTERMUTE crank lamp |
 | `SmokesByEMPEROR` | Сигареты, сигары, трубки, зажигалки / Cigarettes, cigars, pipes, lighters |
-| `SmokehouseByEMPEROR` | Коптильня для мяса и рыбы / Smokehouse for meat and fish |
+| `SmokehouseByEMPEROR` | Коптильня, котёл для консервов и стол для колбас / Smokehouse, canning kettle and sausage table |
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
 | `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |
 | `TrainerByEMPEROR` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
