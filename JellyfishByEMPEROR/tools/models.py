@@ -887,19 +887,28 @@ def aqua_glass_tex(n=256):
     return np.concatenate([rgb, np.clip(a, 0, .8)[..., None]], -1)
 
 
+def soft_noise(n, seed, freq):
+    """Smooth isotropic noise, -1..1: white noise low-passed in the frequency domain (no grid, tiles seamlessly)."""
+    w = np.random.default_rng(seed).standard_normal((n, n))
+    fy = np.fft.fftfreq(n)[:, None] * n; fx = np.fft.fftfreq(n)[None, :] * n
+    f = np.fft.ifft2(np.fft.fft2(w) * np.exp(-(fx * fx + fy * fy) / (2 * freq * freq))).real
+    return f / np.abs(f).max()
+
+
 def aqua_water_tex(n=256):
     """RGBA: sides (lower half) deeper green towards the bottom; the surface (upper half) with ripples and a bright line at the glass."""
     y, x = (np.mgrid[0:n, 0:n] + .5) / n
     img = np.zeros((n, n, 4))
     side = y < .5; f = y / .5
     img[..., 0] = .20; img[..., 1] = .44; img[..., 2] = .42
-    img[..., 3] = np.where(side, .07 + .07 * (1 - f) + .015 * np.sin(x * 40 + f * 6) ** 2, 0)
+    img[..., 3] = np.where(side, .075 + .07 * (1 - f), 0)
     top = ~side
     ty = (y - .5) / .5
     edge = np.minimum(np.minimum(x, 1 - x), np.minimum(ty, 1 - ty))
-    rip = .05 * np.sin(x * 70 + np.sin(ty * 9) * 2) * np.sin(ty * 50 + x * 6)
+    # soft irregular swell, no grid: smooth noise stretched along the long side of the tank, its slopes a little brighter
+    rip = .06 * soft_noise(n, 91, 9.0) + .03 * soft_noise(n, 92, 22.0)
     img[top, 0] = .55; img[top, 1] = .78; img[top, 2] = .74
-    img[..., 3] = np.where(top, np.clip(.13 + rip + .4 * smooth(.03, .0, edge), 0, .7), img[..., 3])
+    img[..., 3] = np.where(top, np.clip(.12 + rip + .35 * smooth(.025, .0, edge), 0, .6), img[..., 3])
     return img
 
 
