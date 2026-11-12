@@ -155,6 +155,10 @@ class App:
         if not self.skin_dir: threading.Thread(target=self.load_skin, daemon=True).start()
         self.render()
 
+    def open_discord(self):
+        import webbrowser
+        webbrowser.open((self.cat or {}).get('discord') or core.DISCORD_URL)
+
     def toggle_lang(self):
         global RU
         RU = not RU; tld_assets.RU = RU
@@ -213,6 +217,7 @@ class App:
         en = not self.busy and bool(self.game)
         ui.title(p, T('МОДЫ SEAGULL', "SEAGULL'S MODS"), W / 2, PY + 46)
         p.text('v' + core.LAUNCHER_VERSION, R, PY + 40, 12, ui.TEAL, al='r')
+        self.btn(p, 'discord', 'Discord', L + 55, PY + 46, 110, 28, self.open_discord, True, 13)
         # game and loader
         y = PY + 104
         p.text(T('Игра', 'Game'), L, y, 13, ui.TEAL)

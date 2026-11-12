@@ -7,7 +7,8 @@ import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, u
 import tld_assets
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.1'
+LAUNCHER_VERSION = '1.0.2'
+DISCORD_URL = 'https://discord.gg/ezT7PRZmuS'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
 MANIFEST = 'Mods/SeagullMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
 UA = 'SeagullModsLauncher/' + LAUNCHER_VERSION

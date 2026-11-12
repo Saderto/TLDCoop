@@ -3,6 +3,8 @@
 Моды для The Long Dark (MelonLoader 0.7, игра 2.60). Все бесплатные.
 Mods for The Long Dark (MelonLoader 0.7, game 2.60). All free.
 
+**Discord:** https://discord.gg/ezT7PRZmuS — вопросы, баги, поиск напарника / questions, bugs, finding a partner.
+
 **Проще всего / Easiest:** скачайте [TLDModsLauncher.exe](https://github.com/Saderto/TLDCoop/releases/latest/download/TLDModsLauncher.exe),
 запустите, отметьте нужные моды и нажмите «Установить». Он сам поставит MelonLoader, библиотеки и соберёт файлы из сюжета.
 Download the launcher, tick the mods and press "Install"; it sets up MelonLoader, the libraries and the story files itself.
