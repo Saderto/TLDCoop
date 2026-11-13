@@ -377,7 +377,7 @@ class App:
 
     # ---------- actions ----------
     def check_closed(self):
-        if core.game_running():
+        if core.game_running(self.game):
             self.say(T('Закройте игру и повторите.', 'Close the game and try again.')); return False
         return True
 

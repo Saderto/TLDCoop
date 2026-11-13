@@ -7,7 +7,7 @@ import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, u
 import tld_assets
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.8'
+LAUNCHER_VERSION = '1.0.9'
 DISCORD_URL = 'https://discord.gg/ezT7PRZmuS'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
 MANIFEST = 'Mods/EMPERORMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
@@ -67,15 +67,30 @@ def file_version(path):
         pass
     return ''
 
-def game_running():
-    """True if tld.exe runs. Checks only this process name."""
+def _in_use(path):
+    """True if Windows keeps the file loaded by a running program (an exe or dll in use cannot be opened for writing).
+    Opening for writing changes nothing in the file."""
+    try:
+        with open(path, 'r+b'): return False
+    except PermissionError: return True
+    except OSError: return False
+
+def game_running(game=None):
+    """True if tld.exe runs. Checks only this process name. A tld.exe that has already ended but is still listed
+    (Windows keeps such an entry while another program holds it open, Steam then shows the game as running) does not
+    count: its game files are no longer in use."""
     if os.name != 'nt': return False
     try:
         out = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq tld.exe', '/FO', 'CSV', '/NH'], capture_output=True,
                              text=True, creationflags=0x08000000).stdout
-        return 'tld.exe' in out.lower()
+        if 'tld.exe' not in out.lower(): return False
     except Exception:
         return False
+    if game:
+        files = [os.path.join(game, f) for f in ('tld.exe', 'GameAssembly.dll', 'UnityPlayer.dll')]
+        files = [f for f in files if os.path.isfile(f)]
+        if files and not any(_in_use(f) for f in files): return False
+    return True
 
 def read_manifest(game):
     for name in (MANIFEST, OLD_MANIFEST):
