@@ -6,22 +6,18 @@ Mods for The Long Dark (MelonLoader 0.7, game 2.60). All free.
 **Discord:** https://discord.gg/ezT7PRZmuS — вопросы, баги, поиск напарника / questions, bugs, finding a partner.
 
 **Проще всего / Easiest:** скачайте [TLDModsLauncher.exe](https://github.com/Saderto/TLDCoop/releases/latest/download/TLDModsLauncher.exe),
-запустите, отметьте нужные моды и нажмите «Установить». Он сам поставит MelonLoader, библиотеки и соберёт файлы из сюжета.
-Download the launcher, tick the mods and press "Install"; it sets up MelonLoader, the libraries and the story files itself.
+запустите, отметьте нужные моды и нажмите «Установить». Он сам поставит MelonLoader и библиотеки.
+Download the launcher, tick the mods and press "Install"; it sets up MelonLoader and the libraries itself.
 
-До 11.2026 моды назывались по-старому (`TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp`, `TLDTrainer`, `...BySeagull`).
+До 11.2026 моды назывались по-старому (`TLDTrainer`, `...BySeagull`).
 Новая версия сама переносит сохранения и настройки из старой папки при первом запуске и убирает старый dll; лаунчер 1.0.6
 делает это при обновлении. Сохранения в игре не теряются: их ключи остались прежними.
-Until 11.2026 the mods had their old names (`TLDCoop`, `TLDShotgun`, `TLDMilitaryStim`, `TLDCrankLamp`, `TLDTrainer`, `...BySeagull`).
+Until 11.2026 the mods had their old names (`TLDTrainer`, `...BySeagull`).
 The new version moves your saves and settings from the old folder on its first start and puts the old dll aside; launcher 1.0.6
 does it when updating. Game saves are kept: their keys did not change.
 
 | Папка / Folder | Что это / What it is |
 |---|---|
-| `CoopByEMPEROR` | Кооператив через Steam: общий мир хоста, звери, предметы, костры, погода, время / Co-op over Steam: the host's shared world, animals, items, fires, weather, time |
-| `ShotgunByEMPEROR` | Дробовик из WINTERMUTE в выживании / The WINTERMUTE shotgun in survival |
-| `MilitaryStimByEMPEROR` | Военный стимулятор из WINTERMUTE / The WINTERMUTE military stim |
-| `CrankLampByEMPEROR` | Фонарь с ручкой (динамо) из WINTERMUTE / The WINTERMUTE crank lamp |
 | `SmokesByEMPEROR` | Сигареты, сигары, трубки, зажигалки / Cigarettes, cigars, pipes, lighters |
 | `SmokehouseByEMPEROR` | Коптильня, котёл для консервов и стол для колбас / Smokehouse, canning kettle and sausage table |
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
@@ -33,18 +29,15 @@ does it when updating. Game saves are kept: their keys did not change.
 | `ContainerLabelsByEMPEROR` | Подписи на контейнерах / Labels on containers |
 | `InventorySearchByEMPEROR` | Поиск в инвентаре / Inventory search |
 | `MarkersByEMPEROR` | Метки на тропах / Trail markers |
-| `TLDAssets` | Сборщик файлов из игры (см. ниже) / Builder of game-derived files (see below) |
+| `TLDAssets` | Лаунчер, список модов для него и автообновление / The launcher, its mod list and the auto update |
 
 ## Файлы из игры / Game files
 
-Копий файлов игры в репозитории и в архивах нет. Персонажи коопа, дробовик, стимулятор и фонарь с ручкой сделаны из
-файлов эпизода 5 WINTERMUTE: их собирает у игрока программа `TLDAssets.exe` из его собственной копии игры.
+Копий файлов игры в репозитории и в архивах нет.
 Часть картинок FoodPack, копчёное мясо и рыба Smokehouse и фон значков Feats нарисованы поверх игровых текстур.
 Оформление лаунчера (рамки, кнопки, шрифты) он тоже берёт из установленной у игрока игры.
 
-There are no copies of game files in this repository or in the archives. The co-op characters, the shotgun, the stim
-and the crank lamp are made from WINTERMUTE episode 5 files; `TLDAssets.exe` builds them on the player's PC from the
-player's own copy of the game. Some FoodPack images, the Smokehouse smoked meat and fish and the Feats badge background
+There are no copies of game files in this repository or in the archives. Some FoodPack images, the Smokehouse smoked meat and fish and the Feats badge background
 are painted over game textures. The launcher also takes its look (frames, buttons, fonts) from the player's installed game.
 
 Код FoodPack, FoodBalance, ContainerLabels, InventorySearch и Markers восстановлен из готовых dll (исходники были потеряны):
@@ -62,7 +55,6 @@ original sources were lost): it builds and works the same, but has no comments a
 | `FoodPackByEMPEROR` | AfflictionComponent, ModData, ComplexLogger, ModSettings, AlcoholMod (+ ModComponent, его требует сам AlcoholMod / required by AlcoholMod itself); с AlcoholMod напитки пьянят / with AlcoholMod drinks make you drunk |
 | `FoodBalanceByEMPEROR` | ModSettings |
 | `ContainerLabelsByEMPEROR` | ModData |
-| `CoopByEMPEROR`, `ShotgunByEMPEROR`, `MilitaryStimByEMPEROR`, `CrankLampByEMPEROR` | `TLDAssets.exe` (есть в их архивах, запустить один раз / included in their archives, run it once) |
 | остальные / the rest | ничего / nothing |
 
 `TLDCompat258.zip` (папка `UserLibs`, код в `TrainerByEMPEROR/Compat`): прослойка для старых чужих модов (ComplexLogger, FoodPackByTKG,
@@ -91,9 +83,8 @@ get them from their authors; the launcher downloads them from there and never re
 
 ## Лаунчер / Launcher
 
-`TLDModsLauncher.exe`: выберите моды галочками, он скачает их из релиза, поставит нужные библиотеки и MelonLoader и сам
-соберёт файлы из сюжета / tick the mods; it downloads them from the release, installs the libraries and MelonLoader it
-needs, and builds the story files itself.
+`TLDModsLauncher.exe`: выберите моды галочками, он скачает их из релиза и поставит нужные библиотеки и MelonLoader /
+tick the mods; it downloads them from the release and installs the libraries and MelonLoader it needs.
 
 - Обновления: при запуске он читает список модов `TLDAssets/catalog.json` отсюда и показывает «есть обновление».
   Updates: on start it reads the mod list `TLDAssets/catalog.json` from here and shows "update available".
@@ -117,11 +108,11 @@ needs, and builds the story files itself.
 
 ### Как проверить exe / How to check the exe
 
-`TLDModsLauncher.exe` и `TLDAssets.exe` собирает не автор у себя на ПК, а GitHub на своей чистой машине из открытого кода
-этого репозитория ([Build exe](.github/workflows/build-exe.yml), настройки сборки `TLDAssets/*.spec`, точные версии
+`TLDModsLauncher.exe` собирает не автор у себя на ПК, а GitHub на своей чистой машине из открытого кода
+этого репозитория ([Build exe](.github/workflows/build-exe.yml), настройки сборки `TLDAssets/TLDModsLauncher.spec`, точные версии
 `TLDAssets/requirements-build.txt`). GitHub записывает, из какого коммита и какой сборкой получен файл.
-Both exes are built not on the author's PC but by GitHub on its own clean machine from the public source here
-([Build exe](.github/workflows/build-exe.yml), `TLDAssets/*.spec`, exact versions in `TLDAssets/requirements-build.txt`);
+The exe is built not on the author's PC but by GitHub on its own clean machine from the public source here
+([Build exe](.github/workflows/build-exe.yml), `TLDAssets/TLDModsLauncher.spec`, exact versions in `TLDAssets/requirements-build.txt`);
 GitHub records which commit and which run produced each file.
 
 1. Контрольная сумма / checksum: PowerShell `Get-FileHash TLDModsLauncher.exe` → сравните с `SHA256SUMS.txt` в релизе / compare with `SHA256SUMS.txt` in the release.
@@ -137,9 +128,6 @@ GitHub records which commit and which run produced each file.
 1. MelonLoader 0.7.3 в папке игры (https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3, `MelonLoader.x64.zip`) /
    MelonLoader 0.7.3 in the game folder.
 2. Распакуйте нужные архивы из Releases в папку игры (в них папка `Mods`) / Extract the archives you want from Releases into the game folder (they contain `Mods`).
-3. Если ставили кооп, дробовик, стимулятор или фонарь, запустите `Mods\TLDAssets.exe` при закрытой игре. Он сам найдёт игру через Steam и соберёт файлы для установленных модов (около 30 с). Нужен скачанный эпизод 5 WINTERMUTE.
-   If you installed the co-op, shotgun, stim or crank lamp, run `Mods\TLDAssets.exe` with the game closed. It finds the game through Steam and builds the files for the installed mods (about 30 s). WINTERMUTE episode 5 must be downloaded.
-4. В коопе у обоих игроков должны стоять одни и те же моды / In co-op both players need the same mods.
 
 ## Сборка / Build
 
@@ -148,9 +136,9 @@ GitHub records which commit and which run produced each file.
 Mods: .NET 6 SDK, `dotnet build -c Release -p:RefsDir=<folder with the game assemblies>` in the mod's `src`. `RefsDir`
 needs the assemblies MelonLoader generates in your `MelonLoader/Il2CppAssemblies` and `MelonLoader/net6`; they are not included.
 
-TLDAssets и лаунчер / and the launcher: Python 3.13, в папке `TLDAssets` / in `TLDAssets`:
-`pip install -r requirements-build.txt`, затем / then `pyinstaller TLDModsLauncher.spec` и / and `pyinstaller TLDAssets.spec`
-(без exe / without an exe: `python launcher.py`, `python tld_assets.py`).
+Лаунчер / the launcher: Python 3.13, в папке `TLDAssets` / in `TLDAssets`:
+`pip install -r requirements-build.txt`, затем / then `pyinstaller TLDModsLauncher.spec`
+(без exe / without an exe: `python launcher.py`).
 
 ## Лицензия / License
 
@@ -159,8 +147,6 @@ Mod code: MIT (`LICENSE`), by EMPEROR. The game and anything derived from it are
 
 ## Благодарности / Credits
 
-- SkyCoop (Filigrani, MIT): кооп скачивает его модель игрока из официального релиза, если нет персонажей; некоторые приёмы запуска игры подсмотрены там / the co-op downloads its player model from the official release as a fallback; some game-start techniques were learned from it.
-- Анимации приседа в коопе: Quaternius (CC0), перенесены на скелет игры / Co-op crouch animations: Quaternius (CC0), retargeted.
 - Звуки SmokesByEMPEROR: Freesound (CC0), список в `CREDITS.txt` мода / SmokesByEMPEROR sounds: Freesound (CC0), see the mod's `CREDITS.txt`.
 - Гравировки зажигалок нарисованы по иконкам game-icons.net (CC BY 3.0) / Lighter engravings drawn from game-icons.net icons (CC BY 3.0).
 - The Long Dark © Hinterland Studio. Моды не связаны с Hinterland / These mods are not affiliated with Hinterland.

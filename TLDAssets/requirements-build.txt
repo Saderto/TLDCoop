@@ -1,4 +1,4 @@
-# Exact versions used to build TLDModsLauncher.exe and TLDAssets.exe (Python 3.13).
+# Exact versions used to build TLDModsLauncher.exe (Python 3.13).
 altgraph==0.17.5
 archspec==0.2.7
 astc-encoder-py==0.1.12

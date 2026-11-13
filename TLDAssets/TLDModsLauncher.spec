@@ -2,14 +2,10 @@
 # Build: pyinstaller TLDModsLauncher.spec  (from this folder; versions in requirements-build.txt).
 # The release exe is built by .github/workflows/build-exe.yml from this public source. No UPX packing
 # (packed exes look suspicious to antivirus programs).
-from PyInstaller.utils.hooks import collect_all
 
-datas = [('steps', 'steps'), ('own', 'own'), ('catalog.json', '.'), ('icon.ico', '.'), ('icon.png', '.')]
+datas = [('catalog.json', '.'), ('icon.ico', '.'), ('icon.png', '.')]
 binaries = []
 hiddenimports = []
-for pkg in ('UnityPy', 'fmod_toolkit', 'archspec'):
-    d, b, h = collect_all(pkg)
-    datas += d; binaries += b; hiddenimports += h
 
 a = Analysis(['launcher.py'], pathex=[], binaries=binaries, datas=datas, hiddenimports=hiddenimports,
              hookspath=[], hooksconfig={}, runtime_hooks=[], excludes=[], noarchive=False, optimize=0)

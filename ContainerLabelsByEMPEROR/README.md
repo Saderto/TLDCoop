@@ -27,11 +27,6 @@ MelonLoader and the libraries needed, and keeps the mod updated.
 - ModData.
 - ModData.
 
-## Кооп / Co-op
-
-Работает вместе с [CoopByEMPEROR](../CoopByEMPEROR): у обоих игроков должны стоять одни и те же моды и версии.
-Works with [CoopByEMPEROR](../CoopByEMPEROR): both players must run the same mods and versions.
-
 ## Вопросы и баги / Questions and bugs
 
 Discord: https://discord.gg/ezT7PRZmuS (раздел / category «🧩 Mods / Моды»).

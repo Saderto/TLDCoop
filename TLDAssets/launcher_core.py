@@ -1,13 +1,12 @@
 # EMPEROR's mods launcher: logic without the window (the window is launcher.py).
 # Finds the game, reads the mod list, downloads the chosen mods from the GitHub release of Saderto/TLDCoop,
-# installs/removes them, fetches the libraries they need from their authors' own GitHub releases,
-# and builds the game-derived files (tld_assets.build) for mods that need them.
+# installs/removes them and fetches the libraries they need from their authors' own GitHub releases.
 import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, urllib.parse, subprocess, hashlib, time
 
-import tld_assets
+import game_find
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.9'
+LAUNCHER_VERSION = '1.0.10'
 DISCORD_URL = 'https://discord.gg/ezT7PRZmuS'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
 MANIFEST = 'Mods/EMPERORMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
@@ -35,7 +34,7 @@ def load_catalog(log=lambda s: None):
 
 # ---------------- game state ----------------
 def find_game():
-    return tld_assets.find_game(None)
+    return game_find.find_game(None)
 
 def melonloader_version(game):
     """'0.7.3' etc., '' if installed but unknown, None if not installed."""
@@ -276,7 +275,7 @@ def verify_download(cat, name, path, tag=None, log=lambda s: None):
     """Checks a downloaded file against SHA256SUMS.txt of the release. Raises if it does not match."""
     want = release_sums(cat, tag).get(name)
     if not want:
-        log('  ' + ('нет контрольной суммы в релизе, проверка пропущена' if tld_assets.RU else 'no checksum in the release, check skipped'))
+        log('  ' + ('нет контрольной суммы в релизе, проверка пропущена' if game_find.RU else 'no checksum in the release, check skipped'))
         return
     got = sha256(path)
     if got != want:
@@ -349,7 +348,7 @@ def migrate_legacy(game, mod, log=lambda s: None):
             if os.path.isfile(p): os.remove(p); n += 1
     except Exception as e:
         log('  %s: %s' % ('old name', e))
-    if n: log('  ' + ('перенёс со старого имени: %d файлов' if tld_assets.RU else 'carried over from the old name: %d files') % n)
+    if n: log('  ' + ('перенёс со старого имени: %d файлов' if game_find.RU else 'carried over from the old name: %d files') % n)
 
 def target_of(mod, name):
     """Where a zip entry goes, relative to the game folder (forward slashes), or None to skip it."""
@@ -398,10 +397,7 @@ def uninstall(game, mod, manifest, log=lambda s: None):
     rec = manifest.get(mod['id'])
     files = list(rec['files'] if rec else [mod['detect']])
     if old_dll(mod): files.append(old_dll(mod))
-    # files built from the game by TLDAssets for this mod
-    for name, dll, fn, gen, _ in tld_assets.MODS:
-        if name == mod['id']: files += ['Mods/' + f for f in gen]
-    # a file another installed mod also brought (TLDAssets.exe) stays
+    # a file another installed mod also brought stays
     shared = {f for k, r in manifest.items() if k != mod['id'] for f in r.get('files', [])}
     files = [f for f in files if f not in shared]
     removed = 0
@@ -468,11 +464,3 @@ def needed_libs(cat, mods, game, manifest=None):
             if lib and not lib_present(game, lib) and n not in [x[0] for x in out]:
                 out.append((n, lib))
     return out
-
-def build_assets(game, mod_ids, log):
-    tld_assets.RU = True if tld_assets.RU is None else tld_assets.RU
-    tld_assets.SINK = log
-    try:
-        return tld_assets.build(game, only=list(mod_ids))
-    finally:
-        tld_assets.SINK = None

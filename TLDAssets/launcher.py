@@ -9,7 +9,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk, ImageChops
 
 import launcher_core as core
-import tld_assets
+import game_find
 import game_ui as ui
 
 def system_ru():
@@ -157,7 +157,7 @@ class App:
         d = filedialog.askdirectory(title=T('Папка The Long Dark (где tld.exe)', 'The Long Dark folder (with tld.exe)'))
         if not d: return
         d = os.path.normpath(d)
-        if not tld_assets.is_game(d):
+        if not game_find.is_game(d):
             self.say(T('Это не папка игры: ', 'Not a game folder: ') + d); self.render(); return
         self.game = d; self.manifest = core.read_manifest(d); self.st = None; self.libupd = []
         if self.cat:
@@ -175,7 +175,7 @@ class App:
 
     def toggle_lang(self):
         global RU
-        RU = not RU; tld_assets.RU = RU
+        RU = not RU; game_find.RU = RU
         self.root.title(T('Моды EMPEROR для The Long Dark', "EMPEROR's mods for The Long Dark"))
         if not self.busy and self.cat:      # the status lines in the new language
             self.logs = [T('Модов в списке: %d. Отметьте нужные и нажмите «Установить».',
@@ -220,7 +220,6 @@ class App:
         desc = p.wrap(m['desc']['ru' if RU else 'en'], 14, ROW_W - 60)
         extra = []
         if m.get('needs'): extra.append(T('Нужно: ', 'Needs: ') + ', '.join(m['needs']))
-        if m.get('assets'): extra.append(T('файлы из сюжета (эпизод 5) соберутся сами', 'story files (episode 5) are built automatically'))
         h = 14 + 22 + len(desc) * 20 + (19 if extra else 0) + 10
         return desc, '   ·   '.join(extra), h
 
@@ -269,10 +268,9 @@ class App:
         # actions
         y = LIST_Y + LIST_H + 34
         ui.line(p, L, y - 20, ROW_W)
-        bw = (ROW_W - 30) / 4
+        bw = (ROW_W - 20) / 3
         acts = [('inst', T('Установить / обновить', 'Install / update'), self.do_install),
                 ('rem', T('Удалить отмеченные', 'Remove checked'), self.do_remove),
-                ('assets', T('Собрать файлы из сюжета', 'Rebuild story files'), self.do_assets),
                 ('open', T('Папка Mods', 'Mods folder'), self.open_mods)]
         for i, (k, t, fn) in enumerate(acts):
             self.btn(p, k, t, L + bw / 2 + i * (bw + 10), y + 6, bw, 36, fn, en and self.cat is not None, 14)
@@ -433,7 +431,6 @@ class App:
                 try:
                     core.install_lib(g, name, lib, tmp, self.say, self.progress, cat, self.manifest); core.write_manifest(g, self.manifest)
                 except Exception as e: self.say(T('  не вышло: ', '  failed: ') + str(e))
-            built = []
             for m in mods:
                 title = m['title']['ru' if RU else 'en']
                 self.say(T('Скачиваю «%s» (%s)…', 'Downloading "%s" (%s)…') % (title, size_txt(m.get('size', 0))))
@@ -452,14 +449,6 @@ class App:
                 finally:
                     try: os.remove(z)
                     except OSError: pass
-                if m.get('assets'): built.append(m['id'])
-            if built:
-                self.say(T('Собираю файлы из сюжета (около минуты)…', 'Building the story files (about a minute)…'))
-                self.q.put(('prog', 0))
-                code = core.build_assets(g, built, self.say)
-                if code == 3:
-                    self.say(T('Чтобы эти моды заработали, скачайте эпизод 5 WINTERMUTE (запустите его один раз в игре) и нажмите «Собрать файлы из сюжета».',
-                               'For these mods, download WINTERMUTE episode 5 (start it once in the game), then press "Rebuild story files".'))
             self.say(T('Готово.', 'Done.'))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
@@ -477,18 +466,13 @@ class App:
             self.q.put(('call', lambda: self.checked.clear()))
         self.run(w)
 
-    def do_assets(self):
-        if not self.check_closed(): self.render(); return
-        ids = [m['id'] for m in self.mods() if m.get('assets')]
-        self.run(lambda: core.build_assets(self.game, ids, self.say))
-
     def open_mods(self):
         p = os.path.join(self.game, 'Mods'); os.makedirs(p, exist_ok=True)
         try: os.startfile(p)
         except Exception: subprocess.Popen(['xdg-open', p])
 
 def main():
-    tld_assets.RU = RU
+    game_find.RU = RU
     try:   # own taskbar entry, so Windows shows our icon and not python's
         import ctypes
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('EMPEROR.TLDModsLauncher')

@@ -82,13 +82,11 @@ The barrel and the kettle are lit outdoors only. A station can be picked up or m
 ## Прочее / Other
 
 - Копчёное мясо и рыба (но не консервы и не колбасы) бывают у Торговца (DLC Tales).
-- Кооп: станции и их содержимое видны и меняются у обоих игроков (нужен CoopByEMPEROR, тот же мод у обоих).
 - Состояние бочек и котлов хранится по мирам в `Mods/SmokehouseByEMPEROR/saves`. Старая папка `SmokehouseBySeagull`
   переносится сама при первом запуске.
 - Ctrl+Shift+F8 (тестовые предметы) работает, только если в настройках включено TestKeys; по умолчанию выключено.
 
 - Smoked meat and fish (not the cans or sausages) can show up at the Trader (Tales DLC).
-- Co-op: the stations and what is in them are shared between both players (needs CoopByEMPEROR, same mod on both sides).
 - The state of barrels and kettles is kept per world in `Mods/SmokehouseByEMPEROR/saves`. An old `SmokehouseBySeagull`
   folder is moved over by itself on the first start.
 - Ctrl+Shift+F8 (test items) works only when TestKeys is turned on in the settings; it is off by default.

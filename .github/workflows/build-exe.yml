@@ -1,5 +1,5 @@
-# Builds TLDModsLauncher.exe and TLDAssets.exe from the public source in this repository on GitHub's own
-# Windows machine, records where they came from (GitHub build attestation) and, when asked, puts them into
+# Builds TLDModsLauncher.exe from the public source in this repository on GitHub's own
+# Windows machine, records where it came from (GitHub build attestation) and, when asked, puts it into
 # the release together with SHA256SUMS.txt. Anyone can check a downloaded exe with:
 #   gh attestation verify TLDModsLauncher.exe --repo Saderto/TLDCoop
 name: Build exe
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: "Upload to the release (TLDModsLauncher.exe, TLDAssets.exe inside the mod zips, SHA256SUMS.txt)"
+        description: "Upload to the release (TLDModsLauncher.exe, SHA256SUMS.txt)"
         type: boolean
         default: false
       tag:
@@ -39,22 +39,19 @@ jobs:
         working-directory: TLDAssets
         run: |
           python -m PyInstaller --noconfirm TLDModsLauncher.spec
-          python -m PyInstaller --noconfirm TLDAssets.spec
       - name: Checksums
         working-directory: TLDAssets/dist
         shell: bash
-        run: sha256sum TLDModsLauncher.exe TLDAssets.exe | tee exe-sha256.txt
+        run: sha256sum TLDModsLauncher.exe | tee exe-sha256.txt
       - uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
             TLDAssets/dist/TLDModsLauncher.exe
-            TLDAssets/dist/TLDAssets.exe
       - uses: actions/upload-artifact@v4
         with:
           name: exe
           path: |
             TLDAssets/dist/TLDModsLauncher.exe
-            TLDAssets/dist/TLDAssets.exe
             TLDAssets/dist/exe-sha256.txt
 
       - name: Put into the release
@@ -67,23 +64,6 @@ jobs:
           set -e
           dist=TLDAssets/dist
           mkdir rel && cd rel
-          # the mod zips that carry TLDAssets.exe get the exe built here
-          for z in CoopByEMPEROR.zip ShotgunByEMPEROR.zip MilitaryStimByEMPEROR.zip CrankLampByEMPEROR.zip; do
-            gh release download "$TAG" --repo "$GITHUB_REPOSITORY" -p "$z"
-            python - "$z" "../$dist/TLDAssets.exe" <<'PY'
-          import sys, zipfile, os
-          src, exe = sys.argv[1], sys.argv[2]
-          tmp = src + '.new'
-          with zipfile.ZipFile(src) as zi, zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as zo:
-              for info in zi.infolist():
-                  if info.filename.replace('\\', '/') == 'Mods/TLDAssets.exe':
-                      zo.write(exe, 'Mods/TLDAssets.exe')
-                  else:
-                      zo.writestr(info, zi.read(info.filename))
-          os.replace(tmp, src)
-          PY
-            gh release upload "$TAG" "$z" --clobber --repo "$GITHUB_REPOSITORY"
-          done
           gh release upload "$TAG" "../$dist/TLDModsLauncher.exe" --clobber --repo "$GITHUB_REPOSITORY"
           # checksums of every file in the release
           gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --skip-existing -D all

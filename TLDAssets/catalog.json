@@ -62,101 +62,6 @@
  },
  "mods": [
   {
-   "id": "TLDCoop",
-   "zip": "CoopByEMPEROR.zip",
-   "version": "0.19.70",
-   "size": 34153936,
-   "detect": "Mods/CoopByEMPEROR.dll",
-   "legacy": {
-    "dll": "Mods/TLDCoop.dll",
-    "dir": "TLDCoop",
-    "dir_to": "CoopByEMPEROR"
-   },
-   "assets": true,
-   "title": {
-    "ru": "Кооператив",
-    "en": "Co-op"
-   },
-   "desc": {
-    "ru": "Игра вдвоём через Steam: общий мир хоста, звери, предметы, костры, погода, время. У обоих игроков должны стоять одни и те же моды.",
-    "en": "Play together over Steam: the host's shared world, animals, items, fires, weather, time. Both players need the same mods."
-   }
-  },
-  {
-   "id": "TLDShotgun",
-   "zip": "ShotgunByEMPEROR.zip",
-   "version": "0.1.35",
-   "size": 34406709,
-   "detect": "Mods/ShotgunByEMPEROR.dll",
-   "legacy": {
-    "dll": "Mods/TLDShotgun.dll",
-    "dir": "TLDShotgun",
-    "dir_to": "ShotgunByEMPEROR",
-    "files": {
-     "tldshotgun.bundle": "shotgunbyemperor.bundle",
-     "places.txt": "",
-     "spots.txt": ""
-    }
-   },
-   "assets": true,
-   "title": {
-    "ru": "Дробовик",
-    "en": "Shotgun"
-   },
-   "desc": {
-    "ru": "Дробовик из WINTERMUTE в режиме выживания, с патронами и навыком.",
-    "en": "The WINTERMUTE shotgun in survival, with shells and a skill."
-   }
-  },
-  {
-   "id": "TLDMilitaryStim",
-   "zip": "MilitaryStimByEMPEROR.zip",
-   "version": "0.1.7",
-   "size": 33699999,
-   "detect": "Mods/MilitaryStimByEMPEROR.dll",
-   "legacy": {
-    "dll": "Mods/TLDMilitaryStim.dll",
-    "dir": "TLDMilitaryStim",
-    "dir_to": "MilitaryStimByEMPEROR",
-    "files": {
-     "tldmilitarystim.bundle": "militarystimbyemperor.bundle"
-    }
-   },
-   "assets": true,
-   "title": {
-    "ru": "Военный стимулятор",
-    "en": "Military stim"
-   },
-   "desc": {
-    "ru": "Военный стимулятор из WINTERMUTE в режиме выживания.",
-    "en": "The WINTERMUTE military stim in survival."
-   }
-  },
-  {
-   "id": "TLDCrankLamp",
-   "zip": "CrankLampByEMPEROR.zip",
-   "version": "0.4.3",
-   "size": 33715850,
-   "detect": "Mods/CrankLampByEMPEROR.dll",
-   "legacy": {
-    "dll": "Mods/TLDCrankLamp.dll",
-    "dir": "TLDCrankLamp",
-    "dir_to": "CrankLampByEMPEROR",
-    "files": {
-     "tldcranklamp.bundle": "cranklampbyemperor.bundle"
-    }
-   },
-   "assets": true,
-   "title": {
-    "ru": "Фонарь с ручкой",
-    "en": "Crank lamp"
-   },
-   "desc": {
-    "ru": "Фонарь с динамо-ручкой из WINTERMUTE: заряжается вручную, изнашивается.",
-    "en": "The WINTERMUTE crank lamp: charged by hand, wears out."
-   }
-  },
-  {
    "id": "SmokesBySeagull",
    "zip": "SmokesByEMPEROR.zip",
    "version": "0.1.134",
@@ -242,8 +147,8 @@
     "en": "Jellyfish"
    },
    "desc": {
-    "ru": "Медузы северного моря: всплывают в лунках на морском льду, живут в банке или аквариуме, плавают и светятся. Для коопа нужен кооп 0.19.69+.",
-    "en": "Jellyfish of the northern sea: they float up in holes on sea ice and live in a jar or an aquarium, swimming and glowing. Co-op needs Co-op 0.19.69+."
+    "ru": "Медузы северного моря: всплывают в лунках на морском льду, живут в банке или аквариуме, плавают и светятся.",
+    "en": "Jellyfish of the northern sea: they float up in holes on sea ice and live in a jar or an aquarium, swimming and glowing."
    }
   },
   {

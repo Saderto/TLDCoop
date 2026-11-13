@@ -50,15 +50,6 @@ and glows. It gives no food, bait or other benefit: it is just a beautiful thing
 jellyfish, львиная грива / lion's mane, северная морская крапива / sea nettle, хрустальная медуза / crystal jelly, морской крыжовник /
 comb jelly, шлемовидная медуза / helmet jellyfish (только ночью / night only).
 
-## Кооп / Co-op
-
-Нужен **CoopByEMPEROR 0.19.69** или новее, у обоих игроков одни и те же версии. Медузу в лунке видят все рядом, окно ловли
-получает каждый в пределах 6 м, забирает первый, кто прошёл игру с клавишами (решает хост); пока кто-то ловит, медуза у остальных не тонет. Аквариумы у всех одинаковые; действия друга идут через хоста.
-
-Needs **CoopByEMPEROR 0.19.69** or newer, both players on the same versions. Everyone nearby sees the jellyfish in the hole, everyone
-within 6 m gets the catch panel, and the first to finish the key game gets it (the host decides); while someone is catching, it does not sink for the others. Aquariums are the same for everyone; the friend's
-actions go through the host.
-
 ## Настройки / Settings
 
 `UserData/MelonPreferences.cfg`, раздел / section `[JellyfishByEMPEROR]`:
