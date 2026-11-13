@@ -408,8 +408,8 @@
     "en": "TLDCompat258 shim"
    },
    "desc": {
-    "ru": "Прослойка для старых чужих модов, исправленных трейнером под игру 2.58+ (ComplexLogger 1.0.8, FoodPackByTKG, Personality). Нужна, если у вас исправленный ComplexLogger.",
-    "en": "Shim for older third-party mods patched by the trainer for game 2.58+ (ComplexLogger 1.0.8, FoodPackByTKG, Personality). Needed with the patched ComplexLogger."
+    "ru": "Нужна только старым чужим модам, которые мы чинили под игру 2.58 (ComplexLogger 1.0.8, FoodPack от TKG, Personality). Моды EMPEROR и наш ComplexLogger 1.0.9 без неё работают. Если не уверены, ставьте: весит 2 КБ и ничему не мешает.",
+    "en": "Only needed by older third-party mods we patched for game 2.58 (ComplexLogger 1.0.8, FoodPack by TKG, Personality). EMPEROR mods and our ComplexLogger 1.0.9 work without it. If unsure, install it: 2 KB, harmless."
    }
   }
  ]
