@@ -20,7 +20,7 @@ internal static class Words
 		["FOODBALANCE_AUTUMN"] = ("Autumn Comforts", "Autumn Comforts"),
 		["FOODBALANCE_MOD_DESC"] = ("Сколько еды этого мода на картах и в контейнерах. На картах шанс не поднимается выше 100%, поэтому 200% дают немного меньше двойного количества.", "How much of this mod's food on maps and in containers. On maps a chance stops at 100%, so 200% gives a little less than double."),
 		["FOODBALANCE_SEAGULL"] = ("Food Pack by EMPEROR", "Food Pack by EMPEROR"),
-		["FOODBALANCE_SEAGULL_DESC"] = ("Сколько нашей еды на картах и в контейнерах. Саке и карточки рецептов не меняются.", "How much of our food on maps and in containers. Sake and recipe cards don't change."),
+		["FOODBALANCE_SEAGULL_DESC"] = ("Сколько еды Food Pack by EMPEROR на картах и в контейнерах. Саке и карточки рецептов не меняются.", "How much Food Pack by EMPEROR food on maps and in containers. Sake and recipe cards don't change."),
 		["FOODBALANCE_SECTION_GAME"] = ("Еда самой игры", "The game's own food"),
 		["FOODBALANCE_GAME_BOXES"] = ("В контейнерах", "In containers"),
 		["FOODBALANCE_GAME_BOXES_DESC"] = ("Сколько игровой еды в контейнерах: шкафах, рюкзаках, машинах. Вода не меняется.", "How much of the game's food in containers: cupboards, backpacks, cars. Water doesn't change."),
