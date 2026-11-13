@@ -64,8 +64,8 @@
   {
    "id": "TLDCoop",
    "zip": "CoopByEMPEROR.zip",
-   "version": "0.19.69",
-   "size": 34146930,
+   "version": "0.19.70",
+   "size": 34147344,
    "detect": "Mods/CoopByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDCoop.dll",
