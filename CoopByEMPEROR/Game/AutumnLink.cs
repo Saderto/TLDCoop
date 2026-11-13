@@ -62,6 +62,68 @@ namespace CoopByEMPEROR.Game
                 catch (Exception e) { MelonLogger.Warning($"[моды] AutumnComforts {m.Name}: {e.Message}"); }
             }
             MelonLogger.Msg($"[моды] AutumnComforts: временные вещи для материалов не создаются в кооп-сессии ({ok} методов, вызовов {_swapped})");
+            PatchHarvest(h);
+        }
+
+        // AutumnComforts 1.0.2: разделка и вырезание тыквы создают вещь в мире (GearItem.InstantiateGearItem) и отдают её
+        // в PlayerManager.InstantiateItemInPlayerInventory(GearItem), который кладёт в рюкзак копию. Созданная вещь
+        // оставалась лежать в мире (в 1.0.0 мод брал префаб и лишнего не было). Запоминаем вещи, созданные за время
+        // OnActionFinished, и после него удаляем те, что не попали в рюкзак. Так и в одиночной игре, и в коопе.
+        private static readonly List<GearItem> HarvestTemps = new();
+        private static int _harvestDepth, _harvestRemoved;
+
+        private static void PatchHarvest(HarmonyLib.Harmony h)
+        {
+            MethodInfo m = null;
+            try
+            {
+                var t = AccessTools.TypeByName("AutumnComforts.HarvestButton");
+                m = t != null ? AccessTools.Method(t, "OnActionFinished") : null;
+            }
+            catch { }
+            if (m == null) return;
+            try
+            {
+                h.Patch(m, prefix: new HarmonyMethod(typeof(AutumnLink), nameof(HarvestPrefix)),
+                    finalizer: new HarmonyMethod(typeof(AutumnLink), nameof(HarvestFinalizer)));
+                h.Patch(AccessTools.Method(typeof(GearItem), nameof(GearItem.InstantiateGearItem), new[] { typeof(string) }),
+                    postfix: new HarmonyMethod(typeof(AutumnLink), nameof(HarvestCreated)));
+                MelonLogger.Msg("[моды] AutumnComforts: лишние вещи после разделки тыквы будут удаляться");
+            }
+            catch (Exception e) { MelonLogger.Warning("[моды] AutumnComforts, разделка тыквы: " + e.Message); }
+        }
+
+        private static void HarvestPrefix() => _harvestDepth++;
+
+        private static void HarvestCreated(GearItem __result)
+        {
+            if (_harvestDepth > 0 && __result != null) HarvestTemps.Add(__result);
+        }
+
+        private static Exception HarvestFinalizer(Exception __exception)
+        {
+            if (_harvestDepth > 0) _harvestDepth--;
+            if (_harvestDepth == 0 && HarvestTemps.Count > 0)
+            {
+                bool q = ItemSync.Quiet;
+                ItemSync.Quiet = true;
+                try
+                {
+                    foreach (var gi in HarvestTemps)
+                    {
+                        try
+                        {
+                            if (gi == null || gi.gameObject == null || gi.m_InPlayerInventory || gi.m_InsideContainer) continue;
+                            gi.gameObject.SetActive(false);
+                            UnityEngine.Object.Destroy(gi.gameObject);
+                            if (_harvestRemoved++ < 5) MelonLogger.Msg($"[моды] AutumnComforts: удалил лишнюю вещь после разделки тыквы ({gi.name})");
+                        }
+                        catch { }
+                    }
+                }
+                finally { ItemSync.Quiet = q; HarvestTemps.Clear(); }
+            }
+            return __exception;
         }
 
         private static IEnumerable<CodeInstruction> Swap(IEnumerable<CodeInstruction> code)
