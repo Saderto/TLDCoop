@@ -45,7 +45,7 @@
    "asset": "AlcoholMod.dll",
    "tag": "3.0.1",
    "path": "Mods/AlcoholMod.dll",
-   "note": "3.0.1 No3371, original ds5678 (MIT); pinned: newer versions only after a check with our mods"
+   "note": "3.0.1 No3371, original ds5678 (MIT); pinned: newer versions only after a check with my mods"
   },
   "SmokesAudioOn": {
    "zip": "SmokesAudioOnByEMPEROR.zip",
@@ -408,8 +408,8 @@
     "en": "TLDCompat258 shim"
    },
    "desc": {
-    "ru": "Нужна только старым чужим модам, которые мы чинили под игру 2.58 (ComplexLogger 1.0.8, FoodPack от TKG, Personality). Моды EMPEROR и наш ComplexLogger 1.0.9 без неё работают. Если не уверены, ставьте: весит 2 КБ и ничему не мешает.",
-    "en": "Only needed by older third-party mods we patched for game 2.58 (ComplexLogger 1.0.8, FoodPack by TKG, Personality). EMPEROR mods and our ComplexLogger 1.0.9 work without it. If unsure, install it: 2 KB, harmless."
+    "ru": "Нужна только старым чужим модам, которые я починил под игру 2.58 (ComplexLogger 1.0.8, FoodPack от TKG, Personality). Мои моды и мой ComplexLogger 1.0.9 без неё работают. Если не уверены, ставьте: весит 2 КБ и ничему не мешает.",
+    "en": "Only needed by older third-party mods I patched for game 2.58 (ComplexLogger 1.0.8, FoodPack by TKG, Personality). My mods and my ComplexLogger 1.0.9 work without it. If unsure, install it: 2 KB, harmless."
    }
   }
  ]

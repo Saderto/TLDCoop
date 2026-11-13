@@ -66,9 +66,9 @@ original sources were lost): it builds and works the same, but has no comments a
 | остальные / the rest | ничего / nothing |
 
 `TLDCompat258.zip` (папка `UserLibs`, код в `TrainerByEMPEROR/Compat`): прослойка для старых чужих модов (ComplexLogger, FoodPackByTKG,
-Personality), исправленных трейнером под игру 2.58+. Нашим модам напрямую не нужна, но нужна исправленному ComplexLogger 1.0.8.
+Personality), которые я починил под игру 2.58+. Моим модам и моему ComplexLogger 1.0.9 не нужна.
 `TLDCompat258.zip` (`UserLibs`, source in `TrainerByEMPEROR/Compat`): a shim for older third-party mods (ComplexLogger, FoodPackByTKG,
-Personality) patched by the trainer for game 2.58+. Not used by these mods directly, but the patched ComplexLogger 1.0.8 needs it.
+Personality) I patched for game 2.58+. My mods and my ComplexLogger 1.0.9 don't need it.
 
 Плагин `SmokesAudioOnByEMPEROR` (исходник в `SmokesByEMPEROR/audioon`): игра выключает встроенный звук Unity, а SmokesByEMPEROR играет
 свои звуки через него. Плагин перед запуском игры включает его (меняет один байт в `globalgamemanagers`, копию оригинала

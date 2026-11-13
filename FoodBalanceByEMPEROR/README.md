@@ -11,7 +11,7 @@ Food balance for The Long Dark. Settings sliders: how much food of each food mod
 - «Overall»: вся еда сразу. / All food at once.
 - «Food Pack by TKG», «Foods by Calorie Waltz», «Retro Food», «Autumn Comforts»: паки еды других авторов, если они стоят. /
   Food packs by other authors, when installed.
-- «Food Pack by EMPEROR»: наш [FoodPackByEMPEROR](../FoodPackByEMPEROR). / Our food pack.
+- «Food Pack by EMPEROR»: мой [FoodPackByEMPEROR](../FoodPackByEMPEROR). / My food pack.
 - «In containers», «On maps»: еда самой игры. / The game's own food.
 
 100 = как без мода, 0 = нет совсем, 200 = примерно вдвое больше. / 100 = as without the mod, 0 = none, 200 = about twice as much.
