@@ -1,3 +1,4 @@
+using System.Reflection;
 using HarmonyLib;
 using Il2Cpp;
 
@@ -5,13 +6,10 @@ namespace FoodBalanceByEMPEROR;
 
 // ModSettings writes a slider's hint once, when it builds the menu, so after switching the game language
 // the hint stayed in the old language. After ModSettings shows a hint, swap our text to the current language.
-[HarmonyPatch(typeof(Panel_CustomXPSetup), "UpdateMenuNavigation")]
 internal static class HintLanguage
 {
-	[HarmonyPriority(0)]
-	private static void Postfix(Panel_CustomXPSetup __instance)
+	internal static void Fix(UILabel label)
 	{
-		UILabel label = __instance.m_TooltipLabel;
 		if (label == null) return;
 		string text = label.text;
 		if (string.IsNullOrEmpty(text)) return;
@@ -32,5 +30,39 @@ internal static class HintLanguage
 				return;
 			}
 		}
+	}
+}
+
+// Options > Mod Settings: the hint next to the selected slider.
+[HarmonyPatch]
+internal static class HintLanguageOptions
+{
+	// If ModSettings changes, skip this patch instead of failing the others.
+	private static bool Prepare()
+	{
+		return AccessTools.Method("ModSettings.ModSettingsGUI:UpdateDescriptionLabel") != null;
+	}
+
+	private static MethodBase TargetMethod()
+	{
+		return AccessTools.Method("ModSettings.ModSettingsGUI:UpdateDescriptionLabel");
+	}
+
+	[HarmonyPriority(0)]
+	private static void Postfix()
+	{
+		Panel_OptionsMenu panel = InterfaceManager.GetPanel<Panel_OptionsMenu>();
+		if (panel != null) HintLanguage.Fix(panel.m_OptionDescriptionLabel);
+	}
+}
+
+// Custom game mode settings page.
+[HarmonyPatch(typeof(Panel_CustomXPSetup), "UpdateMenuNavigation")]
+internal static class HintLanguageCustomMode
+{
+	[HarmonyPriority(0)]
+	private static void Postfix(Panel_CustomXPSetup __instance)
+	{
+		HintLanguage.Fix(__instance.m_TooltipLabel);
 	}
 }

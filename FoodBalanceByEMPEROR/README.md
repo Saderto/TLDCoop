@@ -4,7 +4,7 @@
 
 Food balance for The Long Dark. Settings sliders: how much food of each food mod spawns on maps and in containers.
 
-Версия / Version: **1.0.5**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
+Версия / Version: **1.0.6**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Ползунки / Sliders
 

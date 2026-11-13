@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 using FoodBalanceByEMPEROR;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(Mod), "FoodBalanceByEMPEROR", "1.0.5", "EMPEROR", null)]
+[assembly: MelonInfo(typeof(Mod), "FoodBalanceByEMPEROR", "1.0.6", "EMPEROR", null)]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 [assembly: MelonAdditionalDependencies(new string[] { "ModSettings" })]
 [assembly: AssemblyCompany("FoodBalanceByEMPEROR")]
