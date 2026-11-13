@@ -4,6 +4,8 @@
 
 Smokes for The Long Dark. Cigarettes, cigars, pipes, tobacco and lighters with their own sounds and effects. The SmokesAudioOnByEMPEROR sound plugin is included.
 
+![Сигарета в руке на вышке / A cigarette in hand on a lookout](screenshot.jpg)
+
 Версия / Version: **0.1.134**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install

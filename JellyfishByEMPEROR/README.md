@@ -10,6 +10,8 @@ and glows. It gives no food, bait or other benefit: it is just a beautiful thing
 
 ![Медузы в банках и в аквариуме / Jellyfish in jars and an aquarium](preview.jpg)
 
+![Аквариум и банки с медузами в игре / The aquarium and jellyfish jars in the game](screenshot.jpg)
+
 ## Как поймать / How to catch one
 
 - Только на морском льду: Coastal Highway, Desolation Point, Bleak Inlet, Forsaken Airfield. В озёрах и реках медуз нет.

@@ -8,6 +8,8 @@ hot or cold smoked, cans are boiled in the kettle, sausages are made at the tabl
 
 ![Бочка, котёл, стол и колбасы / Barrel, kettle, table and sausages](preview.jpg)
 
+![Бочка, стол для колбас и котёл в игре / The barrel, sausage table and kettle in the game](screenshot.jpg)
+
 ## Станции / Stations
 
 Всё делается на верстаке. Начатую станцию можно бросить: она остаётся предметом «недостроенная …», и на верстаке её

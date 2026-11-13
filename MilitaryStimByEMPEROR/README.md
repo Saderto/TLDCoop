@@ -4,6 +4,8 @@
 
 Military stim for The Long Dark. The WINTERMUTE military stim in survival.
 
+![Военный стимулятор / The military stim](screenshot.jpg)
+
 Версия / Version: **0.1.7**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Что делает / What it does

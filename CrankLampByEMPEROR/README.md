@@ -4,6 +4,8 @@
 
 Crank lamp for The Long Dark. The WINTERMUTE crank lamp: charged by hand, wears out.
 
+![Фонарь с ручкой / The crank lamp](screenshot.jpg)
+
 Версия / Version: **0.4.3**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install

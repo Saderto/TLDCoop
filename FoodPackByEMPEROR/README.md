@@ -4,6 +4,8 @@
 
 Food and drinks for The Long Dark. New food, drinks and dishes with effects, found on maps and in containers. AlcoholMod is installed with it: drinks make you drunk.
 
+![Еда мода на столе / Food from the mod on a table](screenshot.jpg)
+
 Версия / Version: **1.1.1**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install

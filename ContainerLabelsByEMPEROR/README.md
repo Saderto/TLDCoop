@@ -4,6 +4,10 @@
 
 Container labels for The Long Dark. Your own labels and colours on lockers and boxes.
 
+![Подпись на шкафу / A label on a cabinet](screenshot.jpg)
+
+![Подпись и её цвет в окне контейнера / The label and its colour in the container window](screenshot2.jpg)
+
 Версия / Version: **0.6.1**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install

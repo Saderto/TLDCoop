@@ -4,6 +4,8 @@
 
 Trail markers for The Long Dark. Trail markers you place so you don't get lost; can be shown on the map.
 
+![Метка в метель у Загадочного озера / A marker in a blizzard at Mystery Lake](screenshot.jpg)
+
 Версия / Version: **0.4.6**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install

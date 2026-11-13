@@ -4,6 +4,8 @@
 
 Inventory search for The Long Dark. A search box in the backpack and in containers.
 
+![Поиск по рюкзаку и контейнеру / Search in the backpack and the container](screenshot.jpg)
+
 Версия / Version: **0.6.1**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install
