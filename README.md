@@ -97,6 +97,12 @@ needs, and builds the story files itself.
 
 - Обновления: при запуске он читает список модов `TLDAssets/catalog.json` отсюда и показывает «есть обновление».
   Updates: on start it reads the mod list `TLDAssets/catalog.json` from here and shows "update available".
+- Кнопка «Автообновление: вкл» ставит плагин `Plugins\AutoUpdateByEMPEROR.dll` (код в `TLDAssets/autoupdate`). При каждом
+  запуске игры он до загрузки модов сверяется с тем же списком и обновляет моды, поставленные лаунчером, тем же способом
+  (с проверкой `SHA256SUMS.txt`). Без интернета игра просто запускается с теми модами, что есть. Выключается той же кнопкой.
+  The "Auto update: on" button puts the `Plugins\AutoUpdateByEMPEROR.dll` plugin in (source in `TLDAssets/autoupdate`). Each time
+  the game starts, before the mods load, it checks the same list and updates the mods the launcher installed the same way
+  (checked against `SHA256SUMS.txt`). Offline the game just starts with the mods it has. The same button turns it off.
 - «Удалить» убирает только файлы, которые поставил сам лаунчер; сохранения и настройки остаются. Что он поставил,
   записано в `Mods\EMPERORMods.json`. / "Remove" deletes only the files the launcher installed (listed in
   `Mods\EMPERORMods.json`); saves and settings stay.

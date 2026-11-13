@@ -260,6 +260,10 @@ class App:
             p.text(T('Отмечено: %d, %s', 'Checked: %d, %s') % (len(ch), size_txt(sum(m.get('size', 0) for m in ch))), L + 330, y, 13, ui.DIM)
         elif self.libupd:
             p.text(T('Есть обновления библиотек: %d', 'Library updates: %d') % len(self.libupd), L + 330, y, 13, ui.AMBER)
+        if self.cat and (self.cat.get('libs') or {}).get(core.AUTO):
+            on = core.auto_update_on(self.game, self.cat)
+            self.btn(p, 'auto', T('Автообновление: вкл', 'Auto update: on') if on else T('Автообновление: выкл', 'Auto update: off'),
+                     R - 125, y, 250, 28, self.do_auto, en, 13)
         # list
         self.draw_list(p)
         # actions
@@ -386,6 +390,23 @@ class App:
                 core.install_melonloader(self.game, self.cat['melonloader'], tmp, self.say, self.progress)
                 self.say(T('MelonLoader установлен. Первый запуск игры после него долгий (несколько минут): так и должно быть.',
                            'MelonLoader installed. The first game start after it takes a few minutes: that is expected.'))
+            finally: shutil.rmtree(tmp, ignore_errors=True)
+        self.run(w)
+
+    def do_auto(self):
+        """Puts the auto update plugin into Plugins (or takes it out): it updates the installed mods each time the game starts."""
+        if not self.check_closed(): self.render(); return
+        on = not core.auto_update_on(self.game, self.cat)
+        def w():
+            tmp = tempfile.mkdtemp(prefix='tldmods_')
+            try:
+                core.set_auto_update(self.game, self.cat, on, self.manifest, tmp, self.say, self.progress)
+                core.write_manifest(self.game, self.manifest)
+                self.say(T('Автообновление включено: при каждом запуске игры моды обновятся сами, если вышла новая версия.',
+                           'Auto update is on: each time the game starts, the mods update themselves when a new version is out.') if on else
+                         T('Автообновление выключено.', 'Auto update is off.'))
+            except Exception as e:
+                self.say(T('  не вышло: ', '  failed: ') + str(e))
             finally: shutil.rmtree(tmp, ignore_errors=True)
         self.run(w)
 

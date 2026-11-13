@@ -7,7 +7,7 @@ import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, u
 import tld_assets
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.7'
+LAUNCHER_VERSION = '1.0.8'
 DISCORD_URL = 'https://discord.gg/ezT7PRZmuS'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
 MANIFEST = 'Mods/EMPERORMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
@@ -111,6 +111,19 @@ def mod_state(game, mod, manifest):
     if not rec: return 'unknown', None
     if renamed and not present: return 'update', rec.get('version')
     return ('installed' if rec.get('version') == mod['version'] else 'update'), rec.get('version')
+
+AUTO = 'AutoUpdate'   # catalog lib: the plugin that updates the mods when the game starts (Plugins/AutoUpdateByEMPEROR.dll)
+
+def auto_update_on(game, cat):
+    lib = (cat or {}).get('libs', {}).get(AUTO)
+    return bool(game and lib and lib_present(game, lib))
+
+def set_auto_update(game, cat, on, manifest, tmpdir, log=lambda s: None, progress=None):
+    lib = cat['libs'][AUTO]
+    if on:
+        install_lib(game, AUTO, lib, tmpdir, log, progress, cat, manifest)
+    else:
+        uninstall(game, {'id': AUTO, 'detect': lib['path']}, manifest, log)
 
 def lib_present(game, lib):
     return os.path.isfile(os.path.join(game, lib['path']))

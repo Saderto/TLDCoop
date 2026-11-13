@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>AutoUpdateByEMPEROR</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DebugType>none</DebugType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <RefsDir Condition="'$(RefsDir)' == ''">..\..\shotgun\refs-2.59</RefsDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(RefsDir)\MelonLoader.dll" Private="false" />
+  </ItemGroup>
+</Project>
