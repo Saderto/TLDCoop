@@ -6,8 +6,6 @@ Shotgun for The Long Dark. The WINTERMUTE shotgun in survival, with shells and a
 
 ![Дробовик под крылом самолёта / The shotgun under the plane wing](screenshot.jpg)
 
-![Место крушения самолёта в метель / The plane crash site in a blizzard](screenshot2.jpg)
-
 Версия / Version: **0.1.35**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install
