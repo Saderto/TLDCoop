@@ -280,8 +280,8 @@
   {
    "id": "FoodBalanceBySeagull",
    "zip": "FoodBalanceByEMPEROR.zip",
-   "version": "1.0.1",
-   "size": 16544,
+   "version": "1.0.2",
+   "size": 16503,
    "detect": "Mods/FoodBalanceByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodBalanceBySeagull.dll",

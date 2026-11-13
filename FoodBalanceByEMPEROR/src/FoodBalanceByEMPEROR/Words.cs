@@ -14,7 +14,7 @@ internal static class Words
 		["FOODBALANCE_GENERAL"] = ("Общий множитель", "Overall"),
 		["FOODBALANCE_GENERAL_DESC"] = ("Умножается на ползунок источника. Действует только на ещё не посещённые места и не заполненные контейнеры.", "Multiplied by each source's slider. Applies only to places not yet visited and containers not yet filled."),
 		["FOODBALANCE_SECTION_MODS"] = ("Моды на еду", "Food mods"),
-		["FOODBALANCE_FOODPACK"] = ("Food Pack", "Food Pack"),
+		["FOODBALANCE_FOODPACK"] = ("Food Pack by TKG", "Food Pack by TKG"),
 		["FOODBALANCE_WALTZ"] = ("Foods by Calorie Waltz", "Foods by Calorie Waltz"),
 		["FOODBALANCE_RETRO"] = ("Retro Food", "Retro Food"),
 		["FOODBALANCE_AUTUMN"] = ("Autumn Comforts", "Autumn Comforts"),
