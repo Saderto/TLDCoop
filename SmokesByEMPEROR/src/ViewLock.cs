@@ -137,6 +137,79 @@ internal static class ViewLock
         lockCam = c;
     }
 
+    // the hands view of a level look: [0] cigarette or cigar, [1] pipe. Kept in UserData/SmokesByEMPEROR_handsview.txt
+    // built in (taken on the author's game 11-13 with a level look), so that the very first smoke lit looking down is right too;
+    // a file written by an older build, or by this one on another rig, takes their place
+    static readonly string[] kept =
+    {
+        "0.90705997 0.23505567 -0.34927237 0 -0.16868946 0.9630339 0.21002266 0 -0.3857282 0.13158457 -0.9131809 0 -0.29656446 0.30728996 -0.157421 1 0.9152154 -0.23546143 0.32701522 0 0.25703284 0.9661114 -0.023724835 0 -0.3103468 0.10576697 0.94472134 0 0.1437195 -0.27005577 0.2527148 1",
+        "0.9167855 0.25426623 -0.30798218 0 -0.23147587 0.9667086 0.10905675 0 -0.32545856 0.028691215 -0.94512105 0 -0.24992974 0.24251378 -0.07680489 1 0.9167626 -0.23144735 0.3255433 0 0.25427428 0.96670395 -0.028776541 0 -0.30804372 0.10915851 0.9450891 0 0.14385267 -0.20390081 0.16082765 1",
+    };
+    static bool keptLoaded;
+    static readonly bool[] keptFromFile = new bool[2];
+    static string KeptPath => System.IO.Path.Combine(MelonLoader.Utils.MelonEnvironment.UserDataDirectory, "SmokesByEMPEROR_handsview.txt");
+
+    static void LoadKept()
+    {
+        if (keptLoaded) return;
+        keptLoaded = true;
+        try
+        {
+            if (!System.IO.File.Exists(KeptPath)) return;
+            var lines = System.IO.File.ReadAllLines(KeptPath);
+            for (int i = 0; i < 2 && i < lines.Length; i++) if (Unpack(lines[i], out _, out _)) { kept[i] = lines[i].Trim(); keptFromFile[i] = true; }
+            Safe.Info($"Level hands view read: smoke {(kept[0].Length > 0)}, pipe {(kept[1].Length > 0)}");
+        }
+        catch (Exception e) { Safe.Log("Level hands view read", e); }
+    }
+
+    static void SaveKept()
+    {
+        try { System.IO.File.WriteAllLines(KeptPath, kept); }
+        catch (Exception e) { Safe.Log("Level hands view write", e); }
+    }
+
+    static string Pack(Matrix4x4 a, Matrix4x4 b)
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int m = 0; m < 2; m++)
+            for (int i = 0; i < 16; i++)
+                sb.Append((m == 0 ? a : b)[i].ToString("R", System.Globalization.CultureInfo.InvariantCulture)).Append(' ');
+        return sb.ToString().TrimEnd();
+    }
+
+    static bool Unpack(string? s, out Matrix4x4 a, out Matrix4x4 b)
+    {
+        a = b = Matrix4x4.identity;
+        if (string.IsNullOrWhiteSpace(s)) return false;
+        var p = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (p.Length != 32) return false;
+        for (int i = 0; i < 32; i++)
+        {
+            if (!float.TryParse(p[i], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var f) || float.IsNaN(f) || float.IsInfinity(f)) return false;
+            if (i < 16) a[i] = f; else b[i - 16] = f;
+        }
+        return true;
+    }
+
+    /// <summary>The turn (about the camera's own right) that brings the hands camera's look back to the horizon; the angle is how far
+    /// it looks down (+) or up (-), in degrees.</summary>
+    public static float LevelTurn(Camera? c, out Quaternion turn)
+    {
+        turn = Quaternion.identity;
+        try
+        {
+            if (c == null || !c || !Settings.LevelLock.Value) return 0f;
+            var t = c.transform;
+            var flat = Vector3.ProjectOnPlane(t.forward, Vector3.up);
+            if (flat.sqrMagnitude < 1e-4f) return 0f;
+            float ang = Vector3.SignedAngle(t.forward, flat.normalized, t.right);
+            turn = Quaternion.AngleAxis(ang, t.right);
+            return -ang;
+        }
+        catch { return 0f; }
+    }
+
     /// <summary>Called once, when the smoke has settled at rest in the hand: the camera as the game has it now is kept against the smoke.</summary>
     public static void Anchor(Camera? c, Vector2? restOnScreen = null)
     {
@@ -146,11 +219,22 @@ internal static class ViewLock
             c.ResetWorldToCameraMatrix();
             var b = B!;
             var camToWorld = c.worldToCameraMatrix.inverse;
+            // 11-13 (user: lighting up while looking down broke the arm): the hands camera pitches with the look and the arms do not, so a
+            // lock taken while looking down (or up) saw the hand from a tilted view for the whole smoke. The camera is first levelled
+            // (turned about itself back to the horizon), so the lock is the same whatever the look was when lighting up
+            float tilt = LevelTurn(c, out var lev);
+            if (Mathf.Abs(tilt) > .05f)
+            {
+                var at = (Vector3)camToWorld.GetColumn(3);
+                camToWorld = Matrix4x4.TRS(at, lev, Vector3.one) * Matrix4x4.TRS(-at, Quaternion.identity, Vector3.one) * camToWorld;
+                Safe.Info($"Hands view levelled by {tilt:0.0} deg before the lock (lit while looking {(tilt > 0f ? "down" : "up")})");
+            }
+            var worldToCam = camToWorld.inverse;
             if (restOnScreen.HasValue)
             {
                 // the held smoke always at the same place on the view, however the head was turned when the lock was taken
                 var pm = c.projectionMatrix;
-                var p = c.worldToCameraMatrix.MultiplyPoint3x4(Prop.position);
+                var p = worldToCam.MultiplyPoint3x4(Prop.position);
                 var v = restOnScreen.Value;
                 var want = new Vector3((v.x * 2f - 1f) / pm.m00, (v.y * 2f - 1f) / pm.m11, -1f).normalized;
                 if (p.sqrMagnitude > 1e-6f && p.z < 0f)
@@ -163,6 +247,25 @@ internal static class ViewLock
             restToCam = b.worldToLocalMatrix * camToWorld;
             restInFrame = Frame.worldToLocalMatrix * b.localToWorldMatrix;
             ourMove = Matrix4x4.identity;
+            // 11-13 (log 2001, 0.1.126): the game itself shifts the arms in their frame with the look (0.36 m between looking down and up),
+            // so a lock taken while looking far down or up stood in the wrong place once the look came back, levelled or not. The lock
+            // of a smoke lit with a level look is kept (for good, in the settings) and used whenever one is lit looking down or up
+            int slot = restOnScreen.HasValue ? 0 : 1;
+            LoadKept();
+            if (Mathf.Abs(tilt) < 15f)
+            {
+                // written to its own file at once, the first time: the game often hangs on exit and settings are then never saved
+                // the built-in view stays unless a file from an earlier build is there (then that one is kept up to date in memory only)
+                // kept up to date in the file too (the hand's rest pose may change between builds)
+                var now = Pack(restToCam, restInFrame);
+                if (now != kept[slot]) { kept[slot] = now; SaveKept(); }
+            }
+            else if (Settings.LevelLock.Value && Unpack(kept[slot], out var k1, out var k2))
+            {
+                restToCam = k1; restInFrame = k2;
+                Safe.Info($"Lit while looking {tilt:0} deg {(tilt > 0f ? "down" : "up")}: the hands view of a level look is used");
+            }
+            else Safe.Info($"Lit while looking {tilt:0} deg off level and no level hands view kept yet: locked as it stands");
             lockCam = c;
             cam = c;
             Locked = true;

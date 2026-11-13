@@ -8,7 +8,7 @@ namespace SmokesByEMPEROR;
 /// <summary>Cigarettes, cigars and pipes: smoked on the move, held like a torch, with drags, exhaled smoke and the effects the owner chose.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.1.125";
+    public const string VersionText = "0.1.134";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SmokesByEMPEROR");
 

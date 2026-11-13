@@ -32,6 +32,8 @@ public static class Visual
     static bool pipeHandSet, pipeHeldAsMouth;
 
     /// <summary>The smoke as it lies in the resting hand, in the eye bone's space: the start of every move to the mouth.</summary>
+    static Vector3 shownLocal, savedShownLocal; static Quaternion shownRot = Quaternion.identity, savedShownRot = Quaternion.identity;
+
     static void KeepRest()
     {
         if (prop == null || eyeBone == null) return;
@@ -43,6 +45,17 @@ public static class Visual
         Eye(out var ep, out var eq);
         var rp = pipeHeldAsMouth ? heldPos0 : prop.transform.position;
         var rr = pipeHeldAsMouth ? heldRot0 : prop.transform.rotation;
+        // as it really lies in the hand: what the hand is held to at rest (18:16 user: with a cigarette the hand jerked for a frame when
+        // taken out, because for the frames before the lock it was held to the pose without the wrist limit)
+        shownLocal = Quaternion.Inverse(eq) * (rp - ep);
+        shownRot = Quaternion.Inverse(eq) * rr;
+        if (!pipeHeldAsMouth && Hands.Wrist != null && Quaternion.Angle(restFree, Quaternion.identity) > .01f)
+        {
+            // a cigarette: the rest pose as it would be with the wrist not limited (see RestHand)
+            var wp = Hands.Wrist.position;
+            rp = wp + restFree * (rp - wp);
+            rr = restFree * rr;
+        }
         restLocal = Quaternion.Inverse(eq) * (rp - ep);
         restRot = Quaternion.Inverse(eq) * rr;
         haveRest = true;
@@ -187,7 +200,7 @@ public static class Visual
     {
         if (haveRest)
         {
-            savedRestLocal = restLocal; savedRestRot = restRot; savedPipeHand = pipeHandFromEye; savedPipeHandSet = pipeHandSet;
+            savedRestLocal = restLocal; savedRestRot = restRot; savedShownLocal = shownLocal; savedShownRot = shownRot; savedPipeHand = pipeHandFromEye; savedPipeHandSet = pipeHandSet;
             savedRestHave = true; savedRestAt = Time.unscaledTime;
         }
         restFixed = false;
@@ -195,6 +208,7 @@ public static class Visual
         upHave = false;
         faceHave = false;
         restDirHave = false;
+        restFree = Quaternion.identity;
         Tune.Frozen = false;   // the hold key is for one smoke: the next starts in the hand
         UncarryArms();
         carried = null;
@@ -208,6 +222,7 @@ public static class Visual
             if (prop != null) UnityEngine.Object.Destroy(prop);
         }
         catch { }
+        FilterStain.Clear();
         prop = ember = halo = emberCap = null;
         tobaccoGlow = null;
         emberBand = null;
@@ -276,6 +291,7 @@ public static class Visual
             burn.Cut(z);
             keep = emberZ > 1e-4f ? z / emberZ : 1f;
         }
+        if (lit.Smoke == SmokeType.Cigarette) FilterStain.Set(Smoking.StainShare);
         keepNow = keep;
         var tip = lit.Smoke == SmokeType.Pipe ? pipeBowl : new Vector3(0f, 0f, emberZ * keep);
         if (ember != null) ember.transform.localPosition = tip;
@@ -287,11 +303,20 @@ public static class Visual
         var camT = cam != null ? cam.transform : null;
         if (halo != null)
         {
-            float size = (lit.Smoke == SmokeType.Cigarette ? .016f : lit.Smoke == SmokeType.Cigar ? .024f : .02f) * (1f + glow * .5f);
+            // 11-13 (user: "an orange circle under the model"): the glow was a disc twice as wide as a cigarette, drawn round its end.
+            // Now hardly wider than the smoke itself, fainter, and gone when the lit end is not turned to the eye
+            float size = (lit.Smoke == SmokeType.Pipe ? .02f : Mathf.Clamp(propRadius * 2.5f, .008f, .024f)) * (1f + glow * .3f);
             halo.transform.localScale = new Vector3(size, size, size);
             if (haveView) halo.transform.rotation = Quaternion.LookRotation(view.transform.forward, view.transform.up);
             else if (camT != null) halo.transform.rotation = Quaternion.LookRotation(halo.transform.position - camT.position, camT.up);
-            SetColor(halo, new Color(1f, .3f + .2f * glow, .06f, 1f) * k * .45f);
+            float seen = 1f;
+            var hw = WeaponCam();
+            if (lit.Smoke != SmokeType.Pipe && prop != null && hw != null && hw)
+            {
+                var eyeAt = (Vector3)hw.cameraToWorldMatrix.GetColumn(3);
+                seen = Mathf.Clamp01(.35f + Vector3.Dot(prop.transform.forward, (eyeAt - halo.transform.position).normalized));
+            }
+            SetColor(halo, new Color(1f, .3f + .2f * glow, .06f, 1f) * k * (lit.Smoke == SmokeType.Pipe ? .45f : .3f * seen));
         }
         if (light != null) light.intensity = .05f + .35f * glow;
         if (emberCap != null && emberCap.GetComponent<MeshRenderer>() is { } ecr && ecr.sharedMaterial != null)
@@ -310,10 +335,41 @@ public static class Visual
     public const float PipeHandsDown = 2.5f;
     public const float PipeOutroTime = 2.4f;
 
+    // 11-13 (user screenshots: an orange dot on the ground under the player while smoking): the lit item itself, which stays in the
+    // world at the player's feet while held, carries a point light (Items.EmberName, made for the friend's view in coop, plus the
+    // torch's own). In the player's own hands they are switched off; the friend's copy is another object and keeps its light
+    static IntPtr lightsFor;
+    static Light[]? ownLights;
+    static float ownFxNext;
+
+    static void OwnItemLights(GearItem? item)
+    {
+        try
+        {
+            if (item == null) return;
+            if (lightsFor != item.Pointer || ownLights == null)
+            {
+                lightsFor = item.Pointer;
+                ownLights = item.GetComponentsInChildren<Light>(true).ToArray();
+                Safe.Info($"Lit item's own lights switched off in the player's hands: {ownLights.Length}");
+            }
+            foreach (var l in ownLights) if (l != null && l && l.enabled) l.enabled = false;
+            // and the torch's own flame effects, wherever the game keeps them on the item
+            if (Time.unscaledTime >= ownFxNext)
+            {
+                ownFxNext = Time.unscaledTime + .5f;
+                foreach (var r in item.GetComponentsInChildren<ParticleSystemRenderer>(true)) if (r != null && r.enabled && !IsOurs(r.transform)) r.enabled = false;
+            }
+        }
+        catch (Exception e) { Safe.Log("Own item lights", e); }
+    }
+
     public static void Late(GearItem item, Def lit, float drag, float since, float outro)
     {
         FirstPersonWeapon? rig = null;
+        OwnItemLights(item);
         lateSince = since;
+        lateDrag = drag; lateOutro = outro;
         faceOk = drag <= 0f && outro < 0f && since >= .4f && !Tune.Frozen;
         try
         {
@@ -321,7 +377,8 @@ public static class Visual
             viewWeapon = weapon;
             if (rig != null && Hands.Palm(rig.transform) != null && lit.Smoke != SmokeType.Pipe) { Hands.Open(1f); if (lit.Smoke == SmokeType.Cigar) Hands.Spread(Settings.CigarSpread.Value * Mathf.Clamp(propRadius / .0095f, .6f, 1.5f));
                 // 11-09: slim cigarettes hung in the air between the fingers: the fingers close in by how much thinner than a regular one (r 3.9 mm)
-                else if (propRadius < .0037f && Settings.SlimSqueeze.Value > 0f) Hands.Spread(-Settings.SlimSqueeze.Value * Mathf.Clamp01((.0039f - propRadius) / .0013f)); };
+                else if (propRadius < .0037f && Settings.SlimSqueeze.Value > 0f) Hands.Spread(-Settings.SlimSqueeze.Value * Mathf.Clamp01((.0039f - propRadius) / .0013f));;
+                if (lit.Smoke == SmokeType.Cigarette) Hands.BendIndex(Settings.CigIndexBend.Value); };
         }
         catch (Exception e)
         {
@@ -337,7 +394,7 @@ public static class Visual
             // a smoke back from a scene change: the rest pose from before it, not one taken in the settling view
             if (ResumeLock && !haveRest && savedRestHave && Time.unscaledTime - savedRestAt < 120f)
             {
-                restLocal = savedRestLocal; restRot = savedRestRot; pipeHandFromEye = savedPipeHand; pipeHandSet = savedPipeHandSet;
+                restLocal = savedRestLocal; restRot = savedRestRot; shownLocal = savedShownLocal; shownRot = savedShownRot; pipeHandFromEye = savedPipeHand; pipeHandSet = savedPipeHandSet;
                 haveRest = true; restFixed = true; savedRestHave = false;
                 Safe.Info("Rest pose kept from before the scene change");
             }
@@ -441,6 +498,12 @@ public static class Visual
                 // 11-09 evening: the tip turned in towards the index finger (it pointed away from it)
                 if (Settings.CigThumbToIndex.Value > 0f) Hands.ThumbTipToIndex(Settings.CigThumbToIndex.Value, 25f);
                 if (Settings.CigThumbTipTurn.Value > 0f) Hands.TurnThumbTipToIndex(Settings.CigThumbTipTurn.Value);
+            }
+            if (lit.Smoke == SmokeType.Cigar && prop != null && Settings.CigarPinkyDown.Value > 0f)
+            {
+                // 11-13 (user): with a cigar too the little finger a little lower
+                var hc = HandsCamera(prop.layer);
+                if (hc != null) Hands.MovePinky(-ScreenUp(hc) * Settings.CigarPinkyDown.Value, 25f);
             }
             if (lit.Smoke == SmokeType.Cigarette && prop != null && Settings.CigPinkyDown.Value > 0f)
             {
@@ -721,6 +784,7 @@ public static class Visual
     static bool restDirHave;
 
     static bool restCigar;
+    static Quaternion restFree = Quaternion.identity;   // from the wrist as it lies (limited) to where it would lie without the limit
 
     static void RestHand()
     {
@@ -753,8 +817,17 @@ public static class Visual
         // only the extra bend (beyond what the game's own pose has) is limited; the rest of the turn is given up
         var elbow = Hands.Elbow ?? w.parent;
         // cigars only: with cigarettes the limit kept the hand in the torch pose (the cigarette stood up out of the fist, the drag broke)
-        if (elbow != null && restCigar)
+        // 11-13 (user): the resting hand with a cigarette lies as with a cigar, so the same limit holds for it too. But only at rest:
+        // it comes in after the rest pose is kept (1 s) and goes in the first third of a drag, so the kept rest pose and the mouth poses
+        // made from it are as they were (on 11-09 the limit on all the time broke the cigarette's drag)
+        // 18:05 user: no turning in and out at all: the hand with a cigarette is as with a cigar from the moment it is taken out.
+        // The rest pose that the mouth poses are made from is still kept as it would be without the limit (restFree, used in KeepRest),
+        // so the cigarette comes to the mouth exactly as before; the way there starts from the hand as it lies now
+        float like = restCigar || Settings.CigRestLikeCigar.Value ? 1f : 0f;
+        restFree = Quaternion.identity;
+        if (elbow != null && like > 0f)
         {
+            float free = turn;
             var arm = (w.position - elbow.position).normalized;
             float own = Vector3.Angle(arm, f), max = Math.Max(own, Settings.RestWristBend.Value);
             if (Vector3.Angle(arm, Quaternion.Slerp(Quaternion.identity, q, turn) * f) > max)
@@ -765,7 +838,8 @@ public static class Visual
                     float mid = (lo + hi) * .5f;
                     if (Vector3.Angle(arm, Quaternion.Slerp(Quaternion.identity, q, mid) * f) > max) hi = mid; else lo = mid;
                 }
-                turn = lo;
+                turn = Mathf.Lerp(free, lo, like);
+                if (!restCigar) restFree = Quaternion.Slerp(Quaternion.identity, q, free) * Quaternion.Inverse(Quaternion.Slerp(Quaternion.identity, q, turn));
             }
         }
         w.rotation = Quaternion.Slerp(Quaternion.identity, q, turn) * w.rotation;
@@ -996,8 +1070,8 @@ public static class Visual
         if (restOnly && haveRest && eyeBone != null)
         {
             Eye(out var rp, out var rq);
-            pos = rp + rq * restLocal;
-            rot = rq * restRot;
+            pos = rp + rq * shownLocal;
+            rot = rq * shownRot;
             return;
         }
         if (Settings.ByOffset.Value && haveRest && eyeBone != null)
@@ -1127,6 +1201,8 @@ public static class Visual
     {
         var wc = WeaponCam();
         var up = wc != null && wc ? wc.transform.up : hc.transform.up;
+        // 11-13: as the view stands when levelled (lit while looking down, "up" leaned forward and the thumb went the wrong way)
+        if (wc != null && wc) { ViewLock.LevelTurn(wc, out var lev); up = lev * up; }
         // 11-09 evening: taken from the camera every frame, the little finger (and the thumb) went up and down with the look;
         // now taken once at rest, after the view has settled, and kept fixed in the hand
         var w = Hands.Wrist;
@@ -1141,7 +1217,7 @@ public static class Visual
     }
     static Vector3 upInWrist;
     static bool upHave;
-    static float lateSince;
+    static float lateSince, lateDrag, lateOutro = -1f;
 
     static HandsView? HandsCamera(int layer)
     {
@@ -1506,7 +1582,14 @@ public static class Visual
         if (propMat != null)
         {
             var m = new Material(propMat);
-            if (Assets.Texture(Def.TexPath(Smoking.From?.CigTexture ?? lit.Texture)) is { } tex) m.mainTexture = tex;
+            string texPath = Def.TexPath(Smoking.From?.CigTexture ?? lit.Texture);
+            Texture? tex = null;
+            // 11-13: a filter cigarette gets its own copy of the texture, whose mouth end disc goes brown as it is smoked (FilterStain)
+            if (lit.Smoke == SmokeType.Cigarette && Settings.FilterStain.Value > 0f && Smoking.From?.CigMesh is { } fm && fm != "cig_nofilter")
+                tex = FilterStain.Make(texPath);
+            else FilterStain.Clear();
+            tex ??= Assets.Texture(texPath);
+            if (tex != null) m.mainTexture = tex;
             mr.sharedMaterial = m;
         }
         mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -1555,15 +1638,19 @@ public static class Visual
             br.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             emberCap.transform.localPosition = new Vector3(0f, 0f, band * .15f);
         }
-        var lgo = new GameObject("EmberLight");
-        lgo.layer = layer;
-        lgo.transform.SetParent(ember.transform, false);
-        light = lgo.AddComponent<Light>();
-        light.type = LightType.Point;
-        light.color = new Color(1f, .45f, .15f);
-        light.range = .12f;
-        light.intensity = .08f;
-        light.shadows = LightShadows.None;
+// the faint light of the ember on the hand (a setting)
+        if (Settings.EmberLight.Value)
+        {
+                var lgo = new GameObject("EmberLight");
+            lgo.layer = layer;
+            lgo.transform.SetParent(ember.transform, false);
+            light = lgo.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, .45f, .15f);
+            light.range = .12f;
+            light.intensity = .08f;
+            light.shadows = LightShadows.None;
+        }
 
         Safe.Debug($"Prop on {handle.name} (rig {rig.name}, parent {rig.transform.parent?.name}), layer {layer}, material {(propMat != null ? propMat.shader?.name : "none")}, glow {(glowMat != null)}, smoke {(smokeMat != null)}");
     }

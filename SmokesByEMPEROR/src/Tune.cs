@@ -13,10 +13,10 @@ internal static class Tune
     {
         if (d.Smoke != SmokeType.Pipe) return d.Smoke == SmokeType.Cigar ? Settings.CigarInView : Settings.CigInView;
         // the churchwarden's first values were broken (its long stem across the view): new keys, set from the billiard's tuned pose
-        string key = d.Id + "InTeethOnScreen" + (d.Id.Contains("Churchwarden") ? "2" : "");
+        string key = d.Id + "InTeethOnScreen" + (d.Id.Contains("Churchwarden") ? "3" : "");
         if (pipeEntries.TryGetValue(key, out var e)) return e;
         var c = MelonPreferences.GetCategory("SmokesBySeagull") ?? MelonPreferences.CreateCategory("SmokesBySeagull");
-        e = c.GetEntry<string>(key) ?? c.CreateEntry(key, d.Id.Contains("Corncob") ? "0.50 -0.03 0.27" : d.Id.Contains("Bent") ? "0.49 0.00 0.25" : d.Id.Contains("Churchwarden") ? "0.52 -0.03 0.13" : d.Id.Contains("Billiard") ? "0.50 -0.02 0.25" : Settings.PipeInView.Value, "Эта трубка в зубах: мундштук на экране x y (0..1) и расстояние, м / this pipe in the teeth: mouthpiece on screen x y and distance m");
+        e = c.GetEntry<string>(key) ?? c.CreateEntry(key, d.Id.Contains("Corncob") ? "0.50 -0.03 0.27" : d.Id.Contains("Bent") ? "0.49 0.00 0.25" : d.Id.Contains("Churchwarden") ? "0.52 -0.05 0.09" : d.Id.Contains("Billiard") ? "0.50 -0.02 0.25" : Settings.PipeInView.Value, "Эта трубка в зубах: мундштук на экране x y (0..1) и расстояние, м / this pipe in the teeth: mouthpiece on screen x y and distance m");
         pipeEntries[key] = e;
         return e;
     }
@@ -29,11 +29,12 @@ internal static class Tune
 
     static MelonPreferences_Entry<string> PipeEntry(Def d, bool offset)
     {
-        string key = d.Id + (offset ? "MouthOffset" : "MouthTurn") + (d.Id.Contains("Churchwarden") ? "2" : "");
+        string key = d.Id + (offset ? "MouthOffset" : "MouthTurn") + (d.Id.Contains("Churchwarden") ? "3" : "");
         if (pipeEntries.TryGetValue(key, out var e)) return e;
         var c = MelonPreferences.GetCategory("SmokesBySeagull") ?? MelonPreferences.CreateCategory("SmokesBySeagull");
         string def = Settings.PipeDefault(d.Id, offset) ?? (offset ? Settings.PipeOffset.Value : Settings.PipeTurnAt.Value);
-        if (d.Id.Contains("Churchwarden") && !offset) def = "25 -125 -60";
+        if (d.Id.Contains("Churchwarden") && !offset) def = "35 -125 -60";   // the user's own tuning 11-13 (keys ...3)
+        if (d.Id.Contains("Churchwarden") && offset) def = "-0.04 0.37 -0.43";
         e = c.GetEntry<string>(key) ?? c.CreateEntry(key, def, (offset ? "Эта трубка во рту: сдвиг, м / this pipe in the mouth: offset, m" : "Эта трубка во рту: поворот, градусы / this pipe in the mouth: turn, degrees"));
         pipeEntries[key] = e;
         return e;

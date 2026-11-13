@@ -545,6 +545,21 @@ public static class Hands
         Turn(middleChain[0]!, middleChain[3]!, -sign);
     }
 
+    /// <summary>The index finger bent a little more at its middle joint (degrees), towards the palm: with a cigarette it stood out
+    /// further forward than the middle finger under it (user 11-13).</summary>
+    public static void BendIndex(float deg)
+    {
+        if (Mathf.Abs(deg) < .01f || palm == null || indexChain[0] == null || indexChain[1] == null || indexChain[3] == null || middleChain[0] == null || ring1 == null) return;
+        var side = (indexChain[0]!.position - ring1.position).normalized;
+        var fingers = (middleChain[0]!.position - palm.position).normalized;
+        var back = Vector3.Cross(side, fingers).normalized;
+        var k = indexChain[1]!; var tip = indexChain[3]!;
+        var r1 = Quaternion.AngleAxis(deg, side);
+        var t1 = k.position + r1 * (tip.position - k.position);
+        // the turn that takes the tip to the palm side (away from the back of the hand)
+        k.rotation = (Vector3.Dot(t1 - tip.position, back) <= 0f ? r1 : Quaternion.AngleAxis(-deg, side)) * k.rotation;
+    }
+
     /// <summary>A cigar pinched like a pen held up: across the pads of the index and middle fingertips, the thumb under it; it lies along
     /// the knuckle line, the lit end out on the little-finger side, tilted down a little towards the palm.</summary>
     public static bool Pinch(float towardThumb, out Vector3 pos, out Vector3 dir, out Vector3 up)

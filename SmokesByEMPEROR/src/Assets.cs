@@ -77,6 +77,20 @@ public static class Assets
         for (int i = 0; i < nv; i++) u[i] = new Vector2(r.ReadSingle(), r.ReadSingle());
         var t = new Il2CppStructArray<int>(ni);
         for (int i = 0; i < ni; i++) t[i] = r.ReadInt32();
+        // 11-13 (user: a dot or hole in the filter of nearly every cigarette): the end discs of the cigarette meshes stop 0.5 mm short of
+        // the axis, which left a 1 mm hole in both ends. The innermost ring is drawn together onto the axis
+        if (Path.GetFileName(path).StartsWith("cig_", StringComparison.OrdinalIgnoreCase) && nv > 0)
+        {
+            Vector3 lo = v[0], hi = v[0];
+            for (int i = 1; i < nv; i++) { lo = Vector3.Min(lo, v[i]); hi = Vector3.Max(hi, v[i]); }
+            var size = hi - lo; var mid = (lo + hi) * .5f;
+            int ax = size.x >= size.y && size.x >= size.z ? 0 : size.y >= size.z ? 1 : 2;
+            for (int i = 0; i < nv; i++)
+            {
+                var d = v[i] - mid; d[ax] = 0f;
+                if (d.sqrMagnitude < .0008f * .0008f) { var q = v[i]; q -= d; v[i] = q; }
+            }
+        }
         var m = new Mesh { name = Path.GetFileNameWithoutExtension(path), indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
         m.vertices = v;
         m.normals = n;

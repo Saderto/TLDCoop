@@ -22,6 +22,7 @@ public static class Smoking
         public bool Equipped;          // was in the hand at least once
         public float NextDrag, DragStart = -1f;
         public bool Exhaled, DragSounded;
+        public float Stain, StainFrom;  // how far the filter's mouth end has gone brown (a share 0..1): moves only while a drag is drawn
         public bool Ending;
         public float EquippedAt;        // unscaled time it reached the hand
         public bool Resumed;            // came back with a scene change: the view settles first, a pipe goes straight back into the mouth
@@ -80,7 +81,10 @@ public static class Smoking
     public static float InventoryAt = -10f;
     public static bool IsOurs(GearItem? g) => s != null && g != null && s.Item != null && g.Pointer == s.Item.Pointer;
 
-    const float DragUp = .55f, DragHold = 1.1f, DragDown = .6f;
+    // 11-13 (user: the hand goes to the face too fast): the way up and down are settings now (were .55 and .6 s)
+    const float DragHold = 1.1f;
+    static float DragUp => Mathf.Clamp(Settings.DragUpSeconds.Value, .2f, 3f);
+    static float DragDown => Mathf.Clamp(Settings.DragDownSeconds.Value, .2f, 3f);
 
     /// <summary>What the smoke came from (a variety pack gives the cigarette its look and numbers).</summary>
     public static Def? From => s?.From;
@@ -192,6 +196,8 @@ public static class Smoking
         return true;
     }
 
+    /// <summary>11-13 (user: the filter must go yellow from the drags, not by itself): the share smoked as of the last drag drawn.</summary>
+    public static float StainShare => s == null ? 0f : s.Stain;
     public static float Share => s == null || s.Length <= 0f ? 0f : Math.Clamp(s.Smoked / s.Length, 0f, 1f);
 
     /// <summary>Time in the hand for the pose; a pipe brought back by a scene change skips its way to the mouth (it was in the mouth already).</summary>
@@ -319,7 +325,8 @@ public static class Smoking
             if (now > s.LastGameHour) s.Smoked += now - s.LastGameHour;
             s.LastGameHour = now;
         }
-        if (Share >= 1f)
+        // 11-13 (user: the smoke ended in the middle of a drag): burnt down, it is thrown away only once the hand is back at rest
+        if (Share >= 1f && s.DragStart < 0f)
         {
             Use.Say(s.Lit.Smoke == SmokeType.Pipe ? "SMOKES_MSG_PIPE_DONE" : "SMOKES_MSG_DONE");
             End(true);
@@ -344,6 +351,7 @@ public static class Smoking
             s.DragStart = Time.time;
             s.Exhaled = false;
             s.DragSounded = false;
+            s.StainFrom = s.Stain;
         }
         if (s.DragStart >= 0f)
         {
@@ -353,6 +361,8 @@ public static class Smoking
                 s.DragSounded = true;
                 Sounds.Drag(s.Lit.Smoke);
             }
+            // the smoke drawn through the filter stains it: over the time the drag is held, up to the share smoked by now
+            if (t >= DragUp && !s.Exhaled) s.Stain = Mathf.Max(s.Stain, Mathf.Lerp(s.StainFrom, Share, Smooth(Mathf.Clamp01((t - DragUp) / DragHold))));
             if (!s.Exhaled && t >= DragUp + DragHold)
             {
                 s.Exhaled = true;
