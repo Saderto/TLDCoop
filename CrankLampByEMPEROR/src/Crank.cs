@@ -29,7 +29,6 @@ namespace CrankLampByEMPEROR
         static bool _cranking;
         internal static bool Cranking => _cranking && _held != null;
         static float _crankedFor;
-        static float _nextChargeMsg;
         static bool _loggedUnits;
         static bool _hadLamp;
         static float _nextTick;
@@ -457,11 +456,6 @@ namespace CrankLampByEMPEROR
                 AddCharge(f, dt / Math.Max(1f, LampMod.CrankSecondsToFull.Value));
                 Wear(f, dt / 60f * Math.Max(0f, LampMod.WearPerCrankMinute.Value));
                 _crankAngle = (_crankAngle + CrankDegreesPerSecond * dt) % 360f;
-                if (Time.unscaledTime >= _nextChargeMsg)
-                {
-                    _nextChargeMsg = Time.unscaledTime + 1f;
-                    HUDMessage.AddMessage(string.Format(Texts.Get("TLDCRANK_Charge"), Mathf.RoundToInt(Normalized(f) * 100f)), 1f, false, false);
-                }
             }
 
             // the light runs out: switch off like an empty flashlight

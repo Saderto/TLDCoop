@@ -15,7 +15,7 @@ namespace CrankLampByEMPEROR
     /// </summary>
     public class LampMod : MelonMod
     {
-        public const string Version = "0.4.2";
+        public const string Version = "0.4.3";
         internal static LampMod Instance;
         internal static string Folder;
         bool _setUp;
@@ -37,7 +37,7 @@ namespace CrankLampByEMPEROR
             CrankSecondsToFull = cat.CreateEntry("CrankSecondsToFull2", 45f, "Сколько секунд крутить ручку с нуля до полного заряда / seconds of cranking from empty to full");
             HandleOffsetDegrees = cat.CreateEntry("HandleOffsetDegrees", 0f, "Поворот ручки относительно руки, градусы (если ручку крутит код) / handle angle offset against the hand, degrees");
             LightIntensity = cat.CreateEntry("LightIntensity", 3f, "Яркость света фонаря (в WINTERMUTE 1) / light intensity (1 in WINTERMUTE)");
-            FullChargeGameHours = cat.CreateEntry("FullChargeGameHours", 1f, "Сколько игровых часов светит полный заряд / game hours of light on a full charge");
+            FullChargeGameHours = cat.CreateEntry("FullChargeGameHours2", 0.8f, "Сколько игровых часов светит полный заряд (0.8 = 48 минут) / game hours of light on a full charge (0.8 = 48 minutes)");
             WearPerLightHour = cat.CreateEntry("WearPerLightHour", 1f, "Сколько процентов состояния теряет фонарь за игровой час горения / condition percent lost per game hour of light");
             WearPerCrankMinute = cat.CreateEntry("WearPerCrankMinute", 2f, "Сколько процентов состояния теряет фонарь за минуту кручения ручки / condition percent lost per minute of cranking");
             DebugLog = cat.CreateEntry("DebugLog", true, "Подробный лог / verbose log");
