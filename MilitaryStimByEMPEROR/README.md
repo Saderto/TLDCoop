@@ -4,7 +4,19 @@
 
 Military stim for The Long Dark. The WINTERMUTE military stim in survival.
 
-Версия / Version: **0.1.6**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
+Версия / Version: **0.1.7**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
+
+## Что делает / What it does
+
+- +50% состояния и −75% усталости сразу после укола.
+- Целый час сердцебиение, размытие по краям экрана и бонусы «Усталость снижена» и «Прилив сил», как у обычного шприца.
+- После действия нет отката: усталость не возвращается.
+- Консоль: `add GEAR_MilitaryStim`.
+
+- +50% condition and −75% fatigue right after the injection.
+- For a full hour: heartbeat, blurred screen edges and the «Fatigue reduced» and «Energy boost» buffs, as with the regular stim.
+- No crash afterwards: the fatigue does not come back.
+- Console: `add GEAR_MilitaryStim`.
 
 ## Скачать и установить / Download and install
 

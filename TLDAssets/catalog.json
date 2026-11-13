@@ -111,8 +111,8 @@
   {
    "id": "TLDMilitaryStim",
    "zip": "MilitaryStimByEMPEROR.zip",
-   "version": "0.1.6",
-   "size": 33698199,
+   "version": "0.1.7",
+   "size": 33692375,
    "detect": "Mods/MilitaryStimByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDMilitaryStim.dll",

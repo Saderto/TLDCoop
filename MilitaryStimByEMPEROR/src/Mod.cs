@@ -15,7 +15,7 @@ namespace MilitaryStimByEMPEROR
     /// </summary>
     public class StimMod : MelonMod
     {
-        public const string Version = "0.1.6";
+        public const string Version = "0.1.7";
         internal static StimMod Instance;
         internal static string Folder;
         bool _setUp;
@@ -24,6 +24,7 @@ namespace MilitaryStimByEMPEROR
         internal static MelonPreferences_Entry<float> WorldChance;
         internal static MelonPreferences_Entry<float> MedicalChance;
         internal static MelonPreferences_Entry<bool> DebugLog;
+        internal static MelonPreferences_Entry<float> StimulatedMinutes;
 
         public override void OnInitializeMelon()
         {
@@ -35,10 +36,11 @@ namespace MilitaryStimByEMPEROR
             LootChance = cat.CreateEntry("ContainerChancePercent", 5f, "Шанс, что шприц первой помощи в тайнике окажется военным стимулятором, % / chance an emergency stim in a container is a military stim, %");
             WorldChance = cat.CreateEntry("WorldChancePercent", 5f, "Шанс, что шприц первой помощи, лежащий на локации, окажется военным стимулятором, % / chance an emergency stim lying in the world is a military stim, %");
             MedicalChance = cat.CreateEntry("MedicalContainerChancePercent", 3f, "Отдельный шанс найти военный стимулятор в любой аптечке или аптечном шкафчике, % / extra chance for any first-aid kit or medicine cabinet, %");
+            StimulatedMinutes = cat.CreateEntry("StimulatedMinutes", 60f, "Сколько минут после укола действуют сердцебиение и бонусы обычного шприца (без отката), 0 = как в WINTERMUTE / minutes of the vanilla stim effects after injecting (no crash after), 0 = as in WINTERMUTE");
             DebugLog = cat.CreateEntry("DebugLog", true, "Подробный лог / verbose log");
         }
 
-        public override void OnUpdate() { AssetsHint.Tick(); }
+        public override void OnUpdate() { AssetsHint.Tick(); Effects.Tick(); }
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
@@ -50,6 +52,7 @@ namespace MilitaryStimByEMPEROR
                 Texts.Patch(HarmonyInstance);
                 ConsoleNames.Patch(HarmonyInstance);
                 Loot.Patch(HarmonyInstance);
+                Effects.Patch(HarmonyInstance);
                 Assets.Register();
                 LoggerInstance.Msg($"MilitaryStimByEMPEROR {Version}: готово / ready");
             }
