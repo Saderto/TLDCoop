@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Il2Cpp;
@@ -215,6 +215,9 @@ public static class TraderSakes
 			m_GainedItemAmount = 1,
 			m_MaxExchangeInSingleTrade = 1,
 			m_IsSpecialRequest = false,
+			// the game copies both lists when a trade is accepted (CloneForActiveTrade): null made the accept button do nothing
+			m_UnlockedExchanges = new Il2CppSystem.Collections.Generic.List<AssetReferenceTradeExchange>(),
+			m_UnlockedConversations = new Il2CppSystem.Collections.Generic.List<AssetReferenceTraderConversation>(),
 			m_Description = new LocalizedString
 			{
 				m_LocalizationID = "SEAGULL_" + o.Sake + "_DESC"
