@@ -62,6 +62,11 @@ public static class Visual
         pipeHandSet = false;   // the pipe's turn in the fist is taken again from this rest pose
     }
 
+    /// <summary>The hand lies at rest with the smoke and the hands view is locked on it: only then may a drag start (after 5 s it may
+    /// anyway, should the lock never come).</summary>
+    public static bool HandAtRest(float since) =>
+        since >= 1.1f && haveRest && (since >= 5f || (Time.unscaledTime >= SettleUntil && (ViewLock.Locked || !Settings.LockCamera.Value)));
+
     static Camera? weaponCam;
     static float weaponCamLook;
     static bool eyeLogged;
@@ -501,7 +506,7 @@ public static class Visual
                 Transform? clav = null;
                 for (var t = prop.transform.parent; t != null; t = t.parent) if (t.name == "RightClavJoint") { clav = t; break; }
                 ViewLock.Bone = clav;
-                if (ViewLock.Relock(WeaponCam())) { ResumeLock = false; SettleUntil = Time.unscaledTime; }
+                if (ViewLock.Relock(WeaponCam(), lit.Smoke == SmokeType.Pipe)) { ResumeLock = false; SettleUntil = Time.unscaledTime; }
             }
             bool settling = lit.Smoke == SmokeType.Pipe && outro < 0f && since >= PipeHandsDown && Time.unscaledTime < SettleUntil;
             if (lit.Smoke == SmokeType.Pipe && (since < .3f || retake || settling)) KeepRest();

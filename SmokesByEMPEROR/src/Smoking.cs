@@ -253,6 +253,11 @@ public static class Smoking
                 s.EquippedAt = Time.unscaledTime - Visual.PipeHandsDown - .05f;
                 Visual.SettleUntil = Math.Max(Visual.SettleUntil, Time.unscaledTime + 1.5f);
             }
+            // 11-14 (user's shot: a cigar's first drag with a huge hand and the sleeve across the screen): the first drag was timed from
+            // the lighting, not from the hand. A smoke that reached the hand late (lit from the inventory and the inventory left open,
+            // or the game not ready to give it to the hand) was dragged at once, before the hand lay at rest and the hands view was
+            // locked. Now the hand always rests with it first
+            if (s.Lit.Smoke != SmokeType.Pipe) s.NextDrag = Math.Max(s.NextDrag, Time.time + (s.Resumed ? 3.2f : 1.8f));
             Safe.Info("The smoke is in the hand");
             if (Settings.BareHands.Value) Hands.TakeOffGloves();
         }
@@ -366,7 +371,7 @@ public static class Smoking
             Safe.Log("H key", e);
         }
         // drags
-        if (s.DragStart < 0f && Time.time >= s.NextDrag && !GameManager.m_IsPaused)
+        if (s.DragStart < 0f && Time.time >= s.NextDrag && !GameManager.m_IsPaused && (s.Lit.Smoke == SmokeType.Pipe || Visual.HandAtRest(Since())))
         {
             s.DragStart = Time.time;
             s.Exhaled = false;
@@ -639,6 +644,8 @@ public static class Smoking
                 s.NextEquip = Time.unscaledTime + 1f;
                 s.GoneAt = -1f;
                 s.LostAt = -1f;
+                // 11-14: a drag caught by the scene change is dropped (it went on in the new scene before the hands view was put back)
+                if (s.DragStart >= 0f) { s.DragStart = -1f; s.NextDrag = Time.time + 4f; }
                 Visual.Reset();
                 Visual.SettleUntil = Time.unscaledTime + 3f;
                 Visual.ResumeLock = true;

@@ -6,7 +6,7 @@ Smokes for The Long Dark. Cigarettes, cigars, cigarillos, pipes, tobacco and lig
 
 ![Сигарета в руке на вышке / A cigarette in hand on a lookout](screenshot.jpg)
 
-Версия / Version: **0.1.147**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
+Версия / Version: **0.1.148**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
 
 ## Скачать и установить / Download and install
 

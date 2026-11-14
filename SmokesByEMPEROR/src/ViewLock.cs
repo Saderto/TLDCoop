@@ -325,7 +325,9 @@ internal static class ViewLock
     static bool haveSaved;
 
     /// <summary>The lock as it was before the scene change, put back on the new camera (true when done).</summary>
-    public static bool Relock(Camera? c)
+    /// <param name="atOnce">No easing in: a pipe in the teeth (its hand is out of sight) slid in from the top of the view for half a
+    /// second after every door (11-14, the owner's log: 0.8 m above its place when the new scene came up).</param>
+    public static bool Relock(Camera? c, bool atOnce = false)
     {
         if (Locked || !haveSaved || Time.unscaledTime - savedAt > 120f || !Settings.LockCamera.Value || c == null || !c || Prop == null || !Prop || Frame == null || !Frame) return false;
         try
@@ -337,7 +339,7 @@ internal static class ViewLock
             lockCam = c;
             cam = c;
             Locked = true;
-            lockedAt = Time.unscaledTime;
+            lockedAt = Time.unscaledTime - (atOnce ? BlendIn : 0f);
             haveSaved = false;
             Safe.Info($"Hands camera locked again as before the scene change: camera in smoke space at {(Vector3)restToCam.GetColumn(3):F3}");
             return true;
