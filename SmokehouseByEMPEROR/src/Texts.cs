@@ -10,8 +10,8 @@ public static class Texts
     static Texts()
     {
         Add("Barrel_NAME", "Коптильня из бочки", "Barrel smokehouse");
-        Add("Barrel_DESC", "Железная бочка на камнях с топкой, крышкой и трубой. Ставится на улице. Внутри на прутьях коптится мясо и рыба: горячим дымом за 32 часа, холодным за 52.",
-            "A steel barrel on stones with a firebox, a lid and a pipe. Stands outdoors. Meat and fish smoke on the rods inside: hot in 32 hours, cold in 52.");
+        Add("Barrel_DESC", "Старая железная бочка с топкой, прутьями и трубой. Дым не торопится: за день-два мясо и рыба становятся припасом, который переживёт долгую зиму. Топят её только под открытым небом.",
+            "An old steel drum with a firebox, rods and a pipe. Smoke takes its time: in a day or two meat and fish become stores that will outlast a long winter. It is fired under the open sky only.");
         foreach (var s in Defs.AllSpecies)
             foreach (bool hot in new[] { true, false })
                 foreach (bool salted in new[] { false, true })
@@ -40,8 +40,8 @@ public static class Texts
                 }
         // ---- «Заготовки к коптильне» (0.3.0)
         Add("Kettle_NAME", "Котёл для консервов", "Canning kettle");
-        Add("Kettle_DESC", "Чугунный котёл на четырёх камнях, огонь под ним. Огонь под ним разжигают только на улице. В нём 24 часа варятся консервы: на банку идут 0,30 кг мяса или рыбы, пустая банка, четверть литра воды и соль.",
-            "A cast-iron kettle on four stones with a fire under it. Its fire is lit outdoors only. Cans boil in it for 24 hours: a can takes 0.30 kg of meat or fish, an empty tin, a quarter litre of water and salt.");
+        Add("Kettle_DESC", "Тяжёлый чугунный котёл на камнях. Мясо или рыба, вода, соль и пустая жестянка, сутки на огне, и получается банка, которой время нипочём. Огонь под ним разводят только на улице.",
+            "A heavy cast-iron kettle set on stones. Meat or fish, water, salt and an empty tin, a day over the fire, and you have a can that time cannot touch. The fire under it is lit outdoors only.");
         Add("BarrelWip_NAME", "Недостроенная коптильня", "Unfinished smokehouse");
         Add("KettleWip_NAME", "Недостроенный котёл для консервов", "Unfinished canning kettle");
         Add("TableWip_NAME", "Недостроенный колбасный стол", "Unfinished sausage table");
@@ -49,8 +49,8 @@ public static class Texts
             Add(s + "Wip_DESC", "Работа начата, материалы уже в деле. Поставить и пользоваться нельзя. Достраивается у любого верстака тем же рецептом: он попросит только эту заготовку и оставшееся время.",
                 "The work is begun, the materials are in it. It cannot be placed or used. Finish it at any workbench with the same recipe: it asks only for this piece and the time that is left.");
         Add("Table_NAME", "Колбасный стол", "Sausage table");
-        Add("Table_DESC", "Стол с жердью для колбас. Ставится где угодно, огня не нужно. Полкило мяса, кишка и соль дают сырую колбасу одного из двух десятков видов. Готовят её только дымом в коптильне.",
-            "A table with a pole for sausages. Stands anywhere and needs no fire. Half a kilo of meat, a gut and salt make a raw sausage of one of two dozen kinds. Only the smokehouse's smoke makes it food.");
+        Add("Table_DESC", "Грубый стол с жердью для колбас. Здесь мясо, кишка и соль становятся сырой колбасой, а до ума её доводит дым коптильни. Огня не просит, стоит где угодно.",
+            "A rough table with a pole for sausages. Here meat, a gut and salt become a raw sausage, and the smoke of the smokehouse does the rest. It asks for no fire and stands anywhere.");
         foreach (var c in Defs.Cans)
         {
             Add(c.Id + "_NAME", c.Ru, c.En);

@@ -70,6 +70,9 @@ public static class TraderSmoked
             m_GainedItemAmount = 1,
             m_MaxExchangeInSingleTrade = 1,
             m_IsSpecialRequest = false,
+            // the game clones both lists when a trade is accepted; null here makes the accept button do nothing
+            m_UnlockedExchanges = new Il2CppSystem.Collections.Generic.List<AssetReferenceTradeExchange>(),
+            m_UnlockedConversations = new Il2CppSystem.Collections.Generic.List<AssetReferenceTraderConversation>(),
             m_Description = new LocalizedString { m_LocalizationID = "SMOKEHOUSE_" + id + "_DESC" },
         };
         var asks = new Il2CppSystem.Collections.Generic.List<ExchangeItem>();
