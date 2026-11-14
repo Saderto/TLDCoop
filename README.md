@@ -125,8 +125,8 @@ GitHub records which commit and which run produced each file.
 
 ## Установка / Install
 
-1. MelonLoader 0.7.3 в папке игры (https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3, `MelonLoader.x64.zip`) /
-   MelonLoader 0.7.3 in the game folder.
+1. MelonLoader 0.7.2 в папке игры (https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.2, `MelonLoader.x64.zip`), 0.7.3 тоже подходит /
+   MelonLoader 0.7.2 in the game folder (0.7.3 works too).
 2. Распакуйте нужные архивы из Releases в папку игры (в них папка `Mods`) / Extract the archives you want from Releases into the game folder (they contain `Mods`).
 
 ## Сборка / Build

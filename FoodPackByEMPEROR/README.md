@@ -6,7 +6,7 @@ Food and drinks for The Long Dark. New food, drinks and dishes with effects, fou
 
 ![Еда мода на столе / Food from the mod on a table](food.jpg)
 
-Версия / Version: **1.1.1**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
+Версия / Version: **1.1.1**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Скачать и установить / Download and install
 

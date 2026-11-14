@@ -6,7 +6,7 @@ Food balance for The Long Dark. Settings sliders: how much food of each food mod
 
 ![Настройки Food Balance / Food Balance settings](screenshot.jpg)
 
-Версия / Version: **1.0.6**. Игра 2.60, MelonLoader 0.7.3 / Game 2.60, MelonLoader 0.7.3.
+Версия / Version: **1.0.6**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Ползунки / Sliders
 

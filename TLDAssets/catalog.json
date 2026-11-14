@@ -4,7 +4,7 @@
  "tag": "v1.0",
  "melonloader": {
   "repo": "LavaGang/MelonLoader",
-  "tag": "v0.7.3",
+  "tag": "v0.7.2",
   "asset": "MelonLoader.x64.zip"
  },
  "libs": {
