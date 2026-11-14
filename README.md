@@ -18,7 +18,7 @@ does it when updating. Game saves are kept: their keys did not change.
 
 | Папка / Folder | Что это / What it is |
 |---|---|
-| `SmokesByEMPEROR` | Сигареты, сигары, трубки, зажигалки / Cigarettes, cigars, pipes, lighters |
+| `SmokesByEMPEROR` | Сигареты, сигары, сигариллы, трубки, зажигалки / Cigarettes, cigars, cigarillos, pipes, lighters |
 | `SmokehouseByEMPEROR` | Коптильня, котёл для консервов и стол для колбас / Smokehouse, canning kettle and sausage table |
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
 | `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |

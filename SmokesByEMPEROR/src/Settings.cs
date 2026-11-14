@@ -9,20 +9,20 @@ public static class Settings
     public static MelonPreferences_Entry<float> HungerLess = null!;
     public static MelonPreferences_Entry<float> BreathPerDay = null!, BreathStaminaLess = null!;
     public static MelonPreferences_Entry<float> AddictionCount = null!, AddictionWindowHours = null!, CravingAfterHours = null!, AddictionEndsHours = null!;
-    public static MelonPreferences_Entry<float> PipeHeldTurn = null!, ElbowDown = null!, PipeWristTurn = null!, PipeOverFist = null!, RestWristBend = null!, RestSmooth = null!, CigarThumbLift = null!, CigThumbLift = null!, CigPinkyDown = null!, CigarThumbStand = null!, SlimSqueeze = null!, CigFilterOut = null!, CigThumbToIndex = null!, CigThumbTipTurn = null!, CigarThumbDragDown = null!, CigarFlickScale = null!;
+    public static MelonPreferences_Entry<float> PipeHeldTurn = null!, ElbowDown = null!, PipeWristTurn = null!, PipeOverFist = null!, RestWristBend = null!, RestSmooth = null!, CigarThumbLift = null!, CigThumbLift = null!, CigPinkyDown = null!, CigarThumbStand = null!, SlimSqueeze = null!, CigarilloRoom = null!, CigFilterOut = null!, CigThumbToIndex = null!, CigThumbTipTurn = null!, CigarThumbDragDown = null!, CigarFlickScale = null!;
     public static MelonPreferences_Entry<bool> PipeHeldAsMouth = null!;
     public static MelonPreferences_Entry<float> CravingFatigueMore = null!, CravingSwayMore = null!;
     public static MelonPreferences_Entry<float> CutterWearPct = null!, KnifeTearChance = null!;
     public static MelonPreferences_Entry<string> PropPos = null!, PropRot = null!, PipePos = null!, PipeRot = null!;
     public static MelonPreferences_Entry<string> CigOffset = null!, CigarOffset = null!, PipeOffset = null!, CigTurn = null!, CigarTurn = null!, PipeTurnAt = null!;
-    public static MelonPreferences_Entry<bool> ByOffset = null!, TuneKeys = null!, FollowView = null!, GameView = null!, CarryArms = null!, LockCamera = null!, LevelLock = null!, CigRestLikeCigar = null!, EmberLight = null!;
+    public static MelonPreferences_Entry<bool> ByOffset = null!, TuneKeys = null!, CglTuneKeys = null!, FollowView = null!, GameView = null!, CarryArms = null!, LockCamera = null!, LevelLock = null!, CigRestLikeCigar = null!, EmberLight = null!;
     public static MelonPreferences_Entry<float> CigIndexBend = null!, CigarPinkyDown = null!, DragUpSeconds = null!, DragDownSeconds = null!;
     public static MelonPreferences_Entry<string> DragHandBelow = null!;
     public static MelonPreferences_Entry<float> DragSplit = null!, FollowAmount = null!, ViewPivot = null!, CigarThumb = null!, PipeThumb = null!, PipeThumbAbove = null!, PipeThumbBaseLift = null!, PipeThumbClearance = null!, PipeThumbOverGap = null!;
     public static MelonPreferences_Entry<bool> CigNameToView = null!;
     public static MelonPreferences_Entry<float> CigNameRoll = null!;
     public static MelonPreferences_Entry<string> CutterSounds = null!, KnifeCutSounds = null!, RestOnScreen = null!, PipeHandAway = null!, CigInView = null!, CigarInView = null!, PipeInView = null!, CigAim = null!, CigarAim = null!, MouthAt = null!, CigInFingers = null!, RestFingers = null!, RestBack = null!, PipeMouthAt = null!, CigMouthDir = null!, PipeMouthDir = null!, CigMouthUp = null!;
-    public static MelonPreferences_Entry<float> PropScale = null!, FingerOpen = null!, SoundVolume = null!, CigarSpread = null!, CigarJoint = null!, CigaretteGrip = null!, CigarGrip = null!, PipeStemUp = null!, PipeTurn = null!, RestHandTurn = null!, HandsFov = null!, EyePitch = null!, EyeHeight = null!, CigaretteFilterStop = null!, FilterStain = null!, CigarBandStop = null!, ThrowSpeed = null!;
+    public static MelonPreferences_Entry<float> PropScale = null!, FingerOpen = null!, SoundVolume = null!, CigarSpread = null!, CigarJoint = null!, CigaretteGrip = null!, CigarGrip = null!, PipeStemUp = null!, PipeTurn = null!, RestHandTurn = null!, HandsFov = null!, EyePitch = null!, EyeHeight = null!, CigaretteFilterStop = null!, FilterStain = null!, CigarilloTime = null!, CigarBandStop = null!, ThrowSpeed = null!;
     public static MelonPreferences_Entry<int> HandsViewMode = null!;
     public static MelonPreferences_Entry<bool> Sounds = null!, SmokesTab = null!, CigarPinchOn = null!, Markers = null!, PoseOff = null!, BareHands = null!, FlipCigarette = null!;
     public static MelonPreferences_Entry<bool> DebugLog = null!, TestKeys = null!, GiveLightersKey = null!;
@@ -85,6 +85,7 @@ public static class Settings
         RestBack = c.CreateEntry("RestHandBack", "0.15 1 0.1", "Тыльная сторона кисти в покое: вправо/вверх/вперёд / resting hand, back of the hand faces: right, up, forward");
         CigPinkyDown = c.CreateEntry("CigarettePinkyDown", .012f, "Мизинец у сигареты ниже на столько метров (0 = как есть) / little finger with a cigarette this many metres lower (0 = as is)");
         CigFilterOut = c.CreateEntry("CigaretteFilterBehindFingers", .022f, "Сигарета: не меньше стольких метров выходит за пальцы со стороны фильтра / cigarette: at least this many metres out behind the fingers on the filter side");
+        CigarilloRoom = c.CreateEntry("CigarilloFingerRoom", .5f, "Сигариллы: указательный и средний разводятся ещё на столько градусов каждый сверх толщины / cigarillos: index and middle open this many degrees each on top of what the thickness needs");
         SlimSqueeze = c.CreateEntry("SlimFingerSqueeze4", .5f, "Тонкие сигареты: указательный и средний сводятся на столько градусов каждый (суперслим) / slim cigarettes: index and middle closed in by this many degrees each (superslim)");
         CigarThumbStand = c.CreateEntry("CigarThumbStandUp2", .025f, "Большой палец у сигары стоит: кончик выше ещё на столько метров (0 = лежит) / thumb stands up off a cigar: tip this many metres higher (0 = lies on it)");
         CigarThumbDragDown = c.CreateEntry("CigarThumbDownOnDrag", .012f, "При затяжке сигары кончик большого пальца ниже на столько метров (не виден в камере) / on a cigar drag the thumb tip goes this many metres lower");
@@ -101,6 +102,7 @@ public static class Settings
         CigaretteFilterStop = c.CreateEntry("CigaretteBurnsTo", .027f, "Сигарета сгорает до (м от фильтра) / cigarette burns down to (m from the mouth end)");
         CigarBandStop = c.CreateEntry("CigarBurnsTo", .047f, "Сигара сгорает до этикетки (м от мундштучного конца) / cigar burns down to its band (m from the mouth end)");
         ByOffset = c.CreateEntry("MouthByOffset", true, "Поза у рта = поза в руке + сдвиг (настраивается клавишами) / pose at the mouth = pose in the hand + offset (tuned with keys)");
+        CglTuneKeys = c.CreateEntry("CigarilloTuneKeys", false, "Тест: [ и ] сводят и разводят пальцы под сигариллой в руке / test: [ and ] close and spread the fingers on the cigarillo in the hand");
         TuneKeys = c.CreateEntry("TuneKeys2", false, "Тест: клавиши цифрового блока и стрелки двигают сигарету/трубку у рта / test: numpad and arrow keys move the smoke at the mouth");
         CigOffset = c.CreateEntry("CigaretteMouthOffset3", "-0.26 0.07 -0.62", "Сигарета у рта: сдвиг от руки, м (оси кости камеры рук) / cigarette at the mouth: offset from the hand, m");
         CigarOffset = c.CreateEntry("CigarMouthOffset3", "-0.26 0.09 -0.72", "Сигара у рта: сдвиг от руки, м / cigar at the mouth: offset from the hand, m");
@@ -113,6 +115,7 @@ public static class Settings
         LevelLock = c.CreateEntry("LevelHandsCameraAtLock", true, "Рука выглядит одинаково, куда бы ты ни смотрел, когда закуривал (вниз, вверх) / the hand looks the same whichever way you looked when lighting up (down, up)");
         CigRestLikeCigar = c.CreateEntry("CigaretteRestHandLikeCigar", true, "Кисть с сигаретой в покое лежит так же, как с сигарой / the resting hand with a cigarette lies as with a cigar");
         FilterStain = c.CreateEntry("CigaretteFilterEndStain", 1f, "Торец фильтра сигареты темнеет по мере курения: 0 выкл, 1 как есть, до 2 сильнее / the mouth end of a cigarette filter goes brown as it is smoked: 0 off, 1 normal, up to 2 stronger");
+        CigarilloTime = c.CreateEntry("CigarilloTimeScale", 1f, "Сигариллы: множитель времени курения (1 = мини 1:45, с мундштуком 2:15, классика 2:30, грубая скрутка 2:45) / cigarillos: smoking time multiplier (1 = mini 1:45, tipped 2:15, classic 2:30, rough rolled 2:45)");
         EmberLight = c.CreateEntry("EmberLightsHand", true, "Огонёк слегка подсвечивает руку / the ember lights the hand a little");
         CigIndexBend = c.CreateEntry("CigaretteIndexFingerBend", 12f, "Сигарета: указательный палец согнуть в среднем суставе, градусы (чтобы не торчал вперёд среднего) / cigarette: the index finger bent at its middle joint, degrees (so it does not stand out past the middle finger)");
         DragUpSeconds = c.CreateEntry("DragHandUpSeconds", .9f, "Затяжка: за сколько секунд рука идёт ко рту / drag: how many seconds the hand takes to the mouth");

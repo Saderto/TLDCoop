@@ -4,6 +4,7 @@
     <AssemblyName>SmokesByEMPEROR</AssemblyName>
     <RootNamespace>SmokesByEMPEROR</RootNamespace>
     <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS0436;CS8618;CS8625;CS8600;CS8602;CS8603;CS8604;CS8632</NoWarn>

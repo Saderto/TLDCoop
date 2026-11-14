@@ -11,6 +11,7 @@ internal static class Tune
     /// <summary>With the hands view locked: where the mouth end sits on that view (x, y 0..1 and distance m), per kind, per pipe.</summary>
     public static MelonPreferences_Entry<string> OnScreen(Def d)
     {
+        if (d.Smoke == SmokeType.Cigarette && CglMesh() is { } cm) return CglMouth(cm, "AtMouthOnScreen", Settings.CigInView, "Эта сигарилла у рта: мундштучный конец на экране x y (0..1) и расстояние, м / this cigarillo at the mouth: mouth end on screen x y and distance m");
         if (d.Smoke != SmokeType.Pipe) return d.Smoke == SmokeType.Cigar ? Settings.CigarInView : Settings.CigInView;
         // the churchwarden's first values were broken (its long stem across the view): new keys, set from the billiard's tuned pose
         string key = d.Id + "InTeethOnScreen" + (d.Id.Contains("Churchwarden") ? "3" : "");
@@ -21,8 +22,25 @@ internal static class Tune
         return e;
     }
 
-    public static MelonPreferences_Entry<string> Offset(Def d) => d.Smoke == SmokeType.Pipe ? PipeEntry(d, true) : d.Smoke == SmokeType.Cigar ? Settings.CigarOffset : Settings.CigOffset;
-    public static MelonPreferences_Entry<string> Turn(Def d) => d.Smoke == SmokeType.Pipe ? PipeEntry(d, false) : d.Smoke == SmokeType.Cigar ? Settings.CigarTurn : Settings.CigTurn;
+    public static MelonPreferences_Entry<string> Offset(Def d) => d.Smoke == SmokeType.Pipe ? PipeEntry(d, true) : d.Smoke == SmokeType.Cigar ? Settings.CigarOffset
+        : CglMesh() is { } cm ? CglMouth(cm, "MouthOffset", Settings.CigOffset, "Эта сигарилла у рта: сдвиг от руки, м / this cigarillo at the mouth: offset from the hand, m") : Settings.CigOffset;
+    public static MelonPreferences_Entry<string> Turn(Def d) => d.Smoke == SmokeType.Pipe ? PipeEntry(d, false) : d.Smoke == SmokeType.Cigar ? Settings.CigarTurn
+        : CglMesh() is { } cm ? CglMouth(cm, "MouthTurn", Settings.CigTurn, "Эта сигарилла у рта: поворот, градусы / this cigarillo at the mouth: turn, degrees") : Settings.CigTurn;
+
+    // 11-14 (user: "I need to move them during the drag"): every cigarillo shape has its own place at the mouth; it starts as the cigarette's
+    static string? CglMesh() => Smoking.From is { Cigarillo: true, CigMesh: { } m } ? m : null;
+
+    static MelonPreferences_Entry<string> CglMouth(string mesh, string what, MelonPreferences_Entry<string> like, string desc)
+    {
+        string key = "Cigarillo" + what + "_" + mesh;
+        if (pipeEntries.TryGetValue(key, out var e)) return e;
+        var c = MelonPreferences.GetCategory("SmokesBySeagull") ?? MelonPreferences.CreateCategory("SmokesBySeagull");
+        // the owner's own placing, 11-14: the tipped ones sit a little lower at the mouth
+        string def = mesh == "cgl_tip" && what == "AtMouthOnScreen" ? "0.54 -0.03 0.21" : like.Value;
+        e = c.GetEntry<string>(key) ?? c.CreateEntry(key, def, desc);
+        pipeEntries[key] = e;
+        return e;
+    }
 
     // every pipe has its own place in the mouth (their shapes differ): entries "<LitPipeX>MouthOffset"/"…MouthTurn", made on first use
     static readonly Dictionary<string, MelonPreferences_Entry<string>> pipeEntries = new();
@@ -40,8 +58,55 @@ internal static class Tune
         return e;
     }
 
+    /// <summary>11-14 (user: "turn the keys on, I want to move the cigarillos"): each cigarillo shape has its own place in the resting hand:
+    /// along its length, up off the fingers, sideways (m) and extra finger spread (degrees). Entry "CigarilloInHand_&lt;mesh&gt;".</summary>
+    public static Vector4 CglHand(string mesh)
+    {
+        var s = CglEntry(mesh).Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var v = Vector4.zero;
+        for (int i = 0; i < 4 && i < s.Length; i++)
+            if (float.TryParse(s[i], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var f)) v[i] = f;
+        return v;
+    }
+
+    static MelonPreferences_Entry<string> CglEntry(string mesh)
+    {
+        string key = "CigarilloInHand_" + mesh;
+        if (pipeEntries.TryGetValue(key, out var e)) return e;
+        var c = MelonPreferences.GetCategory("SmokesBySeagull") ?? MelonPreferences.CreateCategory("SmokesBySeagull");
+        // the owner's own setting of the fingers, 11-14: only the Toskanello needed them a little closer
+        string def = mesh == "cgl_toscano" ? "0 0 0 -0.5" : "0 0 0 0";
+        e = c.GetEntry<string>(key) ?? c.CreateEntry(key, def, "Эта сигарилла в руке: вдоль, вверх, вбок (м) и пальцы шире (градусы) / this cigarillo in the hand: along, up, sideways (m) and fingers wider (degrees)");
+        pipeEntries[key] = e;
+        return e;
+    }
+
+    // 11-14 (user, after placing the tipped ones: "take these test keys away and give me ones to spread or close the fingers"):
+    // only the fingers are left: ] wider, [ closer, for the shape in the hand
+    static void CglKeys()
+    {
+        if (Smoking.From is not { Cigarillo: true, CigMesh: { } mesh }) return;
+        Flush();
+        float d = (K(KeyCode.RightBracket) ? .5f : 0f) - (K(KeyCode.LeftBracket) ? .5f : 0f);
+        if (d == 0f) return;
+        var e = CglEntry(mesh);
+        var v = CglHand(mesh);
+        v.w += d;
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        e.Value = string.Join(" ", v.x.ToString("0.####", ci), v.y.ToString("0.####", ci), v.z.ToString("0.####", ci), v.w.ToString("0.#", ci));
+        MelonPreferences.Save();
+        Safe.Info("Tune cigarillo fingers " + mesh + ": " + e.Value);
+        pending = $"{mesh}: {v.w:0.#}\u00b0";
+        Flush();
+    }
+
     public static void Keys(Def lit)
     {
+        if (Settings.CglTuneKeys.Value && CglMesh() != null)
+        {
+            try { CglKeys(); } catch (Exception e) { Safe.Log("Cigarillo finger keys", e); }
+            return;
+        }
         if (!Settings.TuneKeys.Value) return;
         try
         {
@@ -121,7 +186,7 @@ internal static class Tune
 
     static void Show(Def lit, string? key)
     {
-        string line = $"{(lit.Smoke == SmokeType.Pipe ? lit.Id : lit.Smoke.ToString())}: {(ViewLock.Locked ? OnScreen(lit).Value : Offset(lit).Value)} | {Turn(lit).Value}";
+        string line = $"{(lit.Smoke == SmokeType.Pipe ? lit.Id : CglMesh() ?? lit.Smoke.ToString())}: {(ViewLock.Locked ? OnScreen(lit).Value : Offset(lit).Value)} | {Turn(lit).Value}";
         Safe.Info("Tune " + line + (key != null ? " " + key : ""));
         pending = (key != null ? Texts.Get(key) + " " : "") + line;
         Flush();

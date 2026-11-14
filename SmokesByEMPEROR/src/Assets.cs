@@ -91,6 +91,14 @@ public static class Assets
                 if (d.sqrMagnitude < .0008f * .0008f) { var q = v[i]; q -= d; v[i] = q; }
             }
         }
+        // 11-14 (user: "the cigars have a see-through texture at the tip"): in every cigar mesh the foot (the end that is lit) is a part of
+        // its own whose faces look into the cigar, so from outside it was not drawn and one saw into the hollow body. A flat part at
+        // an end of the mesh that faces the middle is turned round here (so it needs no new mesh files)
+        if (Path.GetFileName(path).StartsWith("cigar", StringComparison.OrdinalIgnoreCase) && nv > 0 && ni >= 3)
+        {
+            try { FaceEndsOut(v, n, t, nv, ni); }
+            catch (Exception e) { MelonLogger.Warning("Mesh ends " + path + ": " + e.Message); }
+        }
         var m = new Mesh { name = Path.GetFileNameWithoutExtension(path), indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
         m.vertices = v;
         m.normals = n;
@@ -104,5 +112,60 @@ public static class Assets
         m.RecalculateBounds();
         m.hideFlags = HideFlags.HideAndDontSave;
         return meshes[relativePath] = m;
+    }
+
+    /// <summary>Turns round the flat parts at the ends of the mesh's long axis that face its middle (triangle order and normals).</summary>
+    static void FaceEndsOut(Il2CppStructArray<Vector3> v, Il2CppStructArray<Vector3> n, Il2CppStructArray<int> t, int nv, int ni)
+    {
+        var pos = new Vector3[nv];
+        for (int i = 0; i < nv; i++) pos[i] = v[i];
+        var tri = new int[ni];
+        for (int i = 0; i < ni; i++) tri[i] = t[i];
+        Vector3 lo = pos[0], hi = pos[0];
+        for (int i = 1; i < nv; i++) { lo = Vector3.Min(lo, pos[i]); hi = Vector3.Max(hi, pos[i]); }
+        var size = hi - lo; var mid = (lo + hi) * .5f;
+        int ax = size.x >= size.y && size.x >= size.z ? 0 : size.y >= size.z ? 1 : 2;
+        var par = new int[nv];
+        for (int i = 0; i < nv; i++) par[i] = i;
+        int Find(int x)
+        {
+            while (par[x] != x) { par[x] = par[par[x]]; x = par[x]; }
+            return x;
+        }
+        for (int i = 0; i + 2 < ni; i += 3)
+        {
+            int ra = Find(tri[i]);
+            par[Find(tri[i + 1])] = ra;
+            par[Find(tri[i + 2])] = ra;
+        }
+        // per part: the sum of its faces (area × direction), its area, where it is
+        var sum = new Dictionary<int, (Vector3 n, float area, Vector3 at, int count)>();
+        for (int i = 0; i + 2 < ni; i += 3)
+        {
+            Vector3 a = pos[tri[i]], b = pos[tri[i + 1]], c = pos[tri[i + 2]];
+            var fn = Vector3.Cross(b - a, c - a) * .5f;
+            int r = Find(tri[i]);
+            sum.TryGetValue(r, out var s);
+            sum[r] = (s.n + fn, s.area + fn.magnitude, s.at + a + b + c, s.count + 3);
+        }
+        var turn = new HashSet<int>();
+        foreach (var kv in sum)
+        {
+            var s = kv.Value;
+            float nl = s.n.magnitude;
+            if (s.area < 1e-12f || nl / s.area < .8f) continue;          // not flat
+            float off = (s.at / s.count - mid)[ax];
+            if (Mathf.Abs(off) < .4f * size[ax]) continue;                // not at an end
+            if (s.n[ax] / nl * Mathf.Sign(off) > -.8f) continue;          // faces out already
+            turn.Add(kv.Key);
+        }
+        if (turn.Count == 0) return;
+        for (int i = 0; i + 2 < ni; i += 3)
+        {
+            if (!turn.Contains(Find(tri[i]))) continue;
+            (t[i + 1], t[i + 2]) = (tri[i + 2], tri[i + 1]);
+        }
+        for (int i = 0; i < nv; i++)
+            if (turn.Contains(Find(i))) n[i] = -n[i];
     }
 }

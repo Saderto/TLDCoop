@@ -26,14 +26,21 @@ internal static class Loot
     static float total;
 
     /// <summary>What can be found and how often: packs most, then cigars, tobacco, pipes, the lighter and the cutter; boxes and rare packs seldom.</summary>
+    const Kind Cgl = (Kind)100;   // the cigarillos' own share of the finds (they are packs otherwise)
+    // 11-14 (user: "cigarettes a third less often"): a third of the packs' share of the finds is now nothing at all (Nothing),
+    // so cigarettes turn up a third less often and everything else exactly as before
+    const float PacksLess = 1f / 3f;
+    const string Nothing = "";
     static void Build()
     {
         table = new();
+        table.Add((Nothing, 50f * PacksLess));
+        total += 50f * PacksLess;
         // base weight of one item inside its kind; each kind then gets a fixed share of all finds, so more brands
         // spread the same share thinner instead of crowding out the lighter or the cutter (pipes: fixed places only)
         var share = new Dictionary<Kind, float>
         {
-            [Kind.Pack] = 60f, [Kind.Tube] = 11.9f,   // 11-09: every cigar found is in its tube (bare cigars only come out of tubes and boxes)
+            [Kind.Pack] = 50f * (1f - PacksLess), [Cgl] = 10f, [Kind.Tube] = 11.9f,   // 11-13: cigarillos take 10 of the packs' 60   // 11-09: every cigar found is in its tube (bare cigars only come out of tubes and boxes)
             [Kind.Box] = 2.04f, [Kind.Pouch] = 8f,
             [Kind.Lighter] = 7f, [Kind.Cutter] = 3f,   // 11-10: 29 collectible lighters (rarer designs weigh less)
             [Kind.Refill] = 4f,
@@ -43,10 +50,11 @@ internal static class Loot
         foreach (var d in Defs.All)
         {
             if (!share.ContainsKey(d.Kind)) continue;
+            var kind = d.Cigarillo ? Cgl : d.Kind;
             float w = d.Kind == Kind.Pack ? (d.CigTexture != null ? (d.Rare ? .3f : 1f) : 0f) : d.Kind == Kind.Lighter ? (d.Rarity >= 3 ? .25f : d.Rarity == 2 ? .55f : 1f) : 1f;
             if (w <= 0f) continue;
-            raw.Add((d.Id, d.Kind, w));
-            sum[d.Kind] = (sum.TryGetValue(d.Kind, out var t) ? t : 0f) + w;
+            raw.Add((d.Id, kind, w));
+            sum[kind] = (sum.TryGetValue(kind, out var t) ? t : 0f) + w;
         }
         foreach (var (id, k, w) in raw)
         {
@@ -54,7 +62,7 @@ internal static class Loot
             table.Add((id, x));
             total += x;
         }
-        Safe.Info($"Loot: {table.Count} items can be found");
+        Safe.Info($"Loot: {table.Count - 1} items can be found");
     }
 
     static string Pick(float r)
@@ -106,6 +114,7 @@ internal static class Loot
                 string key = $"{Seed}|{place}|{i}|smokes";
                 if (Roll(key) >= share.box * scale) continue;
                 string id = Pick(Roll(key + "|what"));
+                if (id == Nothing) continue;
                 drawn[i] = Defs.Prefix + id;
                 Safe.Info($"Loot: {id} in a container at {place} instead of {name}");
             }
@@ -125,6 +134,7 @@ internal static class Loot
         string key = $"{Seed}|{place}|extra|smokes";
         if (Roll(key) >= chance) return;
         string id = Pick(Roll(key + "|what"));
+        if (id == Nothing) return;
         if (drawn.Contains(Defs.Prefix + id)) return;   // 11-10: the game populated this container twice (log: same pack twice)
         drawn.Add(Defs.Prefix + id);
         Safe.Info($"Loot: {id} added to a container ({Clean(c.gameObject.name)}) at {place}");
@@ -152,6 +162,7 @@ internal static class Loot
             cabinetTable = new();
             foreach (var (id, w) in table!)
             {
+                if (id == Nothing) { cabinetTable.Add((id, w)); cabinetTotal += w; continue; }
                 var d = Defs.ById(id);
                 if (d == null || (d.Kind != Kind.Pack && d.Kind != Kind.Tube)) continue;
                 cabinetTable.Add((id, w));
@@ -162,7 +173,7 @@ internal static class Loot
         float x = Roll(key + "|what") * cabinetTotal;
         string pick = cabinetTable[^1].id;
         foreach (var (id, w) in cabinetTable) { if (x < w) { pick = id; break; } x -= w; }
-        if (drawn.Contains(Defs.Prefix + pick)) return;
+        if (pick == Nothing || drawn.Contains(Defs.Prefix + pick)) return;
         drawn.Add(Defs.Prefix + pick);
         Safe.Info($"Loot: {pick} added to a filing cabinet ({n}) at {place}");
     }
@@ -180,7 +191,9 @@ internal static class Loot
             var t = go.transform;
             string key = $"{Seed}|{Cm(t.position)}|smokes";
             if (Roll(key) >= share.world * scale) return;
-            MelonLoader.MelonCoroutines.Start(Swap(go, Pick(Roll(key + "|what")), t.position, t.rotation));
+            string what = Pick(Roll(key + "|what"));
+            if (what == Nothing) return;
+            MelonLoader.MelonCoroutines.Start(Swap(go, what, t.position, t.rotation));
         }
         catch (Exception e) { Safe.Log("Loot world", e); }
     }

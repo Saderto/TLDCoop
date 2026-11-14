@@ -27,6 +27,10 @@ public class Def
     public float[]? PipeStats;        // tobacco pouches: fatigue %, health %, hunger minutes, bonus hours
     public Color? Tobacco;            // tobacco pouches: the colour of the tobacco in the bowl
     public bool Rare;
+    // 11-13 cigarillos (CigarilloCatalog): smoked as a cigarette (same hand and mouth poses), a leaf wrapper, their own numbers
+    public bool Cigarillo;
+    public float GripRadius;              // a cigarillo's radius where the fingers hold it, m
+    public float BurnStop, BurnSeconds;   // how far from the mouth end it burns down to, m; real seconds (a regular cigarette is 90)
     // lighters (11-10 collection) and their refills: "petrol" | "gas"; the bonus to the fire starting chance, %; rarity 1..3
     public string Fuel = "";
     public float FireBonus;
@@ -67,6 +71,14 @@ public static class Defs
                 Smoke = SmokeType.Cigarette, IconId = "LitCigarette" });
             Add(new Def { Id = v.Id, Kind = Kind.Pack, Mesh = v.PackMesh, Texture = v.PackTexture, WeightKg = .025f, Units = 20, UnitKey = "CIG", Lit = "LitCig_" + v.Id,
                 CigTexture = v.CigTexture, CigMesh = v.CigMesh, Strength = v.Strength, Bonus = v.Bonus, Side = v.Side, Rare = v.Rare, Brand = v.Brand });
+        }
+        foreach (var v in CigarilloCatalog.All)
+        {
+            Add(new Def { Id = "LitCig_" + v.Id, Kind = Kind.Lit, Base = "GEAR_Torch", Mesh = v.CigMesh, Texture = v.CigTexture, HeldMesh = v.CigMesh + "_held", WeightKg = .002f,
+                Smoke = SmokeType.Cigarette, IconId = "LitCigarillo" });
+            Add(new Def { Id = v.Id, Kind = Kind.Pack, Mesh = v.PackMesh, Texture = v.PackTexture, WeightKg = .02f + .004f * v.Units, Units = v.Units, UnitKey = "CGL", Lit = "LitCig_" + v.Id,
+                CigTexture = v.CigTexture, CigMesh = v.CigMesh, Strength = v.Strength, Bonus = v.Bonus, Side = v.Side, Rare = v.Rare, Brand = v.Brand,
+                Cigarillo = true, BurnStop = v.Stop, BurnSeconds = v.Seconds, GripRadius = v.Grip });
         }
         foreach (var b in Brands)
             if (ById("Pack" + b) == null) Add(new Def { Id = "Pack" + b, Kind = Kind.Pack, Mesh = "pack_" + b.ToLowerInvariant(), Texture = "pack_" + b.ToLowerInvariant(), WeightKg = .025f, Units = 20, UnitKey = "CIG", Lit = "LitCigarette" });
@@ -143,6 +155,7 @@ public static class Defs
     // fatigue %, hunger minutes, health %, counts for shortness of breath, by strength (1 = the old numbers)
     static readonly float[][] Strengths = { new[] { 3f, 20f, .5f, .7f }, new[] { 5f, 25f, 1f, 1f }, new[] { 7f, 30f, 1.5f, 1.3f }, new[] { 9f, 35f, 2f, 1.6f } };
 
+    static readonly float[][] CigarilloStrengths = { new[] { 6f, 30f, 1f, 1.5f }, new[] { 8f, 35f, 1.5f, 1.8f }, new[] { 10f, 40f, 2f, 2.2f } };
     static readonly float[][] CigarStrengths = { new[] { 8f, 1.5f }, new[] { 10f, 2f }, new[] { 13f, 2.5f } };
 
     /// <summary>A smoke's numbers; a cigarette from a variety pack by its strength and flavour.</summary>
@@ -181,7 +194,7 @@ public static class Defs
             return m / CigarMeanReal;
         if (t == SmokeType.Cigarette && from?.CigMesh != null)
         {
-            float f = CigFormat.TryGetValue(from.CigMesh, out var x) ? x / 6f : 1f;
+            float f = from.Cigarillo ? from.BurnSeconds / 90f * Mathf.Clamp(Settings.CigarilloTime.Value, .2f, 5f) : CigFormat.TryGetValue(from.CigMesh, out var x) ? x / 6f : 1f;
             if (from.Brand != null && from.Brand.StartsWith("djarum", StringComparison.OrdinalIgnoreCase)) f *= 1.4f;   // kretek: cloves, burns long
             // the blend and how tightly it is packed differ by brand: within +-5%, the same for one brand every time
             uint h = 2166136261; foreach (char ch in from.Brand ?? from.Id) { h ^= ch; h *= 16777619; }
@@ -216,6 +229,20 @@ public static class Defs
             return s;
         }
         if (t != SmokeType.Cigarette || from == null || from.CigTexture == null) return s;
+        if (from.Cigarillo)
+        {
+            // between a cigarette and a cigar: about one and a half cigarettes
+            var g = CigarilloStrengths[Math.Clamp(from.Strength, 0, 2)];
+            s.FatiguePct = g[0]; s.HungerMinutes = g[1]; s.HealthPct = g[2]; s.Counts = g[3];
+            switch (from.Bonus)
+            {
+                case "coffee": s.FatiguePct += 2f; break;
+                case "sweet": s.HungerMinutes += 10f; break;
+                case "fresh": case "warm": case "calm": case "hands": case "steady": s.Bonus = from.Bonus; s.BonusHours = .75f; break;
+            }
+            if (from.Side.Length > 0) { s.Side = from.Side; s.SideHours = .75f; }
+            return s;
+        }
         var k = Strengths[Math.Clamp(from.Strength, 0, 3)];
         s.FatiguePct = k[0]; s.HungerMinutes = k[1]; s.HealthPct = k[2]; s.Counts = k[3];
         switch (from.Bonus)

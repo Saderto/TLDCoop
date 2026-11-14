@@ -15,6 +15,19 @@ public class HabitState
     public float HungerUntil { get; set; }
     public Dictionary<string, float> Bonus { get; set; } = new();   // flavour bonus -> game hour it ends
     public List<string> Lighters { get; set; } = new();             // 11-10: collectible lighters found in this world, in order found
+    public PendingSmoke? Pending { get; set; }                      // 11-13: the smoke that was burning when the game was saved
+}
+
+/// <summary>A smoke caught by a save while it burned: after the game is started again it goes on from here.</summary>
+public class PendingSmoke
+{
+    public string LitId { get; set; } = "";
+    public string? FromId { get; set; }
+    public float Smoked { get; set; }
+    public float Length { get; set; }
+    public float EffectMul { get; set; } = 1f;
+    public float Stain { get; set; }
+    public bool RealTime { get; set; }
 }
 
 /// <summary>Effects of a smoke, shortness of breath, addiction and craving (the owner's numbers in Settings).</summary>
@@ -281,7 +294,12 @@ public class SmokeAffliction : CustomAffliction, IBuff, IDuration, IInstance
 [HarmonyPatch(typeof(SaveGameSystem), nameof(SaveGameSystem.SaveGlobalData))]
 internal static class HabitSavePatch
 {
-    static void Postfix() => Habit.Save();
+    static void Postfix()
+    {
+        // only the game's own save takes the burning smoke along: the lit item is in that save too
+        try { Habit.State.Pending = Smoking.Snapshot(); } catch (Exception e) { Safe.Log("Remember the burning smoke", e); }
+        Habit.Save();
+    }
 }
 
 [HarmonyPatch(typeof(SaveGameSystem), nameof(SaveGameSystem.RestoreGlobalData))]

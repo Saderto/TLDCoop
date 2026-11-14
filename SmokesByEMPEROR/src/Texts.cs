@@ -15,6 +15,8 @@ public static class Texts
         en = Read(Path.Combine(root, "data", "text_en.json"));
         foreach (var kv in Read(Path.Combine(root, "data", "text_var_ru.json"))) ru[kv.Key] = kv.Value;
         foreach (var kv in Read(Path.Combine(root, "data", "text_var_en.json"))) en[kv.Key] = kv.Value;
+        foreach (var kv in Read(Path.Combine(root, "data", "text_cgl_ru.json"))) ru[kv.Key] = kv.Value;
+        foreach (var kv in Read(Path.Combine(root, "data", "text_cgl_en.json"))) en[kv.Key] = kv.Value;
         foreach (var kv in Read(Path.Combine(root, "data", "text_cigar_ru.json"))) ru[kv.Key] = kv.Value;
         foreach (var kv in Read(Path.Combine(root, "data", "text_cigar_en.json"))) en[kv.Key] = kv.Value;
         foreach (var kv in Read(Path.Combine(root, "data", "text_pouch_ru.json"))) ru[kv.Key] = kv.Value;
@@ -55,8 +57,8 @@ public static class Texts
             if (key.EndsWith("_NAME", StringComparison.Ordinal))
             {
                 string pack = Get("SMOKES_" + key.Substring("SMOKES_LitCig_".Length));
-                if (Russian) return (pack.StartsWith("Сигареты ") ? "Сигарета " + pack.Substring(9) : pack) + " (курится)";
-                return (pack.EndsWith(" cigarettes") ? pack.Substring(0, pack.Length - 11) + " cigarette" : pack) + " (lit)";
+                if (Russian) return (pack.StartsWith("Сигареты ") ? "Сигарета " + pack.Substring(9) : pack.StartsWith("Сигариллы ") ? "Сигарилла " + pack.Substring(10) : pack) + " (курится)";
+                return (pack.EndsWith(" cigarettes") ? pack.Substring(0, pack.Length - 11) + " cigarette" : pack.EndsWith(" cigarillos") ? pack.Substring(0, pack.Length - 1) : pack) + " (lit)";
             }
             return Get("SMOKES_LitCigarette_DESC");
         }

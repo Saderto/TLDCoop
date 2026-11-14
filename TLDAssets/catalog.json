@@ -64,8 +64,8 @@
   {
    "id": "SmokesBySeagull",
    "zip": "SmokesByEMPEROR.zip",
-   "version": "0.1.134",
-   "size": 143314823,
+   "version": "0.1.147",
+   "size": 167738029,
    "detect": "Mods/SmokesByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokesBySeagull.dll",
@@ -86,8 +86,8 @@
     "en": "Smokes"
    },
    "desc": {
-    "ru": "Сигареты, сигары, трубки, табак и зажигалки со своими звуками и эффектами. Плагин звука SmokesAudioOnByEMPEROR входит в архив.",
-    "en": "Cigarettes, cigars, pipes, tobacco and lighters with their own sounds and effects. The SmokesAudioOnByEMPEROR sound plugin is included."
+    "ru": "Сигареты, сигары, сигариллы, трубки, табак и зажигалки со своими звуками и эффектами. Плагин звука SmokesAudioOnByEMPEROR входит в архив.",
+    "en": "Cigarettes, cigars, cigarillos, pipes, tobacco and lighters with their own sounds and effects. The SmokesAudioOnByEMPEROR sound plugin is included."
    }
   },
   {

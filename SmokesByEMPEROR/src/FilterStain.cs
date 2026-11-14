@@ -15,7 +15,7 @@ internal static class FilterStain
     static float[]? noise;
     static int step = -1;
 
-    public static Texture2D? Make(string relativePath)
+    public static Texture2D? Make(string relativePath, float minBright = .6f)
     {
         Clear();
         try
@@ -39,7 +39,7 @@ internal static class FilterStain
                 int x = i % W - W / 2, y = i / W - W / 2;
                 if (x * x + y * y < 40 * 40) { bright += Mathf.Min(c[i].r, Mathf.Min(c[i].g, c[i].b)); n++; }
             }
-            if (n == 0 || bright / n < .6f) { UnityEngine.Object.Destroy(t); return null; }
+            if (n == 0 || bright / n < minBright) { UnityEngine.Object.Destroy(t); return null; }
             noise ??= MakeNoise();
             clean = c;
             work = new Il2CppStructArray<Color>(W * W);

@@ -183,6 +183,22 @@ public static class Visual
     }
     static Burn? burn;
     static float emberZ;
+    static float sectionZ = float.NaN, bandLen;   // where the ember's cap and band were last built for, and the band's length
+    static readonly float[] sect = new float[ProfSeg], sectBack = new float[ProfSeg];
+    static readonly List<Vector2> outline = new();
+    static bool bandOnBody;            // the burning band is the smoke's own side wall (Burn.Overlay), not a tube round it
+
+    static float capBack;              // how far inside the cut the ember's cap sits (a frayed foot)
+    static int capPoints = -1;         // how many outline points the ember's cap was made from
+
+    static void NewMesh(GameObject go, Mesh m)
+    {
+        var mf = go.GetComponent<MeshFilter>();
+        if (mf == null) return;
+        var old = mf.sharedMesh;
+        mf.sharedMesh = m;
+        if (old != null) UnityEngine.Object.Destroy(old);
+    }
     static float propRadius = .0095f;   // the held smoke's thickness: a cigar's fingers open by it (tuned on the Cohibra, r .0095)               // the lit end, along the prop's z, at full length
     static Vector3 pipeBowl, pipeGrip;
     static readonly List<Vector3> pipeVerts = new();   // a sample of the pipe's points (its own space): nothing of it may sink into the fist
@@ -227,6 +243,8 @@ public static class Visual
         tobaccoGlow = null;
         emberBand = null;
         bandMat = null;
+        try { burn?.Drop(); } catch { }
+        burn = null;
         flung = false;
         dumped = false;
         ClearMarkers();
@@ -286,10 +304,63 @@ public static class Visual
         float keep = 1f;
         if (lit.Smoke != SmokeType.Pipe && burn != null)
         {
-            float stop = burn.MinZ + (lit.Smoke == SmokeType.Cigarette ? (Smoking.From?.CigMesh == "cig_papirosa" ? .067f : Settings.CigaretteFilterStop.Value) : Settings.CigarBandStop.Value);
+            float stop = burn.MinZ + (lit.Smoke == SmokeType.Cigarette ? (Smoking.From is { Cigarillo: true } cg ? cg.BurnStop : Smoking.From?.CigMesh == "cig_papirosa" ? .067f : Settings.CigaretteFilterStop.Value) : Settings.CigarBandStop.Value);
             float z = Mathf.Lerp(emberZ, Math.Min(stop, emberZ), Mathf.Clamp01(share));
             burn.Cut(z);
             keep = emberZ > 1e-4f ? z / emberZ : 1f;
+            // 11-14, the ember's history: a ring and a cap built once stood off the body ("a gap"); rebuilt from the outline by angle
+            // bins they were jagged ("broke"); from the line crossings, resampled, they still cut into a lumpy leaf here and there
+            // ("still breaks now and then, let it be real burning, not an outer ring"). Now the band is the smoke's own surface
+            // (Burn.Overlay, cut together with it) and the cap goes through the very points the cut mesh ends in
+            float cz = burn.CutZ;
+            if (emberCap != null && !float.IsNaN(cz) && (float.IsNaN(sectionZ) || cz != sectionZ))
+            {
+                sectionZ = cz;
+                // a frayed foot (the cheroots) has no whole outline at its very end: the cap sits where the nearest whole one is, inside
+                bool got = false;
+                float at = cz;
+                for (int back = 0; back <= 6 && !got; back++)
+                {
+                    at = cz - back * .001f;
+                    got = burn.Outline(at, outline);
+                }
+                if (got)
+                {
+                    // the same cap moved to the new outline while its number of points stays (the cut now moves in very small steps)
+                    var cmf = emberCap.GetComponent<MeshFilter>();
+                    var cm = cmf != null ? cmf.sharedMesh : null;
+                    if (cm != null && capPoints == outline.Count && cm.vertexCount == outline.Count + 1)
+                    {
+                        FanPoints(outline, .00006f, out var fv, out var fu);
+                        cm.vertices = fv;
+                        cm.uv = fu;
+                        cm.RecalculateBounds();
+                    }
+                    else
+                    {
+                        NewMesh(emberCap, Fan(outline, .00006f));
+                        capPoints = outline.Count;
+                    }
+                    capBack = cz - at;
+                }
+                if (!bandOnBody && emberBand != null)
+                {
+                    got = false;
+                    for (int back = 0; back < 4 && !got; back++) got = burn.Section(cz - back * .002f, sect);
+                    if (got)
+                    {
+                        if (!burn.Section(cz - bandLen * .85f, sectBack) && !burn.Section(cz - .006f, sectBack)) Array.Copy(sect, sectBack, sect.Length);
+                        for (int i = 0; i < sect.Length; i++)
+                        {
+                            sect[i] += .00015f;   // just clear of the surface
+                            sectBack[i] = Math.Max(sectBack[i] + .00015f, sect[i] * .9f);
+                        }
+                        NewMesh(emberBand, Tube(sectBack, sect, bandLen));
+                    }
+                }
+            }
+            // the cap: on the cut the mesh has now (the ember itself follows the burning smoothly, the mesh is cut in small steps)
+            if (emberCap != null && !float.IsNaN(cz)) emberCap.transform.localPosition = new Vector3(0f, 0f, cz - capBack - z + .0001f);
         }
         if (lit.Smoke == SmokeType.Cigarette) FilterStain.Set(Smoking.StainShare);
         keepNow = keep;
@@ -377,6 +448,15 @@ public static class Visual
             viewWeapon = weapon;
             if (rig != null && Hands.Palm(rig.transform) != null && lit.Smoke != SmokeType.Pipe) { Hands.Open(1f); if (lit.Smoke == SmokeType.Cigar) Hands.Spread(Settings.CigarSpread.Value * Mathf.Clamp(propRadius / .0095f, .6f, 1.5f));
                 // 11-09: slim cigarettes hung in the air between the fingers: the fingers close in by how much thinner than a regular one (r 3.9 mm)
+                // 11-13 cigarillos are thicker than a cigarette (r 4.5..5 mm): the fingers open by that share of the cigar's spread
+                // 11-13 night (the owner's shots): by the thickest place the tipped ones, Toskanello and Backwuds hung in the air: a cigarillo
+                // opens the fingers by its radius where they hold it (Def.GripRadius), plus a little room (minis sat too tight)
+                else if (Smoking.From is { Cigarillo: true, GripRadius: > 0f } cgl)
+                {
+                    float deg = Settings.CigarSpread.Value * (cgl.GripRadius - .0039f) / (.0095f - .0039f) + Settings.CigarilloRoom.Value + (cgl.CigMesh != null ? Tune.CglHand(cgl.CigMesh).w : 0f);
+                    if (Mathf.Abs(deg) > .01f) Hands.Spread(Mathf.Clamp(deg, -4f, Settings.CigarSpread.Value * 1.3f));
+                }
+                else if (propRadius > .0042f) Hands.Spread(Settings.CigarSpread.Value * Mathf.Clamp01((propRadius - .0039f) / (.0095f - .0039f)));
                 else if (propRadius < .0037f && Settings.SlimSqueeze.Value > 0f) Hands.Spread(-Settings.SlimSqueeze.Value * Mathf.Clamp01((.0039f - propRadius) / .0013f));;
                 if (lit.Smoke == SmokeType.Cigarette) Hands.BendIndex(Settings.CigIndexBend.Value); };
         }
@@ -1458,6 +1538,12 @@ public static class Visual
                 // long cigars: no more than 3 cm out on the palm side, else the cap ran into the thumb
                 float back = lit.Smoke == SmokeType.Cigar ? emberZ * .2f : Math.Max(emberZ * .25f, Settings.CigFilterOut.Value);   // 11-09: short ones showed too little filter behind the fingers
                 prop.transform.position = bp - bd * (back * Settings.PropScale.Value);
+                // 11-14: each cigarillo shape's own place in the hand (set with the cigarillo tune keys)
+                if (Smoking.From is { Cigarillo: true, CigMesh: { } cm })
+                {
+                    var th = Tune.CglHand(cm);
+                    prop.transform.position += bd * th.x + bu * th.y + Vector3.Cross(bu, bd) * th.z;
+                }
                 return;
             }
         }
@@ -1570,12 +1656,13 @@ public static class Visual
         var model = new GameObject("Model");
         model.layer = layer;
         model.transform.SetParent(prop.transform, false);
+        try { burn?.Drop(); } catch { }
         burn = null;
         keepNow = 1f;
         if (mesh != null)
         {
             mesh = TwoSided(mesh);
-            if (!pipe) burn = new Burn(mesh);
+            if (!pipe) burn = new Burn(mesh, true, lit.Smoke == SmokeType.Cigarette ? .004f : .007f);
         }
         model.AddComponent<MeshFilter>().sharedMesh = mesh;
         var mr = model.AddComponent<MeshRenderer>();
@@ -1586,7 +1673,7 @@ public static class Visual
             Texture? tex = null;
             // 11-13: a filter cigarette gets its own copy of the texture, whose mouth end disc goes brown as it is smoked (FilterStain)
             if (lit.Smoke == SmokeType.Cigarette && Settings.FilterStain.Value > 0f && Smoking.From?.CigMesh is { } fm && fm != "cig_nofilter")
-                tex = FilterStain.Make(texPath);
+                tex = FilterStain.Make(texPath, Smoking.From is { Cigarillo: true, CigMesh: "cgl_rustic" } ? .22f : .6f);   // 11-14: the cheroot's dry husk filter (Mandalai) is darker than white acetate and stains too; bare tobacco ends (darker still) do not
             else FilterStain.Clear();
             tex ??= Assets.Texture(texPath);
             if (tex != null) m.mainTexture = tex;
@@ -1621,22 +1708,36 @@ public static class Visual
             emberCap.transform.SetParent(ember.transform, false);
             // the end's real outline (a box-pressed cigar is square: a round cap and band sat inside it, the burning end hardly showed)
             var prof = Profile(mesh, b, rr);
+            sectionZ = float.NaN;
             emberCap.AddComponent<MeshFilter>().sharedMesh = Disc(prof, 1.03f);   // as wide as the band: a narrower cap left a ring of gap at the end
             var er = emberCap.AddComponent<MeshRenderer>();
             er.sharedMaterial = EmberMat();
             er.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             // the burning band seen from the side: char line, glowing ring, a little grey ash past it
             float band = lit.Smoke == SmokeType.Cigarette ? .004f : .007f;
+            bandLen = band;
+            capBack = 0f;
+            capPoints = -1;
             emberBand = new GameObject("EmberBand");
             emberBand.layer = layer;
-            emberBand.transform.SetParent(ember.transform, false);
-            emberBand.transform.localPosition = new Vector3(0f, 0f, -band * .85f);
-            emberBand.AddComponent<MeshFilter>().sharedMesh = Tube(prof, 1.03f, band);
+            bandOnBody = burn?.Overlay != null;
+            if (bandOnBody)
+            {
+                // the smoke's own side wall once more, in the prop's space like the model itself: the band is painted on it (Burn.Cut)
+                emberBand.transform.SetParent(prop.transform, false);
+                emberBand.AddComponent<MeshFilter>().sharedMesh = burn!.Overlay;
+            }
+            else
+            {
+                emberBand.transform.SetParent(ember.transform, false);
+                emberBand.transform.localPosition = new Vector3(0f, 0f, -band * .85f);
+                emberBand.AddComponent<MeshFilter>().sharedMesh = Tube(prof, 1.03f, band);
+            }
             var br = emberBand.AddComponent<MeshRenderer>();
             bandMat = BandMat();
             br.sharedMaterial = bandMat;
             br.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            emberCap.transform.localPosition = new Vector3(0f, 0f, band * .15f);
+            emberCap.transform.localPosition = new Vector3(0f, 0f, bandOnBody ? .0001f : band * .15f);
         }
 // the faint light of the ember on the hand (a setting)
         if (Settings.EmberLight.Value)
@@ -1908,6 +2009,80 @@ public static class Visual
         return m;
     }
 
+    /// <summary>A tube from one outline (at 0) to another (at 85% of len, the cut), then straight on to len; both sides drawn.</summary>
+    static Mesh Tube(float[] back, float[] front, float len)
+    {
+        const int seg = ProfSeg;
+        var v = new Vector3[(seg + 1) * 3];
+        var uv = new Vector2[(seg + 1) * 3];
+        for (int i = 0; i <= seg; i++)
+        {
+            var f = ProfPoint(front, i, 1f);
+            v[i * 3] = ProfPoint(back, i, 1f);
+            v[i * 3 + 1] = f + new Vector3(0f, 0f, len * .85f);
+            v[i * 3 + 2] = f + new Vector3(0f, 0f, len);
+            float u = (float)i / seg;
+            uv[i * 3] = new Vector2(u, 0f); uv[i * 3 + 1] = new Vector2(u, .85f); uv[i * 3 + 2] = new Vector2(u, 1f);
+        }
+        var t = new int[seg * 24];
+        int o = 0;
+        for (int i = 0; i < seg; i++)
+            for (int k = 0; k < 2; k++)
+            {
+                int a0 = i * 3 + k, a1 = a0 + 1, b0 = a0 + 3, b1 = b0 + 1;
+                t[o++] = a0; t[o++] = b0; t[o++] = a1;
+                t[o++] = a1; t[o++] = b0; t[o++] = b1;
+                t[o++] = a0; t[o++] = a1; t[o++] = b0;
+                t[o++] = a1; t[o++] = b1; t[o++] = b0;
+            }
+        var m = new Mesh();
+        m.vertices = new Il2CppStructArray<Vector3>(v);
+        m.uv = new Il2CppStructArray<Vector2>(uv);
+        m.triangles = new Il2CppStructArray<int>(t);
+        m.RecalculateNormals();
+        m.RecalculateBounds();
+        return m;
+    }
+
+    /// <summary>A flat cap through the outline's own points (a fan from the axis), a little wider all round, both sides drawn; every
+    /// point of the rim takes the rim of the ember's picture, so the ash edge follows a square or lumpy outline too.</summary>
+    static void FanPoints(List<Vector2> pts, float grow, out Vector3[] v, out Vector2[] uv)
+    {
+        int n = pts.Count;
+        v = new Vector3[n + 1];
+        uv = new Vector2[n + 1];
+        v[0] = Vector3.zero;
+        uv[0] = new Vector2(.5f, .5f);
+        for (int i = 0; i < n; i++)
+        {
+            var p = pts[i];
+            float m = p.magnitude;
+            var d = m > 1e-6f ? p / m : Vector2.zero;
+            v[i + 1] = new Vector3(p.x + d.x * grow, p.y + d.y * grow, 0f);
+            uv[i + 1] = new Vector2(.5f + d.x * .49f, .5f + d.y * .49f);
+        }
+    }
+
+    static Mesh Fan(List<Vector2> pts, float grow)
+    {
+        int n = pts.Count;
+        FanPoints(pts, grow, out var v, out var uv);
+        var t = new int[n * 6];
+        for (int i = 0; i < n; i++)
+        {
+            int a = i + 1, b = (i + 1) % n + 1;
+            t[i * 6] = 0; t[i * 6 + 1] = a; t[i * 6 + 2] = b;
+            t[i * 6 + 3] = 0; t[i * 6 + 4] = b; t[i * 6 + 5] = a;
+        }
+        var m2 = new Mesh();
+        m2.vertices = new Il2CppStructArray<Vector3>(v);
+        m2.uv = new Il2CppStructArray<Vector2>(uv);
+        m2.triangles = new Il2CppStructArray<int>(t);
+        m2.RecalculateNormals();
+        m2.RecalculateBounds();
+        return m2;
+    }
+
     /// <summary>A flat cap filling the outline, both sides drawn, UV 0..1 over its widest reach.</summary>
     static Mesh Disc(float[] prof, float scale)
     {
@@ -1980,7 +2155,7 @@ public static class Visual
         if (sh == null) return null;
         if (bandTex == null)
         {
-            const int w = 64, h = 32;
+            const int w = 128, h = 32;   // 11-14: round the smoke and back over the picture's width (mirrored), so twice as wide
             bandTex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             var px = new Color[w * h];
             for (int y = 0; y < h; y++)
@@ -1993,10 +2168,13 @@ public static class Visual
                     else if (v < .7f) c = Color.Lerp(new Color(1f, .35f, .06f), new Color(1f, .68f, .25f), noise);       // glowing ring
                     else c = Color.Lerp(new Color(.2f, .18f, .16f), new Color(.34f, .32f, .3f), noise);                     // dark ash (light grey read as a gap)
                     if (v >= .62f && v < .78f) c = Color.Lerp(c, new Color(.85f, .3f, .08f), .5f * noise);
-                    c.a = 1f;
+                    // 11-14: the band lies on the smoke's own surface, which runs on behind it: the picture starts clear and the char
+                    // line comes in over its first rows (behind the band the surface reads below 0: the clear first row, clamped)
+                    c.a = y == 0 ? 0f : Mathf.Clamp01((v - .03f) / .07f);
                     px[y * w + x] = c;
                 }
             bandTex.SetPixels(new Il2CppStructArray<Color>(px));
+            bandTex.wrapMode = TextureWrapMode.Clamp;
             bandTex.Apply();
             bandTex.hideFlags = HideFlags.HideAndDontSave;
         }

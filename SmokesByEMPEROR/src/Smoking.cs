@@ -26,6 +26,7 @@ public static class Smoking
         public bool Ending;
         public float EquippedAt;        // unscaled time it reached the hand
         public bool Resumed;            // came back with a scene change: the view settles first, a pipe goes straight back into the mouth
+        public bool HandEmptied;        // the hand was emptied once after the equip tries failed
         public float OutroAt = -1f;     // a pipe being taken out of the mouth since (unscaled), before it ends
         public int EquipTries;          // equip calls made so far
         public float NextEquip;         // unscaled time of the next try
@@ -44,6 +45,13 @@ public static class Smoking
     public static bool OwnUnequip;
     /// <summary>The game would empty the hand while the smoke burns in it: kept for the inventory and other menus (taking it out and back
     /// made a hitch, a stow sound and the pipe leaving the mouth) and while a pipe is being taken out of the mouth (H).</summary>
+    public static bool HeldNow()
+    {
+        if (s == null || s.Ending || !s.Equipped || s.Item == null || s.OutroAt >= 0f) return false;
+        var pm = GameManager.GetPlayerManagerComponent();
+        return pm != null && pm.m_ItemInHands != null && pm.m_ItemInHands.Pointer == s.Item.Pointer;
+    }
+
     public static bool KeepInHand(string what)
     {
         if (OwnUnequip || s == null || s.Ending || !s.Equipped || s.Item == null) return false;
@@ -56,7 +64,9 @@ public static class Smoking
         bool holster = false;
         try { holster = InputManager.GetHolsterPressed(pm); } catch { }
         if (holster && s.OutroAt < 0f) { Safe.Info("Holster key: the smoke is put away by our hand"); Use.Say(s.Lit.Smoke == SmokeType.Pipe ? "SMOKES_MSG_PIPE_OUT" : "SMOKES_MSG_THROWN"); End(true); }
-        bool keep = s.OutroAt >= 0f || overlay || inv || Time.unscaledTime < InventoryAt + 1f;
+        // 11-14 (a friend's log: after searching a container the hand was emptied 0.8 s after the search closed, the game put its last
+        // item (a lamp) in the hand and we took the smoke back: seen as throwing the cigarette and taking it again): kept for a second after a menu too
+        bool keep = s.OutroAt >= 0f || overlay || inv || Time.unscaledTime < InventoryAt + 1f || Time.unscaledTime - MenuKeptAt < 1f;
         if (keep && (overlay || inv)) MenuKeptAt = Time.unscaledTime;
         if (keep || Time.unscaledTime >= nextKeepLog)
         {
@@ -179,6 +189,16 @@ public static class Smoking
         }
         if (s.EquipTries >= 4)
         {
+            if (!s.HandEmptied)
+            {
+                // the hand may show a model with no item behind it (a destroyed item): empty it once and try again
+                s.HandEmptied = true;
+                s.EquipTries = 2;
+                s.NextEquip = Time.unscaledTime + .5f;
+                Safe.Info($"Equip: never in the hand (can equip {can}, hand {HandName(pm)}): the hand is emptied, trying again");
+                try { OwnUnequip = true; pm.UnequipImmediate(false); } catch (Exception e) { Safe.Log("Empty the hand before a retry", e); } finally { OwnUnequip = false; }
+                return true;
+            }
             Safe.Info($"Equip: {s.EquipTries} tries, never in the hand (can equip {can}, hand {HandName(pm)})");
             return false;
         }
@@ -539,6 +559,55 @@ public static class Smoking
 
     public static void Orphan(GearItem g) => orphans.Add((g, Time.unscaledTime));
 
+    /// <summary>What the game's save takes along of the smoke burning now (null: nothing burns).</summary>
+    public static PendingSmoke? Snapshot()
+    {
+        if (s == null || s.Ending || s.Item == null || s.Length <= 0f || s.Smoked >= s.Length) return null;
+        return new PendingSmoke { LitId = s.Lit.Id, FromId = s.From?.Id, Smoked = s.Smoked, Length = s.Length, EffectMul = s.EffectMul, Stain = s.Stain, RealTime = Settings.RealTime.Value };
+    }
+
+    /// <summary>11-13 (the owner: «обидно, часть курения пропадает»): the game was closed with a smoke burning and its save loaded in a new run:
+    /// the lit item from the save goes on from where the save caught it, as after a scene change.</summary>
+    static bool TryResume(GearItem g)
+    {
+        try
+        {
+            var p = Habit.State.Pending;
+            if (p == null || !Defs.Is(g, out var lit) || lit.Kind != Kind.Lit || lit.Id != p.LitId) return false;
+            if (p.RealTime != Settings.RealTime.Value || p.Length <= 0f || p.Smoked >= p.Length) return false;
+            Def? from = string.IsNullOrEmpty(p.FromId) ? null : Defs.ById(p.FromId!);
+            var stats = Defs.Stats(lit.Smoke, from ?? (lit.Smoke == SmokeType.Cigar ? lit : null));
+            s = new Session
+            {
+                Lit = lit, From = from, Stats = stats, EffectMul = p.EffectMul, Item = g,
+                Smoked = p.Smoked, Length = p.Length, Stain = p.Stain, StainFrom = p.Stain,
+                LastGameHour = Habit.Now, StartedAt = Time.unscaledTime, NextDrag = Time.time + 6f, NextEquip = Time.unscaledTime + 2f,
+            };
+            Habit.State.Pending = null;
+            SourcePipe = null;
+            if (lit.Smoke == SmokeType.Pipe)
+            {
+                // the pipe itself stayed in the pack: it stands behind the lit one again
+                var inv = GameManager.GetInventoryComponent();
+                if (inv != null)
+                    foreach (var o in inv.m_Items)
+                    {
+                        GearItem? gi = null;
+                        try { gi = o?.m_GearItem; } catch { }
+                        if (gi != null && Defs.Is(gi, out var pd) && pd.Lit == lit.Id) { SourcePipe = gi; break; }
+                    }
+            }
+            Visual.Reset();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Safe.Log("Go on with a saved smoke", e);
+            s = null;
+            return false;
+        }
+    }
+
     static void TidyOrphans()
     {
         if (orphans.Count == 0) return;
@@ -578,7 +647,32 @@ public static class Smoking
                 Safe.Info($"The smoke came back with the scene: going on (old item gone {itemGone})");
                 continue;
             }
-            Safe.Debug("A lit smoke from a save: thrown away");
+            // 11-13 friend log: a save made with a lit pipe; at the load the item was destroyed at once, the game then put it in the
+            // hand anyway: a torch in the hand with no item behind it, which could be neither dropped nor replaced until the next
+            // scene. Now it waits until the load is over, is taken out of the hand properly and only then destroyed.
+            var pm = GameManager.GetPlayerManagerComponent();
+            float waited = Time.unscaledTime - at;
+            bool inHand = false;
+            try { inHand = pm != null && pm.m_ItemInHands != null && pm.m_ItemInHands.Pointer == g.Pointer; } catch { }
+            // the smoke the save caught burning goes on (no waiting: the sooner, the less of the game's torch is seen)
+            if (s == null && pm != null && TryResume(g))
+            {
+                // 11-13 (0.1.138, the owner's shot): brought back straight into the mouth it stood wrong (no rest pose from before in a new run).
+                // Now it is taken out of the hand and put there again by us, exactly as a smoke just lit.
+                if (inHand)
+                {
+                    try { OwnUnequip = true; pm.UnequipImmediate(false); } catch (Exception e) { Safe.Log("Take a saved smoke out of the hand", e); } finally { OwnUnequip = false; }
+                }
+                Safe.Info($"A lit smoke from a save: going on from {s!.Smoked:F1} of {s.Length:F1} (was in the hand {inHand})");
+                continue;
+            }
+            bool busy = pm == null || waited < 2f || (waited < 30f && InterfaceManager.IsOverlayActiveImmediate());
+            if (busy) { orphans.Add((g, at)); continue; }
+            if (inHand)
+            {
+                try { OwnUnequip = true; pm!.UnequipImmediate(false); } catch (Exception e) { Safe.Log("Take a saved smoke out of the hand", e); } finally { OwnUnequip = false; }
+            }
+            Safe.Info($"A lit smoke from a save: thrown away (was in the hand {inHand})");
             Destroy(g);
         }
     }
@@ -621,6 +715,16 @@ internal static class SmokingRules
 
     [HarmonyPrefix, HarmonyPatch(typeof(InputManager), nameof(InputManager.ExecuteAltFire))]
     static bool NoAltFire() => !Smoking.Active || !Smoking.IsOurs(GameManager.GetPlayerManagerComponent()?.m_ItemInHands);
+
+    /// <summary>11-14: after an interaction (a container search) the game puts the item held before the smoke back in the hand; not while
+    /// the smoke is burning in it.</summary>
+    [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.EquipLastItemInHands))]
+    static bool NoLastItem()
+    {
+        if (!Smoking.HeldNow()) return true;
+        Safe.Info("The game would put its last item back in the hand: the smoke stays");
+        return false;
+    }
 
     [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.UnequipItemInHands))]
     static bool KeepA() => !Smoking.KeepInHand("unequip");

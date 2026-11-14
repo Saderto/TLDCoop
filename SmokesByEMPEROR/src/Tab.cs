@@ -137,6 +137,37 @@ internal static class Tab
         }
     }
 
+    // 11-13 (user: our tab's button is not lit like the other sections when it is the one open): the game colours only its own
+    // filter buttons (m_FilterButtons); ours gets the same colours from the panel: selected, or unselected with or without items
+    [HarmonyPostfix, HarmonyPatch(typeof(Panel_Inventory), nameof(Panel_Inventory.RefreshFilterIconColors))]
+    static void Colors(Panel_Inventory __instance)
+    {
+        try
+        {
+            if (ui == null || button == null || !button) return;
+            var p = __instance;
+            bool sel = selected && p.m_FilterName == FilterName;
+            Color c, h;
+            if (sel) { c = p.m_ColorFilterSelected; h = p.m_ColorFilterSelectedHover; }
+            else
+            {
+                bool empty = false;
+                try { empty = p.FilterHasNoItems(FilterName); } catch { }
+                c = empty ? p.m_ColorFilterUnselectedEmpty : p.m_ColorFilterUnselectedNonempty;
+                h = empty ? p.m_ColorFilterUnselectedEmptyHover : p.m_ColorFilterUnselectedNonemptyHover;
+            }
+            ui.defaultColor = c;
+            ui.hover = h;
+            ui.pressed = h;
+            var target = ui.tweenTarget != null ? ui.tweenTarget : button;
+            var w = target.GetComponent<UIWidget>();
+            if (w != null) w.color = c;
+            if (!colorLogged) { colorLogged = true; Safe.Info($"Tobacco tab colours: selected {sel}, colour {c}, target {target.name}, widget {(w != null)}"); }
+        }
+        catch (Exception e) { Safe.Log("Tobacco tab colours", e); }
+    }
+    static bool colorLogged;
+
     // 11-10: the title over the grid said «Всё» and the empty text was the game's: our tab's name and «no tobacco»
     static void Labels(Panel_Inventory p)
     {
