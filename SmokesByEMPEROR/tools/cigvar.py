@@ -21,7 +21,16 @@ FORMATS = {
     'long': (0.100, 0.0039, 0.025),
     'papirosa': (0.105, 0.0042, 0.065),
     'nofilter': (0.070, 0.0039, 0.0),
+    # 11-14 new shapes; a 4th number = the radius at the lit end (a cone)
+    'cigaronni': (0.100, 0.0039, 0.060),          # a very long hollow mouthpiece, a short tobacco part
+    'kretek': (0.088, 0.0036, 0.0, 0.0047),        # hand-rolled clove cigarette, wider at the lit end
+    'bidi': (0.062, 0.0023, 0.0, 0.0037),          # a leaf rolled into a small cone and tied with a thread
 }
+
+
+def radii(fmt):
+    f = FORMATS[fmt]
+    return f[1], (f[3] if len(f) > 3 else f[1])
 
 
 # ---------------------------------------------------------------- mesh
@@ -31,7 +40,8 @@ def ring(r, z, seg):
 
 
 def mesh(fmt, seg=40):
-    L, R, _ = FORMATS[fmt]
+    L = FORMATS[fmt][0]
+    R, R1 = radii(fmt)
     V, N, U, T = [], [], [], []
 
     def add(p, n, uv):
@@ -41,17 +51,19 @@ def mesh(fmt, seg=40):
     # body: two rings, u around, v linear along the length (Burn relies on that)
     th = 2 * math.pi * np.arange(seg + 1) / seg + math.pi / 2
     idx = []
-    for z in (0.0, L):
+    slope = (R1 - R) / L
+    nk = 1.0 / math.sqrt(1.0 + slope * slope)
+    for z, rr in ((0.0, R), (L, R1)):
         row = []
         for i in range(seg + 1):
             c, s = math.cos(th[i]), math.sin(th[i])
-            row.append(add((R * c, R * s, z), (c, s, 0.0), (i / seg, V0 + (1 - V0) * z / L)))
+            row.append(add((rr * c, rr * s, z), (c * nk, s * nk, -slope * nk), (i / seg, V0 + (1 - V0) * z / L)))
         idx.append(row)
     for i in range(seg):
         a, b, c, d = idx[0][i], idx[0][i + 1], idx[1][i + 1], idx[1][i]
         T += [(a, b, c), (a, c, d)]
 
-    def disc(z, prof, cu, normal_sign):
+    def disc(z, prof, cu, normal_sign, R=R):
         # prof: list of (r, dz) from the rim inwards; flat-ish cap, planar UV into the 128 px square at cu
         rows = []
         for r, dz in prof:
@@ -70,7 +82,7 @@ def mesh(fmt, seg=40):
                     T.extend([(a, c, b), (a, d, c)])
 
     disc(0.0, [(R, 0.0), (R * 0.9, -0.0002), (0.0005, -0.0003)], 0.125, -1.0)
-    disc(L, [(R, 0.0), (R * 0.95, 0.0), (R * 0.93, -0.0006), (0.0005, -0.0008)], 0.375, 1.0)
+    disc(L, [(R1, 0.0), (R1 * 0.95, 0.0), (R1 * 0.93, -0.0006), (0.0005, -0.0008)], 0.375, 1.0, R1)
     return (np.array(V, np.float32), np.array(N, np.float32), np.array(U, np.float32), np.array(T, np.int32))
 
 
@@ -201,12 +213,52 @@ PRINT = {'Milston': 'paper', 'Marlbrrro': 'paper', 'Caramel': 'paper', 'Lucky St
          'Parliamint': 'filter', 'Sobrania': 'filter'}
 
 
+def leaf_wrap(w, h, color, seed):
+    """A dried leaf rolled round the tobacco (bidi): mottled, with the leaf's veins running slantwise and an overlapping edge."""
+    rnd = random.Random(seed)
+    im = Image.new('RGB', (w, h), color)
+    d = ImageDraw.Draw(im)
+    for _ in range(260):
+        x, y = rnd.uniform(0, w), rnd.uniform(0, h)
+        r = rnd.uniform(6, 26)
+        k = rnd.randint(-22, 16)
+        d.ellipse([x - r, y - r * 1.6, x + r, y + r * 1.6], fill=tuple(max(0, min(255, c + k)) for c in color))
+    im = im.filter(ImageFilter.GaussianBlur(5))
+    d = ImageDraw.Draw(im)
+    dark = tuple(max(0, c - 34) for c in color)
+    light = tuple(min(255, c + 18) for c in color)
+    for k in range(-6, 16):          # side veins, slanted
+        y0 = k * h / 10.0
+        d.line([(0, y0), (w, y0 + h * .16)], fill=dark, width=2)
+        d.line([(0, y0 + 3), (w, y0 + h * .16 + 3)], fill=light, width=1)
+    d.line([(w * .30, 0), (w * .36, h)], fill=dark, width=4)      # the midrib
+    d.line([(w * .04, 0), (w * .02, h)], fill=tuple(max(0, c - 50) for c in color), width=5)   # the leaf's edge over the roll
+    return noise_mul(im.filter(ImageFilter.GaussianBlur(.6)), 26, seed)
+
+
+def cloves(im, seed):
+    """Oily specks showing through the paper of a clove cigarette."""
+    rnd = random.Random(seed)
+    lay = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(lay)
+    for _ in range(170):
+        x, y = rnd.uniform(0, im.width), rnd.uniform(0, im.height)
+        r = rnd.uniform(2, 7)
+        d.ellipse([x - r, y - r * rnd.uniform(.6, 1.6), x + r, y + r], fill=(150, 104, 50, rnd.randint(26, 70)))
+    im.paste(lay.filter(ImageFilter.GaussianBlur(1.6)), (0, 0), lay.filter(ImageFilter.GaussianBlur(1.6)))
+
+
 def texture(brand_name, v):
-    L, R, FL = FORMATS[v['fmt']]
+    L, FL = FORMATS[v['fmt']][0], FORMATS[v['fmt']][2]
     im = Image.new('RGB', (TW, TH), (0, 0, 0))
     fil = int(round(BODY * FL / L))
     seed = sum(map(ord, brand_name + v['key']))
-    paper = plain(TW, BODY - fil, v['paper'], seed)
+    if v['fmt'] == 'bidi':
+        paper = leaf_wrap(TW, BODY - fil, tuple(v['paper']), seed)
+    else:
+        paper = plain(TW, BODY - fil, v['paper'], seed)
+    if v['fmt'] == 'kretek':
+        cloves(paper, seed)
     pat = {'flowers': flowers, 'leaves': leaves, 'scrolls': scrolls, 'dancer': dancer}.get(v['pattern'])
     if pat:
         pat(paper, tuple(v['pattern_color']), seed, (0, 0, TW, (BODY - fil) * 0.55))
@@ -229,12 +281,21 @@ def texture(brand_name, v):
     d = ImageDraw.Draw(im)
     # rings at the tipping edge (paper side)
     y = BODY - fil
-    for i, rc in enumerate(v['rings']):
-        d.rectangle([0, y - 10 - i * 12, TW, y - 5 - i * 12], fill=tuple(rc))
+    if v['fmt'] == 'bidi':
+        # the thread that ties the roll, wound a few times a centimetre from the mouth end (its colour = the first "ring")
+        tc = tuple(v['rings'][0]) if v['rings'] else (190, 40, 50)
+        ty = int(BODY - BODY * .011 / L)
+        for k in range(5):
+            yy = ty - k * 5 + (k % 2)
+            d.line([(0, yy), (TW, yy + 3)], fill=tuple(max(0, c - (18 if k % 2 else 0)) for c in tc), width=4)
+    else:
+        for i, rc in enumerate(v['rings']):
+            d.rectangle([0, y - 10 - i * 12, TW, y - 5 - i * 12], fill=tuple(rc))
     if fil > 0 and f != 'papirosa':
         d.rectangle([0, y - 2, TW, y + 1], fill=tuple(max(0, c - 30) for c in (im.getpixel((5, y + 6)))))
     # seam
-    d.line([(TW * 0.02, 0), (TW * 0.02, BODY - fil)], fill=tuple(max(0, c - 14) for c in v['paper']), width=2)
+    if v['fmt'] != 'bidi':
+        d.line([(TW * 0.02, 0), (TW * 0.02, BODY - fil)], fill=tuple(max(0, c - 14) for c in v['paper']), width=2)
     # brand along the cigarette, facing u = 0.5: on the paper just above the rings, or on the filter, or nowhere
     where = PRINT.get(brand_name)
     if where == 'filter' and fil <= 0:

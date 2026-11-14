@@ -64,8 +64,8 @@
   {
    "id": "SmokesBySeagull",
    "zip": "SmokesByEMPEROR.zip",
-   "version": "0.1.148",
-   "size": 167738191,
+   "version": "0.1.154",
+   "size": 292477706,
    "detect": "Mods/SmokesByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokesBySeagull.dll",

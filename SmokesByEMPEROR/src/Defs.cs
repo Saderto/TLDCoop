@@ -178,6 +178,7 @@ public static class Defs
     static readonly Dictionary<string, float> CigFormat = new()
     {
         ["cig_regular"] = 6f, ["cig_long"] = 7.5f, ["cig_nofilter"] = 5f, ["cig_papirosa"] = 4f, ["cig_short"] = 5f, ["cig_superslim"] = 6.5f,
+        ["cig_cigaronni"] = 3.6f, ["cig_kretek"] = 9.5f, ["cig_bidi"] = 3f,   // 11-14: a short tobacco part behind a long mouthpiece; a fat clove cone burns long; a small leaf cone is quick
     };
 
     static string CigarKey(string id)

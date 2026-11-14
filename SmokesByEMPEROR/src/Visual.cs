@@ -309,7 +309,7 @@ public static class Visual
         float keep = 1f;
         if (lit.Smoke != SmokeType.Pipe && burn != null)
         {
-            float stop = burn.MinZ + (lit.Smoke == SmokeType.Cigarette ? (Smoking.From is { Cigarillo: true } cg ? cg.BurnStop : Smoking.From?.CigMesh == "cig_papirosa" ? .067f : Settings.CigaretteFilterStop.Value) : Settings.CigarBandStop.Value);
+            float stop = burn.MinZ + (lit.Smoke == SmokeType.Cigarette ? (Smoking.From is { Cigarillo: true } cg ? cg.BurnStop : Smoking.From?.CigMesh == "cig_papirosa" ? .067f : Smoking.From?.CigMesh == "cig_cigaronni" ? .062f : Settings.CigaretteFilterStop.Value) : Settings.CigarBandStop.Value);
             float z = Mathf.Lerp(emberZ, Math.Min(stop, emberZ), Mathf.Clamp01(share));
             burn.Cut(z);
             keep = emberZ > 1e-4f ? z / emberZ : 1f;
@@ -1677,7 +1677,7 @@ public static class Visual
             string texPath = Def.TexPath(Smoking.From?.CigTexture ?? lit.Texture);
             Texture? tex = null;
             // 11-13: a filter cigarette gets its own copy of the texture, whose mouth end disc goes brown as it is smoked (FilterStain)
-            if (lit.Smoke == SmokeType.Cigarette && Settings.FilterStain.Value > 0f && Smoking.From?.CigMesh is { } fm && fm != "cig_nofilter")
+            if (lit.Smoke == SmokeType.Cigarette && Settings.FilterStain.Value > 0f && Smoking.From?.CigMesh is { } fm && fm != "cig_nofilter" && fm != "cig_kretek" && fm != "cig_bidi")
                 tex = FilterStain.Make(texPath, Smoking.From is { Cigarillo: true, CigMesh: "cgl_rustic" } ? .22f : .6f);   // 11-14: the cheroot's dry husk filter (Mandalai) is darker than white acetate and stains too; bare tobacco ends (darker still) do not
             else FilterStain.Clear();
             tex ??= Assets.Texture(texPath);
@@ -1688,6 +1688,8 @@ public static class Visual
         var b = mesh.bounds;
         emberZ = b.max.z;
         propRadius = Mathf.Max(b.extents.x, b.extents.y);
+        // 11-14 the cones are held by their thin mouth end: the fingers close by that, not by the wide lit end
+        if (lit.Smoke == SmokeType.Cigarette && Smoking.From is { Cigarillo: false, CigMesh: { } cone }) { if (cone == "cig_kretek") propRadius = .0036f; else if (cone == "cig_bidi") propRadius = .0026f; }
         pipeBowl = new Vector3(0f, b.max.y - .004f, b.max.z - .016f);
         if (pipe) Tobacco(mesh, layer);
 
