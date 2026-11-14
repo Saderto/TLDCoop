@@ -93,8 +93,8 @@
   {
    "id": "SmokehouseBySeagull",
    "zip": "SmokehouseByEMPEROR.zip",
-   "version": "0.4.26",
-   "size": 113158700,
+   "version": "0.4.27",
+   "size": 111885788,
    "detect": "Mods/SmokehouseByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokehouseBySeagull.dll",
@@ -139,8 +139,8 @@
   {
    "id": "JellyfishByEMPEROR",
    "zip": "JellyfishByEMPEROR.zip",
-   "version": "0.2.14",
-   "size": 5954155,
+   "version": "0.2.15",
+   "size": 5954069,
    "detect": "Mods/JellyfishByEMPEROR.dll",
    "title": {
     "ru": "Медузы",

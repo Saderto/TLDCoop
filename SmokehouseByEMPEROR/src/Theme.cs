@@ -133,7 +133,6 @@ namespace SmokehouseByEMPEROR
         private static float _nextFind;
         private static bool _drawBroken;
         private static Material _blend;
-        private static UnityEngine.Internal_DrawTextureArguments _args;
 
         public static bool HasSprites => _atlas != null && !_drawBroken;
 
@@ -194,17 +193,23 @@ namespace SmokehouseByEMPEROR
         private static void Raw(Rect r, Rect uv, Color c)
         {
             if (r.width <= 0.5f || r.height <= 0.5f || c.a <= 0.003f) return;
-            var a = _args ??= new UnityEngine.Internal_DrawTextureArguments();   // один на все вызовы: без мусора каждый кадр
-            a.screenRect = r;
-            a.sourceRect = uv;
-            a.texture = _atlas;
-            a.mat = _blend;
-            a.color = c;
-            a.leftBorderColor = c;
-            a.rightBorderColor = c;
-            a.topBorderColor = c;
-            a.bottomBorderColor = c;
-            Graphics.Internal_DrawTexture(ref a);
+            // 0.4.27: Graphics.Internal_DrawTexture stopped drawing under MelonLoader 0.7.2+ (no error, nothing on screen: the windows lost their
+            // backs and only the text was left). The piece of the atlas is now shown through a clip: the whole atlas is drawn so large and so shifted
+            // that the wanted piece falls exactly into the clipped rectangle. Plain GUI calls, the same ones that draw the icons.
+            if (uv.width <= 0f || uv.height <= 0f) return;
+            float aw = r.width / uv.width, ah = r.height / uv.height;
+            var old = GUI.color;
+            GUI.BeginGroup(r);
+            try
+            {
+                GUI.color = c;
+                GUI.DrawTexture(new Rect(-uv.x * aw, -(1f - uv.yMax) * ah, aw, ah), _atlas);
+            }
+            finally
+            {
+                GUI.color = old;
+                GUI.EndGroup();
+            }
         }
 
         private static bool Repaint
@@ -272,6 +277,8 @@ namespace SmokehouseByEMPEROR
         public static void Window(Rect r, float k, bool mark = true)
         {
             if (!HasSprites) { Fill(r, PanelBg); Frame(r, Border); return; }
+            // a plain dark back under the pictures: should they fail to draw again, the window is still a window
+            Fill(r, new Color(0.03f, 0.04f, 0.04f, 0.45f));
             float gx = 41f * k, gy = 40f * k;
             Sprite(new Rect(r.x - gx, r.y - gy, r.width + gx * 2f, r.height + gy * 2f), "clothing_slotSelected", new Color(0.98f, 0.98f, 0.98f, 0.24f), true, k);
             Sprite(r, "inv_statBack", new Color(0f, 0f, 0f, 0.62f), true, k);

@@ -7,7 +7,7 @@ namespace SmokehouseByEMPEROR;
 /// Since 0.3.0 also a canning kettle (cans, boiled sausage) and a sausage table (raw sausage, dry-cured in the barrel).</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.4.26";
+    public const string VersionText = "0.4.27";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SmokehouseByEMPEROR");
 
