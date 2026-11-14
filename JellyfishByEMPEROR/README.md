@@ -20,7 +20,7 @@ and glows. It gives no food, bait or other benefit: it is just a beautiful thing
 - Чтобы зачерпнуть, надо нажать показанные клавиши W A S D по порядку и вовремя. У обычной медузы их 3, у самой редкой 7 и времени
   меньше. Ошибся или не успел: медуза уходит на дно.
 - Ночью бывает редкая шлемовидная медуза.
-- Пустые банки лежат в контейнерах (около 4%, на побережье 10%).
+- Пустые банки лежат в контейнерах (около 2,7%, на побережье 6,7%).
 
 - Only on sea ice: Coastal Highway, Desolation Point, Bleak Inlet, Forsaken Airfield. Lakes and rivers have none.
 - A new hole gets a jellyfish with a 30% chance; it stays for 3–7 seconds. A panel at the bottom of the screen offers
@@ -28,7 +28,7 @@ and glows. It gives no food, bait or other benefit: it is just a beautiful thing
 - To scoop it up, press the shown W A S D keys in order and in time: 3 keys for a common jellyfish, 7 and less time for the
   rarest. A wrong key or too slow, and the jellyfish sinks.
 - At night a rare helmet jellyfish can come up.
-- Empty jars are found in containers (about 4%, 10% on the coast).
+- Empty jars are found in containers (about 2.7%, 6.7% on the coast).
 
 ## Банка и аквариум / Jar and aquarium
 

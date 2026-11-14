@@ -1,6 +1,6 @@
 namespace JellyfishByEMPEROR;
 
-/// <summary>Empty glass jars turn up in containers searched for the first time: 4% of them, 10% on the coast (my choice, 11-12).</summary>
+/// <summary>Empty glass jars turn up in containers searched for the first time: about 2.7% of them, 6.7% on the coast (4 and 10 at first; the owner, 11-14: a third rarer).</summary>
 [HarmonyPatch(typeof(Container), nameof(Container.PopulateWithRandomGear))]
 internal static class Loot
 {

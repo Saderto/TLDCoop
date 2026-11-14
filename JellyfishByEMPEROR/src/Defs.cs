@@ -34,7 +34,7 @@ public static class Tune
     // the owner (11-12): no more than three in one aquarium
     public const int TankMax = 3;
     public const float AquariumScale = 2.4f, HoleScale = 2.2f;
-    public const float JarLoot = 4f, JarLootCoast = 10f;       // % of containers searched for the first time
+    public const float JarLoot = 4f * 2f / 3f, JarLootCoast = 10f * 2f / 3f;       // % of containers searched for the first time (the owner, 11-14: a third rarer than 4 and 10)
 }
 
 public static class Defs
