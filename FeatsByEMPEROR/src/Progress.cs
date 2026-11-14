@@ -144,6 +144,11 @@ namespace FeatsByEMPEROR
     /// <summary>State of one game world for the second batch of feats. Times are game hours played (TimeOfDay.GetHoursPlayedNotPaused).</summary>
     internal sealed class World
     {
+        // Streak clock (0.2.3+): CreditH = game hours that really passed for this player: normal play and sleep in a bed.
+        // Time sped up (trainer game speed) or skipped by waiting is not credited, so streaks and sunrises can't be fast-forwarded.
+        public int Clock { get; set; }
+        public double CreditH { get; set; }
+        public double LastSunriseC { get; set; } = -1000;
         public double StartH { get; set; } = -1;
         public double LastIndoorH { get; set; } = -1;
         public double LastMeatH { get; set; } = -1;

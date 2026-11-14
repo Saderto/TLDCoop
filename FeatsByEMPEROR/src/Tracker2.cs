@@ -14,6 +14,7 @@ namespace FeatsByEMPEROR
         static bool _haveLast;
         static float _torchM, _iceM, _trainM;
         static double _lastH = -1;
+        static float _lastReal = -1f;
         static float _nextSlow, _nextFires, _nextTrainFind, _nextWake;
         static readonly List<Fire> _fires = new();
         static Il2CppTLD.SteamTrain.SteamTrain _train;
@@ -32,7 +33,7 @@ namespace FeatsByEMPEROR
 
         public static void Reset()
         {
-            _haveLast = false; _lastH = -1; _fires.Clear(); _train = null; _nextTrainFind = 0f; _nextFires = 0f; _lastHour = -1;
+            _haveLast = false; _lastH = -1; _lastReal = -1f; _fires.Clear(); _train = null; _nextTrainFind = 0f; _nextFires = 0f; _lastHour = -1;
             Effects2.SceneReset();
         }
 
@@ -110,12 +111,25 @@ namespace FeatsByEMPEROR
         {
             double h = Effects2.Hours();
             if (h < 0) return;
-            double dh = _lastH < 0 ? 0 : h - _lastH;
-            if (dh < 0 || dh > 30) dh = 0;
+            double raw = _lastH < 0 ? 0 : h - _lastH;
+            if (raw < 0 || raw > 30) raw = 0;
             _lastH = h;
+            float realDt = _lastReal < 0f ? 0f : Math.Max(0f, now - _lastReal);
+            _lastReal = now;
             var rest = GameManager.GetRestComponent();
             bool sleeping = rest != null && rest.IsSleeping();
+            bool bedSleep = sleeping && rest.m_Bed != null;
+            // credited time: sleep in a bed counts in full; otherwise at most 1.5x the normal pace of the clock,
+            // so trainer game speed and long waiting (pass time) don't count
+            double dh = raw;
+            if (!bedSleep)
+            {
+                double perSec = 24.0 / 4320.0;
+                try { var tod = GameManager.GetTimeOfDayComponent(); float len = tod != null ? tod.GetDayLengthSecondsUnscaled() : 0f; if (len > 60f) perSec = 24.0 / len; } catch { }
+                dh = Math.Min(raw, perSec * realDt * 1.5 + 1e-6);
+            }
             var w = Effects2.W();
+            if (w != null && dh > 0) { w.CreditH += dh; Progress.MarkDirty(); }
 
             // scene / region
             string sc = Effects2.Scene();
@@ -140,8 +154,9 @@ namespace FeatsByEMPEROR
 
             // sunrise (06:00)
             int hour = (int)Math.Floor(Effects2.HourOfDay());
-            if (_lastHour >= 0 && _lastHour < 6 && hour >= 6 && hour < 12)
+            if (_lastHour >= 0 && _lastHour < 6 && hour >= 6 && hour < 12 && w != null && w.CreditH - w.LastSunriseC >= 18.0)
             {
+                w.LastSunriseC = w.CreditH;
                 Progress.Add(Defs2.Fortune, 1f);
                 if (!sleeping) Effects2.RollFortune();
             }
@@ -180,19 +195,17 @@ namespace FeatsByEMPEROR
             if (w != null && w.FortuneKind < 0 && !sleeping) Effects2.RollFortune();
 
             // streaks
-            if (w != null && w.StartH >= 0)
+            if (w != null && w.Clock >= 2)
             {
-                if (!Effects2.OutdoorScene()) { w.LastIndoorH = h; }
+                if (!Effects2.OutdoorScene()) { w.LastIndoorH = w.CreditH; }
                 float weight = CarriedKg();
-                if (weight >= 0f)
-                {
-                    Effects2.LightLoad = weight <= 10f;
-                    if (weight > 10f) w.LastHeavyH = h;
-                }
-                Progress.Max(Defs2.Forest, Days(h, w.LastIndoorH, w.StartH));
-                Progress.Max(Defs2.Vegetarian, Days(h, w.LastMeatH, w.StartH));
-                Progress.Max(Defs2.Prometheus, Days(h, w.LastMatchH, w.StartH));
-                Progress.Max(Defs2.Minimalist, Days(h, w.LastHeavyH, w.StartH));
+                // unknown weight never counts as light
+                Effects2.LightLoad = weight >= 0f && weight <= 10f;
+                if (!Effects2.LightLoad) w.LastHeavyH = w.CreditH;
+                Progress.Max(Defs2.Forest, Days(w.CreditH, w.LastIndoorH, w.StartH));
+                Progress.Max(Defs2.Vegetarian, Days(w.CreditH, w.LastMeatH, w.StartH));
+                Progress.Max(Defs2.Prometheus, Days(w.CreditH, w.LastMatchH, w.StartH));
+                Progress.Max(Defs2.Minimalist, Days(w.CreditH, w.LastHeavyH, w.StartH));
             }
 
             // light sleeper: a predator close by wakes us
@@ -217,7 +230,10 @@ namespace FeatsByEMPEROR
         static float _weight = -1f;
         static float _weightAt = -100f;
 
-        /// <summary>Carried weight without worn clothes, kg; -1 if unknown. Refreshed every 3 s.</summary>
+        static int _logState = -1;
+
+        /// <summary>Carried weight without worn clothes, kg; -1 if unknown. Refreshed every 3 s.
+        /// Summed item by item (not taken from the encumbrance total), and the larger of the two readings wins.</summary>
         static float CarriedKg()
         {
             float now = Time.realtimeSinceStartup;
@@ -225,21 +241,30 @@ namespace FeatsByEMPEROR
             _weightAt = now;
             try
             {
-                var enc = GameManager.GetEncumberComponent();
                 var inv = GameManager.GetInventoryComponent();
-                if (enc == null || inv == null) return _weight = -1f;
-                float total = enc.GetGearWeightKG().ToQuantity(1f);
+                if (inv == null || inv.m_Items == null) return _weight = -1f;
+                float carried = 0f, worn = 0f;
                 var items = inv.m_Items;
-                if (items != null)
-                    for (int i = 0; i < items.Count; i++)
-                    {
-                        var gi = items[i]?.m_GearItem;
-                        if (gi == null || gi.m_ClothingItem == null || !gi.m_ClothingItem.IsWearing()) continue;
-                        total -= gi.GetItemWeightKG(false).ToQuantity(1f);
-                    }
-                return _weight = Math.Max(0f, total);
+                for (int i = 0; i < items.Count; i++)
+                {
+                    var gi = items[i]?.m_GearItem;
+                    if (gi == null) continue;
+                    float kg = gi.GetItemWeightKG(false).ToQuantity(1f);
+                    if (gi.m_ClothingItem != null && gi.m_ClothingItem.IsWearing()) worn += kg; else carried += kg;
+                }
+                float game = -1f;
+                try { var enc = GameManager.GetEncumberComponent(); if (enc != null) game = enc.GetGearWeightKG().ToQuantity(1f); } catch { }
+                float result = carried;
+                if (game >= 0f && game - worn > result) result = game - worn;
+                int state = result > 10f ? 1 : 0;
+                if (state != _logState)
+                {
+                    _logState = state;
+                    FeatsMod.Msg($"груз / load: {result:0.0} кг (вещи {carried:0.0}, одежда {worn:0.0}, игра {game:0.0}) -> {(state == 1 ? "тяжело / heavy" : "легко / light")}");
+                }
+                return _weight = Math.Max(0f, result);
             }
-            catch { return _weight = -1f; }
+            catch (Exception e) { FeatsMod.Error("weight: " + e.Message); return _weight = -1f; }
         }
 
         static bool PredatorNear(Vector3 pos, float r)

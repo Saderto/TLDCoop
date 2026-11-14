@@ -147,7 +147,13 @@ namespace FeatsByEMPEROR
         internal static World W()
         {
             var w = Progress.GetWorld(WorldKey());
-            if (w != null && w.StartH < 0) { double h = Hours(); if (h >= 0) { w.StartH = h; Progress.MarkDirty(); } }
+            if (w != null && w.Clock < 2)
+            {
+                // older state counted raw game hours: streaks start again on the new clock
+                w.Clock = 2; w.CreditH = 0; w.StartH = 0; w.LastSunriseC = -1000;
+                w.LastIndoorH = w.LastMeatH = w.LastMatchH = w.LastHeavyH = -1;
+                Progress.MarkDirty();
+            }
             return w;
         }
 
@@ -255,7 +261,7 @@ namespace FeatsByEMPEROR
                 double h = Hours();
                 if (w != null && h >= 0)
                 {
-                    if (__state.Meat) { w.LastMeatH = h; Progress.MarkDirty(); }
+                    if (__state.Meat) { w.LastMeatH = w.CreditH; Progress.MarkDirty(); }
                     if ((coffee || tea) && h - w.LastWakeH <= 1.0 && !w.RitualCounted)
                     {
                         w.RitualCounted = true; Progress.MarkDirty();
@@ -681,7 +687,7 @@ namespace FeatsByEMPEROR
                 if (!(Has(n, "Match") || Has(n, "Lighter"))) return;
                 var w = W();
                 double h = Hours();
-                if (w != null && h >= 0) { w.LastMatchH = h; Progress.MarkDirty(); }
+                if (w != null) { w.LastMatchH = w.CreditH; Progress.MarkDirty(); }
             }
             catch (Exception e) { FeatsMod.Error("fire start: " + e.Message); }
         }
@@ -905,7 +911,7 @@ namespace FeatsByEMPEROR
                     FeatsMod.Msg("Феникс: смерть отменена / Phoenix: death cancelled");
                     return false;
                 }
-                if (w != null && w.StartH >= 0 && Hours() >= 20 * 24) Progress.Add(Defs2.Phoenix, 1f);
+                if (w != null && w.CreditH >= 20 * 24) Progress.Add(Defs2.Phoenix, 1f);
             }
             catch (Exception e) { FeatsMod.Error("phoenix: " + e.Message); }
             return true;
