@@ -243,6 +243,7 @@ internal static class EffectRow
 
 	public static void Hover()
 	{
+		SurfaceFix.Keep(filled);
 		if (filled.Count == 0)
 		{
 			return;
@@ -354,7 +355,7 @@ internal static class EffectRow
 				{
 					alphas[slot.m_Sprite.Pointer] = slot.m_Sprite.alpha;
 				}
-				slot.m_Sprite.alpha = 0.01f;
+				SurfaceFix.HideSprite(slot.m_Sprite, 0.01f);
 			}
 		}
 		string text = Texts.Get("SEAGULL_FX_" + e.Id + "_NAME");

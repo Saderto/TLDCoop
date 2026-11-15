@@ -113,6 +113,7 @@ public static class Assets
 		}
 		mesh.colors32 = il2CppStructArray5;
 		mesh.triangles = il2CppStructArray4;
+		SurfaceFix.DoubleSide(mesh);
 		mesh.RecalculateBounds();
 		mesh.hideFlags = HideFlags.HideAndDontSave;
 		return meshes[relativePath] = mesh;

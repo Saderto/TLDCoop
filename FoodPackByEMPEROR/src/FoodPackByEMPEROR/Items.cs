@@ -167,7 +167,7 @@ public static class Items
 			Material material = componentsInChild.material;
 			if (texture2D != null && (def.SourceTexture == null || material.mainTexture == null || material.mainTexture.name == def.SourceTexture))
 			{
-				material.mainTexture = texture2D;
+				SurfaceFix.SetMain(material, texture2D);
 			}
 			glassBlur = def.GlassBlur;
 			if (glassBlur.HasValue)
@@ -402,7 +402,7 @@ public static class Items
 			Texture2D texture2D = Assets.Texture(x.Texture);
 			if ((object)texture2D != null)
 			{
-				material.mainTexture = texture2D;
+				SurfaceFix.SetMain(material, texture2D);
 			}
 		}
 		if (x.Matte)
@@ -620,7 +620,7 @@ public static class Items
 				component2.sharedMaterials = new Il2CppReferenceArray<Material>(new Material[1] { component2.sharedMaterial });
 				if (tex != null)
 				{
-					component2.material.mainTexture = tex;
+					SurfaceFix.SetMain(component2.material, tex);
 				}
 			}
 		}
