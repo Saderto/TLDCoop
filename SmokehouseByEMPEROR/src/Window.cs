@@ -231,8 +231,12 @@ public static partial class Window
             else
             {
                 // what is left of the piece: lighter, with its share of the calories
+                // (0.4.33) the game weighs food by its weight times the share of calories left, so the whole of the piece is made smaller, not only
+                // what is left in it: with the total kept, a quarter of a kilo taken cost the piece almost half a kilo (a friend, 11-15: 0.75 kg for a sausage)
+                g.m_FoodItem.m_CaloriesTotal = all - c;
                 g.m_FoodItem.m_CaloriesRemaining = all - c;
                 g.WeightKG = ItemWeight.FromKilograms(w - part);
+                Safe.Info($"Portion: {part:0.00} kg of {Defs.Clean(g.name)} taken, the piece {w:0.00} -> {g.GetItemWeightKG().ToQuantity(1f):0.00} kg, {all:0} -> {all - c:0} kcal");
             }
         }
         cond = condSum / kg;

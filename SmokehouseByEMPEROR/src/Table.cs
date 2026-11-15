@@ -86,9 +86,66 @@ public static partial class Window
         return true;
     }
 
+    // ---- one kind, one value (0.4.33, 11-15 owner: the same sausages came out with different calories). The calories used to be counted from the very
+    // pieces taken, so they changed with the piece and with which meat of a group it was. Now a kind has its own number: the game's cooked
+    // calories per kilo of each part's meat (the mean of a group), by the recipe's weights.
+    static readonly Dictionary<string, float> cookedPerKg = new();
+    static readonly Dictionary<string, float> nominal = new();
+
+    static float CookedPerKg(Species sp)
+    {
+        if (cookedPerKg.TryGetValue(sp.Id, out float v)) return v;
+        v = 0f;
+        GearItem? g = null;
+        try
+        {
+            g = GearItem.InstantiateGearItem(sp.Cooked);
+            if (g != null)
+            {
+                var fw = g.GetComponent<FoodWeight>();
+                if (fw != null && fw.m_CaloriesPerKG > 0f) v = fw.m_CaloriesPerKG;
+                else if (g.m_FoodItem != null)
+                {
+                    float w = g.GetItemWeightKG().ToQuantity(1f);
+                    if (w > .01f) v = g.m_FoodItem.m_CaloriesTotal / w;
+                }
+            }
+        }
+        catch (Exception e) { Safe.Log("Cooked calories of " + sp.Id, e); }
+        finally { if (g != null) UnityEngine.Object.Destroy(g.gameObject); }
+        if (v > 0f) cookedPerKg[sp.Id] = v;
+        return v;
+    }
+
+    /// <summary>The calories of a sausage of this kind; 0 when the game's numbers could not be read (then the pieces taken are counted as before).</summary>
+    static float Nominal(SausKind k)
+    {
+        if (nominal.TryGetValue(k.Id, out float v)) return v;
+        float cal = 0f, kg = 0f;
+        foreach (var p in k.Parts)
+        {
+            var ids = Defs.Groups.TryGetValue(p.Group, out var grp) ? grp : new[] { p.Group };
+            float sum = 0f; int n = 0;
+            foreach (var id in ids)
+            {
+                float one = CookedPerKg(Defs.AllSpecies.First(s => s.Id == id));
+                if (one <= 0f) return 0f;
+                sum += one; n++;
+            }
+            if (n == 0) return 0f;
+            cal += sum / n * p.Kg; kg += p.Kg;
+        }
+        if (kg > Tune.SausageMeatKg + .001f) cal *= Tune.SausageMeatKg / kg;
+        nominal[k.Id] = cal;
+        Safe.Info($"Sausage {k.Id}: {cal:0} kcal by the recipe");
+        return cal;
+    }
+
     static void Finish(SausKind k)
     {
         if (!TakeParts(k, out float kg, out float cal, out float cond)) return;
+        float fixedCal = Nominal(k);
+        if (fixedCal > 0f) cal = fixedCal;
         var got = Items.GiveFood(Defs.Prefix + k.RawId, kg + Tune.SausageSkin, cal, cond);
         if (got == null) MelonLogger.Error("Smokehouse: the raw sausage could not be created");
         Safe.Debug($"Sausage {k.Id} made: {kg:0.00} kg, {cal:0} kcal");

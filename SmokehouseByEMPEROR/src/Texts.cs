@@ -87,7 +87,7 @@ public static class Texts
         Add("K_NEED", "На банку:", "A can takes:");
         Add("K_CANS", "пустая банка (есть {0})", "an empty tin ({0} in the pack)");
         Add("K_WATER", "вода 0,25 л (есть {0} л)", "0.25 l of water ({0} l in the pack)");
-        Add("K_SALT", "соль 300 г (есть {0} кг)", "salt 300 g ({0} kg in the pack)");
+        Add("K_SALT", "соль 0.30 кг (есть {0} кг)", "salt 0.30 kg ({0} kg in the pack)");
         Add("K_M_DEER", "оленина", "venison"); Add("K_M_MOOSE", "лосятина", "moose meat"); Add("K_M_BEAR", "медвежатина", "bear meat");
         Add("K_M_FISH", "любая рыба", "any fish"); Add("K_M_PATE", "заяц или куропатка", "rabbit or ptarmigan");
         Add("K_DIFF_FISH", "разные виды рыбы: {0}, каждой по {1} (у вас подходящих {2})", "{0} different kinds of fish, {1} of each (you have {2} that fit)");
@@ -139,7 +139,7 @@ public static class Texts
         Add("R_HAVE_N", "В рюкзаке {0} шт.", "{0} in the pack");
         Add("R_ALSO", "Что ещё нужно", "What else it takes");
         Add("R_WOOD", "Дрова на {0} ч тления. Сейчас в топке: {1}", "Wood for {0} h of smouldering. In the firebox now: {1}");
-        Add("R_SALT", "Соль по желанию, 300 г на кусок мяса или рыбы (есть {0} кг)", "Salt if you like, 300 g per piece of meat or fish ({0} kg in the pack)");
+        Add("R_SALT", "Соль по желанию, 0.30 кг на кусок мяса или рыбы (есть {0} кг)", "Salt if you like, 0.30 kg per piece of meat or fish ({0} kg in the pack)");
         Add("R_SLOTS", "Мест: {0}. Разжигается на улице", "Places: {0}. Lit outdoors");
         Add("R_WAYS", "Способы", "Ways");
         Add("R_HOT", "Горячее, 32 ч: остаётся 70% веса,", "Hot, 32 h: 70% of the weight is left,");
@@ -168,7 +168,7 @@ public static class Texts
         Add("NO_WOOD_INV", "В рюкзаке нет дров или палок", "No wood or sticks in the pack");
         Add("PUT_IN", "Положить в коптильню:", "Put in the smokehouse:");
         Add("NO_RAW", "В рюкзаке нет сырого мяса, рыбы или колбасы", "No raw meat, fish or sausage in the pack");
-        Add("SALT", "Солить при закладке, 300 г на кусок (соли: {0} кг)", "Salt when putting in, 300 g a piece (salt: {0} kg)");
+        Add("SALT", "Солить при закладке, 0.30 кг на кусок (соли: {0} кг)", "Salt when putting in, 0.30 kg a piece (salt: {0} kg)");
         Add("PICK_UP", "Забрать бочку", "Take the barrel");
         Add("CLOSE", "Закрыть", "Close");
         Add("MORE", "Дальше ({0})", "More ({0})");
