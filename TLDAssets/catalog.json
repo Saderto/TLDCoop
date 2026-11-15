@@ -200,8 +200,8 @@
   {
    "id": "FoodBalanceBySeagull",
    "zip": "FoodBalanceByEMPEROR.zip",
-   "version": "1.0.6",
-   "size": 17003,
+   "version": "1.0.7",
+   "size": 18357,
    "detect": "Mods/FoodBalanceByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodBalanceBySeagull.dll",
@@ -219,8 +219,8 @@
     "en": "Food balance"
    },
    "desc": {
-    "ru": "Ползунки в настройках: сколько еды разных модов лежит на картах и в контейнерах.",
-    "en": "Settings sliders: how much food of each food mod spawns on maps and in containers."
+    "ru": "Ползунки в настройках: сколько еды и находок разных модов лежит на картах и в контейнерах.",
+    "en": "Settings sliders: how much food and finds of each mod spawn on maps and in containers."
    },
    "keep": [
     "Mods/FoodBalanceByEMPEROR.json"

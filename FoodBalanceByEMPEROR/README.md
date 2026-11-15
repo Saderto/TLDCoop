@@ -6,7 +6,7 @@ Food balance for The Long Dark. Settings sliders: how much food of each food mod
 
 ![Настройки Food Balance / Food Balance settings](screenshot.jpg)
 
-Версия / Version: **1.0.6**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
+Версия / Version: **1.0.7**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Ползунки / Sliders
 
@@ -14,6 +14,9 @@ Food balance for The Long Dark. Settings sliders: how much food of each food mod
 - «Food Pack by TKG», «Foods by Calorie Waltz», «Retro Food», «Autumn Comforts»: паки еды других авторов, если они стоят. /
   Food packs by other authors, when installed.
 - «Food Pack by EMPEROR»: мой [FoodPackByEMPEROR](../FoodPackByEMPEROR). / My food pack.
+- «Drinks by EMPEROR», «Snacks by EMPEROR», «Noodles by EMPEROR», «Tea & Coffee by EMPEROR», «Smokes by EMPEROR»: находки моих
+  модов на напитки, снеки, лапшу, чай и кофе, табак (у табака только в контейнерах). / Finds of my drinks, snacks, noodles,
+  tea and coffee and smokes mods (smokes: in containers only).
 - «In containers», «On maps»: еда самой игры. / The game's own food.
 
 100 = как без мода, 0 = нет совсем, 200 = примерно вдвое больше. / 100 = as without the mod, 0 = none, 200 = about twice as much.
