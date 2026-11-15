@@ -66,6 +66,10 @@ public static class Smoking
         if (holster && s.OutroAt < 0f) { Safe.Info("Holster key: the smoke is put away by our hand"); Use.Say(s.Lit.Smoke == SmokeType.Pipe ? "SMOKES_MSG_PIPE_OUT" : "SMOKES_MSG_THROWN"); End(true); }
         // 11-14 (a friend's log: after searching a container the hand was emptied 0.8 s after the search closed, the game put its last
         // item (a lamp) in the hand and we took the smoke back: seen as throwing the cigarette and taking it again): kept for a second after a menu too
+        // 11-15 (a friend's log: 2 pressed for the rifle while some overlay was up: the unequip was refused, the rifle never came and
+        // nothing could be interacted with until a reload, the game was left waiting for the hand to empty): a weapon or light key
+        // is the player's own wish to change what is held, never refused
+        if (SwitchKey(pm)) { Safe.Info($"A weapon or light key: the smoke is let go ({what}; overlay {overlay}, inventory {inv})"); return false; }
         bool keep = s.OutroAt >= 0f || overlay || inv || Time.unscaledTime < InventoryAt + 1f || Time.unscaledTime - MenuKeptAt < 1f;
         if (keep && (overlay || inv)) MenuKeptAt = Time.unscaledTime;
         if (keep || Time.unscaledTime >= nextKeepLog)
@@ -76,6 +80,14 @@ public static class Smoking
         return keep;
     }
     static float nextKeepLog;
+    static float switchKeyAt = -10f;
+    /// <summary>A quick-equip key (weapon, light) pressed now or in the last half second.</summary>
+    public static bool SwitchKeyNow() => Time.unscaledTime - switchKeyAt < .5f;
+    static bool SwitchKey(PlayerManager pm)
+    {
+        try { if (InputManager.GetEquipWeaponPressed(pm) || InputManager.GetEquipLightSourcePressed(pm)) switchKeyAt = Time.unscaledTime; } catch { }
+        return Time.unscaledTime - switchKeyAt < .5f;
+    }
     /// <summary>When a menu last tried to take the smoke from the hand (we kept it).</summary>
     public static float MenuKeptAt = -10f;
     /// <summary>The item the player picked to hold while a menu was open (inventory, wheel), and when.</summary>
@@ -235,6 +247,7 @@ public static class Smoking
         var pm = GameManager.GetPlayerManagerComponent();
         // between scenes there is no player: the smoke waits for its item to come back with the new scene (TidyOrphans)
         if (pm == null) return;
+        SwitchKey(pm);
         if (s.Ending)
         {
             Finish();
@@ -728,7 +741,7 @@ internal static class SmokingRules
     [HarmonyPrefix, HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.EquipLastItemInHands))]
     static bool NoLastItem()
     {
-        if (!Smoking.HeldNow()) return true;
+        if (!Smoking.HeldNow() || Smoking.SwitchKeyNow()) return true;
         Safe.Info("The game would put its last item back in the hand: the smoke stays");
         return false;
     }

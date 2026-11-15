@@ -124,6 +124,7 @@ internal static class Radial
         foreach (var a in arms)
             if (a != null && !a.m_IsCenterButton) saved.Add(Save(a));
         oursSaved = Save(src);
+        panel = p;
         FindDividers(src.transform.parent, arms);
         ours = UnityEngine.Object.Instantiate(src.gameObject, src.transform.parent);
         ours.name = "RadialArm_SmokesTobacco";
@@ -156,6 +157,8 @@ internal static class Radial
     // the wheel's background picture has the eight sector lines drawn into it: a copy with nine lines is made once and shown instead
     static UISprite? backSprite;
     static UITexture? back9;
+    /// <summary>The nine-line background goes into the game only after the user has seen its picture and agreed (11-15).</summary>
+    static readonly bool NineApproved = true;
     static float armReach;   // world radius the sector wedges reach to
     static float iconReach;  // world radius of the sector icons (mean)
 
@@ -163,9 +166,12 @@ internal static class Radial
     {
         backSprite = null;
         if (root == null) return;
-        var t = root.Find("RadialBackground");
+        // 11-15 (log of 0.1.157): the picture with the eight lines is BackpieceAnim (animated frames radial_back_v04_000NN of
+        // radial_anim_atlas) on the panel itself; NonAnimating/RadialBackground is switched off and its sprite does not even exist
+        var t = panel != null ? panel.transform.Find("BackpieceAnim") : null;
+        if (t == null && root.parent != null) t = root.parent.Find("BackpieceAnim");
         backSprite = t != null ? t.GetComponent<UISprite>() : null;
-        if (backSprite == null) { Safe.Info("Action wheel: no RadialBackground sprite"); return; }
+        if (backSprite == null) { Safe.Info("Action wheel: no BackpieceAnim sprite"); return; }
         armReach = 0f;
         try
         {
@@ -446,20 +452,141 @@ internal static class Radial
 
     static void Dividers(bool on)
     {
-        // 11-10 user: our disc was always crooked → the game's own wheel background stays, nothing of ours is drawn
-        if (backSprite != null && backSprite) backSprite.enabled = true;
-        if (back9 != null && back9) back9.gameObject.SetActive(false);
-        return;
-#pragma warning disable CS0162
-        if (on && back9 == null && backSprite != null && backSprite && back9Tries++ < 4)
-            try { MakeBack9(backSprite); } catch (Exception e) { Safe.Log("Action wheel background", e); }
-        if (backSprite == null || !backSprite || back9 == null || !back9) return;
-        back9.gameObject.SetActive(on);
-        backSprite.enabled = !on;
-        if (on) back9.color = backSprite.color;
+        // 11-10 user: our drawn disc was always crooked. 11-14: eight lines under nine sectors are not a proper wheel. 11-15: the radial
+        // fold was a spiky star (the frames are trimmed in the atlas). Now WheelNine re-lays the game's own frames by angle; it was
+        // looked at outside the game on the saved picture first.
+        if (fold != null && fold) fold.SetActive(false);
+        bool use = on && NineApproved && Settings.WheelNineLines.Value && backSprite != null && backSprite;
+        if (use)
+        {
+            WheelNine.Prepare(backSprite!, ((foldStart % 40f) + 40f) % 40f);
+            if (back9 == null || !back9)
+            {
+                var sp = backSprite!;
+                var go = new GameObject("RadialBackground9");
+                go.layer = sp.gameObject.layer;
+                go.transform.SetParent(sp.transform.parent, false);
+                go.transform.localPosition = sp.transform.localPosition;
+                go.transform.localRotation = sp.transform.localRotation;
+                go.transform.localScale = sp.transform.localScale;
+                back9 = go.AddComponent<UITexture>();
+                back9.width = sp.width;
+                back9.height = sp.height;
+                back9.depth = sp.depth;
+                back9.enabled = false;
+            }
+        }
+        if (back9 != null && back9) back9.gameObject.SetActive(use);
+        nineOn = use;
+        if (use) NineFrame();
+        else if (backHidden && backSprite != null && backSprite) { backSprite.color = backCol; backHidden = false; }
     }
 
-#pragma warning restore CS0162
+    static bool nineOn, nineLogged;
+
+    /// <summary>Every frame while the wheel is open: our picture for the frame the game shows now; the game's own one is hidden by
+    /// alpha (not switched off: its animation must keep running). A frame not ready yet is shown the game's way.</summary>
+    static void NineFrame()
+    {
+        if (!nineOn || backSprite == null || !backSprite || back9 == null || !back9) return;
+        if (backSprite.alpha > .01f) backCol = backSprite.color;
+        var tex = WheelNine.For(backSprite.spriteName);
+        if (tex != null)
+        {
+            if (back9.mainTexture == null || back9.mainTexture.Pointer != tex.Pointer) back9.mainTexture = tex;
+            if (back9.color != backCol) back9.color = backCol;
+            if (!back9.enabled) back9.enabled = true;
+            if (backSprite.alpha > .01f) backSprite.alpha = 0f;
+            backHidden = true;
+            if (!nineLogged) { nineLogged = true; Safe.Info($"Wheel nine: shown for frame {backSprite.spriteName} ({tex.width} px, {WheelNine.Frames} frames ready)"); }
+        }
+        else
+        {
+            if (back9.enabled) back9.enabled = false;
+            if (backHidden) { backSprite.color = backCol; backHidden = false; }
+        }
+    }
+
+    // The game's wheel background (a fog blob with eight lines painted in) shown as nine wedges: each wedge is one sixteenth of the
+    // picture (from the middle of a sector to a line) next to its own mirror image, squeezed sideways from 45 to 40 degrees, so the
+    // lines meet at the seams and the picture stays the game's own. Works through the sprite's radial fill: no atlas data is needed.
+    static GameObject? fold;
+    static Color backCol = Color.white;
+    static bool backHidden;
+    static readonly List<UISprite> foldParts = new();
+    static int foldTries;
+    static float foldStart;
+
+    static void MakeFold(UISprite sp)
+    {
+        foldParts.Clear();
+        float squeeze = Mathf.Tan(20f * Mathf.Deg2Rad) / Mathf.Tan(22.5f * Mathf.Deg2Rad);
+        var root = new GameObject("RadialBackground9");
+        root.layer = sp.gameObject.layer;
+        root.transform.SetParent(sp.transform.parent, false);
+        root.transform.localRotation = sp.transform.localRotation;
+        root.transform.localScale = sp.transform.localScale;
+        Vector3 mid = sp.transform.position;
+        try { mid = sp.worldCenter; } catch { }
+        root.transform.position = mid;
+        for (int k = 0; k < 9; k++)
+        {
+            var holder = new GameObject("Wedge" + k);
+            holder.layer = root.layer;
+            holder.transform.SetParent(root.transform, false);
+            holder.transform.localRotation = Quaternion.Euler(0f, 0f, -(foldStart + 40f * k));
+            holder.transform.localScale = new Vector3(squeeze, 1f, 1f);
+            for (int m = 0; m < 2; m++)
+            {
+                var go = UnityEngine.Object.Instantiate(sp.gameObject, holder.transform);
+                go.name = m == 0 ? "Half" : "HalfMirror";
+                for (int i = go.transform.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(go.transform.GetChild(i).gameObject);
+                var part = go.GetComponent<UISprite>();
+                if (part == null) { UnityEngine.Object.Destroy(root); throw new InvalidOperationException("no sprite on the copy"); }
+                foreach (var c in go.GetComponents<Component>())
+                    if (c != null && c.Pointer != part.Pointer && c.TryCast<Transform>() == null) UnityEngine.Object.Destroy(c);
+                try { part.SetAnchor((Transform)null!); } catch { }
+                try { part.pivot = UIWidget.Pivot.Center; } catch { }
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.identity;
+                go.transform.localScale = new Vector3(m == 0 ? 1f : -1f, 1f, 1f);
+                part.width = sp.width;
+                part.height = sp.height;
+                part.type = UIBasicSprite.Type.Filled;
+                part.fillDirection = UIBasicSprite.FillDirection.Radial360;
+                part.invert = false;
+                part.fillAmount = 1f / 16f;
+                part.depth = sp.depth;
+                part.enabled = true;
+                go.SetActive(true);
+                foldParts.Add(part);
+            }
+        }
+        root.SetActive(false);
+        fold = root;
+        Safe.Info($"Action wheel background folded into nine wedges: sprite {sp.spriteName} {sp.width}x{sp.height} type {sp.type} pivot {sp.pivot} at {sp.transform.localPosition:F1}, arms centre {center:F1}, first sector at {foldStart:F1}");
+    }
+
+    static bool treeDumped;
+    static bool picDumped;
+
+    static float nineAt;
+
+
+    static void FoldColor()
+    {
+        if (backSprite == null || !backSprite) return;
+        if (backSprite.alpha > .01f) { backCol = backSprite.color; backSprite.alpha = 0f; }   // the game set it again
+        var col = backCol;
+        string name = backSprite.spriteName;   // the opening animation swaps frames
+        foreach (var p in foldParts)
+        {
+            if (p == null || !p) continue;
+            if (p.color != col) p.color = col;
+            if (p.spriteName != name) p.spriteName = name;
+        }
+    }
+
     static float Angle(Vector3 local) => Mathf.Atan2(local.x - center.x, local.y - center.y) * Mathf.Rad2Deg;   // clockwise from the top
 
     /// <summary>Where a sector is seen: its wedge (or icon) in the arms' parent space; the arm roots themselves may all sit at the centre.</summary>
@@ -516,6 +643,8 @@ internal static class Radial
             }
         }
         nine = true;
+        nineAt = Time.unscaledTime;
+        foldStart = start - order[0].Ang + Mathf.Round(order[0].Ang / 45f) * 45f;   // sector middles (the wedge pictures sit a little off them)
         Dividers(true);
     }
 
@@ -627,7 +756,7 @@ internal static class Radial
         if (!nine || ours == null || !ours) return;
         try
         {
-            if (back9 != null && back9 && backSprite != null && backSprite) back9.color = backSprite.color;
+            NineFrame();
             if (oursBg != null) oursBg.color = hovered ? __instance.m_SectionColorSelected : __instance.m_SectionColorUnselected;
             if (oursGlow != null) oursGlow.enabled = hovered;
             if (hovered && __instance.m_SegmentLabel != null) __instance.m_SegmentLabel.text = Texts.Get("SMOKES_TAB").ToUpperInvariant();

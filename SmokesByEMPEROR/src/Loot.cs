@@ -128,16 +128,41 @@ internal static class Loot
     {
         float chance = Settings.LootAny.Value / 100f * scale;
         if (chance <= 0f) return;
-        int drawers = 1;
-        try { var par = c.transform.parent; if (par != null) drawers = Math.Max(1, par.GetComponentsInChildren<Il2Cpp.Container>(true).Length); } catch { }
-        chance /= Math.Min(drawers, 4);
+        var (drawers, same, mine) = Furniture(c, place);
+        chance = chance * Math.Min(same, 4) / Math.Min(drawers, 4);
         string key = $"{Seed}|{place}|extra|smokes";
         if (Roll(key) >= chance) return;
+        if (same > 1 && Fnv(key + "|which") % (uint)same != (uint)mine) return;   // doors of one cupboard share the roll: one of them gets the find
         string id = Pick(Roll(key + "|what"));
         if (id == Nothing) return;
         if (drawn.Contains(Defs.Prefix + id)) return;   // 11-10: the game populated this container twice (log: same pack twice)
         drawn.Add(Defs.Prefix + id);
         Safe.Info($"Loot: {id} added to a container ({Clean(c.gameObject.name)}) at {place}");
+    }
+
+    /// <summary>11-14 (user: the same cigarettes and lighters far too often; log: four doors of one cupboard are four containers at the
+    /// very same spot, so all four rolled the same and each got the same pack): the containers of one piece of furniture, how many of
+    /// them sit at this container's spot, and this one's number among those (in the scene's own order, the same for every player).</summary>
+    static (int drawers, int same, int mine) Furniture(Il2Cpp.Container c, string place)
+    {
+        int drawers = 1, same = 1, mine = 0;
+        try
+        {
+            var par = c.transform.parent;
+            if (par == null) return (1, 1, 0);
+            var all = par.GetComponentsInChildren<Il2Cpp.Container>(true);
+            drawers = Math.Max(1, all.Length);
+            int n = 0;
+            foreach (var o in all)
+            {
+                if (o == null || Cm(o.transform.position) != place) continue;
+                if (o.Pointer == c.Pointer) mine = n;
+                n++;
+            }
+            same = Math.Max(1, n);
+        }
+        catch { }
+        return (drawers, same, mine);
     }
 
     static List<(string id, float w)>? cabinetTable;
@@ -151,11 +176,11 @@ internal static class Loot
         if (n.IndexOf("File", StringComparison.OrdinalIgnoreCase) < 0 && n.IndexOf("Filing", StringComparison.OrdinalIgnoreCase) < 0) return;
         float chance = Settings.LootCabinet.Value / 100f * Settings.LootContainer.Value / 100f;
         // a cabinet is several drawers, each its own container (log 1718: three finds in one cabinet): the chance is for the whole cabinet
-        int drawers = 1;
-        try { var par = c.transform.parent; if (par != null) drawers = Math.Max(1, par.GetComponentsInChildren<Il2Cpp.Container>(true).Length); } catch { }
-        chance /= drawers;
+        var (drawers, same, mine) = Furniture(c, place);
+        chance = chance * same / drawers;
         string key = $"{Seed}|{place}|cabinet|smokes";
         if (Roll(key) >= chance) return;
+        if (same > 1 && Fnv(key + "|which") % (uint)same != (uint)mine) return;
         if (cabinetTable == null)
         {
             if (table == null) Build();

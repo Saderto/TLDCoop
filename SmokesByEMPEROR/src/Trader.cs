@@ -100,6 +100,9 @@ public static class TraderSmokes
             m_MaxExchangeInSingleTrade = 1,
             m_IsSpecialRequest = false,
             m_Description = new LocalizedString { m_LocalizationID = "SMOKES_" + id + "_DESC" },
+            // 11-14: the game copies both lists when a trade is accepted; left null, the accept button did nothing (no log line)
+            m_UnlockedExchanges = new Il2CppSystem.Collections.Generic.List<Il2CppTLD.Trader.AssetReferenceTradeExchange>(),
+            m_UnlockedConversations = new Il2CppSystem.Collections.Generic.List<Il2CppTLD.Trader.AssetReferenceTraderConversation>(),
         };
         var asks = new Il2CppSystem.Collections.Generic.List<ExchangeItem>();
         var cheap = new Il2CppSystem.Collections.Generic.List<ExchangeItem>();

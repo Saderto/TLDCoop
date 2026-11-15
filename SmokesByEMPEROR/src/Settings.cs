@@ -15,7 +15,7 @@ public static class Settings
     public static MelonPreferences_Entry<float> CutterWearPct = null!, KnifeTearChance = null!;
     public static MelonPreferences_Entry<string> PropPos = null!, PropRot = null!, PipePos = null!, PipeRot = null!;
     public static MelonPreferences_Entry<string> CigOffset = null!, CigarOffset = null!, PipeOffset = null!, CigTurn = null!, CigarTurn = null!, PipeTurnAt = null!;
-    public static MelonPreferences_Entry<bool> ByOffset = null!, TuneKeys = null!, CglTuneKeys = null!, FollowView = null!, GameView = null!, CarryArms = null!, LockCamera = null!, LevelLock = null!, CigRestLikeCigar = null!, EmberLight = null!;
+    public static MelonPreferences_Entry<bool> ByOffset = null!, TuneKeys = null!, CglTuneKeys = null!, FollowView = null!, GameView = null!, CarryArms = null!, LockCamera = null!, LevelLock = null!, CigRestLikeCigar = null!, EmberLight = null!, WheelNineLines = null!;
     public static MelonPreferences_Entry<float> CigIndexBend = null!, CigarPinkyDown = null!, DragUpSeconds = null!, DragDownSeconds = null!;
     public static MelonPreferences_Entry<string> DragHandBelow = null!;
     public static MelonPreferences_Entry<float> DragSplit = null!, FollowAmount = null!, ViewPivot = null!, CigarThumb = null!, PipeThumb = null!, PipeThumbAbove = null!, PipeThumbBaseLift = null!, PipeThumbClearance = null!, PipeThumbOverGap = null!;
@@ -46,6 +46,7 @@ public static class Settings
         LootAny = c.CreateEntry("LootAnyContainerPercent3", 18f, "Шанс курева в любом контейнере сверх обычного, % (шкаф с ящиками считается одним) / extra chance of smokes in any container, % (a chest of drawers counts as one)");
         LootCabinet = c.CreateEntry("LootFilingCabinetPercent2", 30f, "Шанс найти пачку или сигару в тубе в шкафу для документов, % / chance of a pack or a tubed cigar in a filing cabinet, %");
         PlaceBoxKey = c.CreateEntry("PlaceCigarBoxKey2", false, "Тест: Ctrl+Shift+B ставит коробку сигар (каждый раз другую) / test: Ctrl+Shift+B places a cigar box (a different one each time)");
+        WheelNineLines = c.CreateEntry("WheelNineLines", true, "Круг действий: девять ровных линий под девять секций (false = фон игры как есть, восемь линий) / action wheel: nine even lines for the nine sectors (false = the game's background as is, eight lines)");
         LootWorld = c.CreateEntry("LootWorldPercent", 100f, "Сколько курева лежит на локациях, % от обычного (0 = нет) / smokes lying around, % of normal (0 = none)");
         RealTime = c.CreateEntry("BurnInRealTime", true, "Время горения в реальных минутах (иначе игровые 5/15/10) / burn time in real minutes (else game minutes 5/15/10)");
         CigaretteRealMinutes = c.CreateEntry("CigaretteRealMinutes3", 1.5f, "Обычная сигарета, реальных минут (другие форматы и марки по своей доле) / regular cigarette, real minutes (other formats and brands by their share)");
@@ -163,7 +164,7 @@ public static class Settings
         PipeMouthAt = c.CreateEntry("PipeInMouth4", "0.52 0.3 0.75", "Мундштук во рту: x y на экране рук (0..1) и расстояние, м / mouthpiece in the mouth: x y on the hands' view, distance m");
         PipeMouthDir = c.CreateEntry("PipeInMouthDir", "0.06 -0.18 1", "Трубка у рта, к чаше: вправо/вверх/вперёд / pipe at the mouth, towards the bowl: right, up, forward");
         DebugLog = c.CreateEntry("DebugLog", true, "Подробный лог / verbose log");
-        GiveLightersKey = c.CreateEntry("GiveLightersKey", true, "Ctrl+Shift+L: все 29 зажигалок, бензин и газ в рюкзак / all 29 lighters, fluid and butane into the pack");
+        GiveLightersKey = c.CreateEntry("GiveLightersKey2", false, "Ctrl+Shift+L: все 29 зажигалок, бензин и газ в рюкзак / all 29 lighters, fluid and butane into the pack");
         TestKeys = c.CreateEntry("TestKeys2", false, "Тест: Ctrl+Shift+F9 все предметы в рюкзак, Ctrl+Shift+F10 перебор звуков резки / test: Ctrl+Shift+F9 all items into the pack, Ctrl+Shift+F10 cycles cut sounds");
     }
 
