@@ -14,6 +14,7 @@ namespace FoodPackByEMPEROR
     /// <summary>FoodPack goods at the trader (1.1.8), in place of the old TraderPatches + TraderSakes.AddTo/MarkBought.
     /// Sold: everything of the pack that is found in the world as loot (cans, snacks, drinks, alcohol, tea and coffee packs),
     /// the soda cans of the drinks add-on, the eight sakes and the three craft ingredients. Not sold: recipe cards and cooked dishes.
+    /// At most six rows of all EMPEROR mods together are shown, the kinds take turns (TraderShare, the same file in every mod).
     /// Each aurora's set is chosen by the aurora's number (the same on every machine); a bought one is marked in the trader's own
     /// saved state. Only a paid offer is marked and owed; owed goods are put into the exchange box if the game did not put them.</summary>
     public static class TraderGoods
@@ -61,7 +62,7 @@ namespace FoodPackByEMPEROR
         /// <summary>How many different goods of a kind one aurora's set shows.</summary>
         static readonly SlotDef[] Slots =
         {
-            new SlotDef("can", 50, 2), new SlotDef("snack", 50, 2), new SlotDef("drink", 50, 1), new SlotDef("soda", 50, 2),
+            new SlotDef("can", 50, 1), new SlotDef("snack", 50, 1), new SlotDef("drink", 50, 1), new SlotDef("ingredient", 50, 1),
             new SlotDef("tea", 100, 1), new SlotDef("alcohol", 150, 1), new SlotDef("sake", 200, 1),
         };
 
@@ -93,6 +94,7 @@ namespace FoodPackByEMPEROR
         static readonly List<Offer> offers = new List<Offer>();
         static readonly Dictionary<string, Offer> byId = new Dictionary<string, Offer>();
         static bool ready;
+        static int sodaCount;
 
         static void Add(string id, string slot, int trust, int perSet, Ask[] asks)
         {
@@ -112,10 +114,10 @@ namespace FoodPackByEMPEROR
         {
             if (ready) return;
             ready = true;
-            // the craft ingredients, always there (unchanged since 1.1.x)
-            Add("Sauerkraut", null, 50, 2, new[] { CatKg(Fish, 5f), Litres(Water, 2f), GearN(Maple, 2) });
-            Add("WhippedCream", null, 100, 2, new[] { CatKg(Meat, 3f), Litres(Water, 1f), GearN(Ptarmigan, 4) });
-            Add("IrishWhiskey", null, 200, 1, new[] { CatN(Hides, 3), Litres(Kerosene, 2f), GearN(Crow, 4) });
+            // the craft ingredients: one of them on the turn of their kind (prices unchanged since 1.1.x)
+            Add("Sauerkraut", "ingredient", 50, 2, new[] { CatKg(Fish, 5f), Litres(Water, 2f), GearN(Maple, 2) });
+            Add("WhippedCream", "ingredient", 100, 2, new[] { CatKg(Meat, 3f), Litres(Water, 1f), GearN(Ptarmigan, 4) });
+            Add("IrishWhiskey", "ingredient", 200, 1, new[] { CatN(Hides, 3), Litres(Kerosene, 2f), GearN(Crow, 4) });
             // the sakes, one an aurora (unchanged)
             Add("Sake_Junmai", "sake", 200, 1, new[] { CatN(Hides, 3), GearN(Gut, 3), GearN(Cloth, 4) });
             Add("Sake_Ginjo", "sake", 200, 1, new[] { CatN(Plants, 12), Litres(Kerosene, 3f), GearN(Crow, 4) });
@@ -207,6 +209,7 @@ namespace FoodPackByEMPEROR
                 Add(def.Id, "soda", 50, 2, Price(def.WeightKg >= 0.8f ? 2 : 1, def.Id));
                 sodas++;
             }
+            sodaCount = sodas;
             // anything else that lies in the world as loot (a new kind of the pack or of an add-on) is sold by the same rules
             int auto = 0;
             foreach (List<LootEntry> table in Loot.Tables.Values)
@@ -332,7 +335,7 @@ namespace FoodPackByEMPEROR
         static string shownKey;
         static List<Offer> shown = new List<Offer>();
 
-        /// <summary>This set: per kind, its first Show goods ordered by a hash of the aurora's number, then the ingredients.</summary>
+        /// <summary>This set: for each kind whose turn it is (TraderShare), its first goods ordered by a hash of the aurora's number.</summary>
         static List<Offer> Shown(int trust, int aurora)
         {
             Prepare();
@@ -343,19 +346,22 @@ namespace FoodPackByEMPEROR
             foreach (SlotDef s in Slots)
             {
                 if (trust < s.Trust) continue;
+                // at most six rows of all our mods together: this kind shows one row, and only on its turn (TraderShare)
+                if (!TraderShare.On("FoodPackByEMPEROR", s.Name, trust, aurora)) continue;
+                // the drink row is a drink of the pack or, every other time by the aurora's hash, a can of an add-on
+                string want = s.Name;
+                if (want == "drink" && sodaCount > 0 && OneTimeSpawns.Fnv("TraderGoods|" + set + "|soda") % 2u == 1u) want = "soda";
                 var pool = new List<KeyValuePair<uint, Offer>>();
                 foreach (Offer o in offers)
                 {
-                    if (o.Slot != s.Name || trust < o.Trust) continue;
+                    if (o.Slot != want || trust < o.Trust) continue;
                     // the sakes keep the roll they had before 1.1.8
                     uint roll = s.Name == "sake" ? OneTimeSpawns.Fnv("TraderSake|" + set + "|" + o.Id)
-                                                 : OneTimeSpawns.Fnv("TraderGoods|" + set + "|" + s.Name + "|" + o.Id);
+                                                 : OneTimeSpawns.Fnv("TraderGoods|" + set + "|" + want + "|" + o.Id);
                     pool.Add(new KeyValuePair<uint, Offer>(roll, o));
                 }
                 foreach (var p in pool.OrderBy(p => p.Key).Take(s.Show)) list.Add(p.Value);
             }
-            foreach (Offer o in offers)
-                if (o.Slot == null && trust >= o.Trust) list.Add(o);
             shownKey = key;
             shown = list;
             return list;

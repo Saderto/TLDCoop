@@ -94,7 +94,9 @@ public static class TraderSnacks
         foreach (var s in Slots)
         {
             if (tm.CurrentTrust < s.Trust) continue;
-            foreach (var d in Defs.All.Where(s.Pick).OrderBy(d => Fnv($"SNKTrade|{aurora}|{s.Name}|{d.Id}")).Take(s.Count))
+            // at most six rows of all our mods together: this kind shows one row, and only on its turn (TraderShare)
+            if (!TraderShare.On("SnacksByEMPEROR", s.Name, tm.CurrentTrust, aurora)) continue;
+            foreach (var d in Defs.All.Where(s.Pick).OrderBy(d => Fnv($"SNKTrade|{aurora}|{s.Name}|{d.Id}")).Take(1))
             {
                 if (names != null && names.Contains(Bought(d.Id, aurora))) continue;
                 list.Add(Build(d.Id, s));

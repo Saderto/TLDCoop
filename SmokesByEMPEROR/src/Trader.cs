@@ -120,7 +120,9 @@ public static class TraderSmokes
         foreach (var s in Slots)
         {
             if (trust < s.Trust) continue;
-            foreach (var d in Defs.All.Where(s.Pick).OrderBy(d => Fnv($"SmokeTrade|{aurora}|{s.Name}|{d.Id}")).Take(s.Count))
+            // at most six rows of all our mods together: this kind shows one row, and only on its turn (TraderShare)
+            if (!TraderShare.On("SmokesByEMPEROR", s.Name, trust, aurora)) continue;
+            foreach (var d in Defs.All.Where(s.Pick).OrderBy(d => Fnv($"SmokeTrade|{aurora}|{s.Name}|{d.Id}")).Take(1))
                 yield return (d.Id, s);
         }
     }
