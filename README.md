@@ -23,6 +23,7 @@ does it when updating. Game saves are kept: their keys did not change.
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
 | `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |
 | `MatchboxesByEMPEROR` | Спичечные коробки: 120 этикеток для коллекции / Matchboxes: 120 collectible labels |
+| `SnacksByEMPEROR` | Снеки: 1546 видов от 159 марок, свои эффекты / Snacks: 1546 kinds from 159 brands, own effects |
 | `TrainerByEMPEROR` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
 | `SmokehouseByEMPEROR` | плагин `SmokesAudioOnByEMPEROR.dll` в папке `Plugins` для звука кипения котла (лаунчер ставит его сам) / the `SmokesAudioOnByEMPEROR.dll` plugin in `Plugins` for the kettle's boiling sound (the launcher installs it) |
 | `FoodPackByEMPEROR` | Новая еда и напитки с эффектами / New food and drinks with effects |
@@ -55,6 +56,7 @@ original sources were lost): it builds and works the same, but has no comments a
 | `SmokesByEMPEROR` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself); плагин `SmokesAudioOnByEMPEROR.dll` в папке `Plugins` (есть в архиве) / the `SmokesAudioOnByEMPEROR.dll` plugin in `Plugins` (included in the archive) |
 | `FoodPackByEMPEROR` | AfflictionComponent, ModData, ComplexLogger, ModSettings, AlcoholMod (+ ModComponent, его требует сам AlcoholMod / required by AlcoholMod itself); с AlcoholMod напитки пьянят / with AlcoholMod drinks make you drunk |
 | `FoodBalanceByEMPEROR` | ModSettings |
+| `SnacksByEMPEROR` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself) |
 | `ContainerLabelsByEMPEROR` | ModData |
 | остальные / the rest | ничего / nothing |
 

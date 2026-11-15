@@ -167,6 +167,27 @@
    }
   },
   {
+   "id": "SnacksByEMPEROR",
+   "zip": "SnacksByEMPEROR.zip",
+   "version": "0.7.2",
+   "size": 423095692,
+   "detect": "Mods/SnacksByEMPEROR.dll",
+   "needs": [
+    "AfflictionComponent",
+    "ModData",
+    "ComplexLogger",
+    "ModSettings"
+   ],
+   "title": {
+    "ru": "Снеки",
+    "en": "Snacks"
+   },
+   "desc": {
+    "ru": "1546 видов снеков от 159 марок: чипсы, сухарики, орехи, вяленое мясо. Свои эффекты, находки в шкафах, у Торговца.",
+    "en": "1546 kinds of snacks from 159 brands: crisps, croutons, nuts, jerky. Own effects, finds in cupboards, sold by the Trader."
+   }
+  },
+  {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
    "version": "1.1.3",
