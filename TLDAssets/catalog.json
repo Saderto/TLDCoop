@@ -169,8 +169,8 @@
   {
    "id": "SnacksByEMPEROR",
    "zip": "SnacksByEMPEROR.zip",
-   "version": "0.7.2",
-   "size": 423095692,
+   "version": "0.7.3",
+   "size": 423109004,
    "detect": "Mods/SnacksByEMPEROR.dll",
    "needs": [
     "AfflictionComponent",
