@@ -410,21 +410,44 @@ internal static class Crafting
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(CraftingOperation), nameof(CraftingOperation.StartCrafting))]
-    static void Starting(CraftingOperation __instance)
+    static void Starting(BlueprintData blueprintData)
     {
         try
         {
             if (paidFor != null) Settle(paidFor);      // the next go was begun before the last one was settled
-            var id = Ours(__instance);
-            if (id == null) return;
+            // the operation has no recipe yet at this point (0.4.30 read it from there and so never took the rest): it comes as the argument
+            var bn = blueprintData != null ? blueprintData.name : null;
+            if (bn == null || !bn.StartsWith(NamePrefix, StringComparison.Ordinal)) return;
+            var id = bn.Substring(NamePrefix.Length);
             var r = Recipes.First(x => x.Id == id);
-            var req = __instance.Blueprint.m_RequiredGear;
+            var req = blueprintData!.m_RequiredGear;
             if (req == null || req.Length != r.Needs.Length) return;      // a begun station: it asks for its piece alone
             paidFrom = new Dictionary<string, int>();
             foreach (var (gear, _) in r.Needs) paidFrom[gear] = Units(gear);
             paidFor = id;
+            Safe.Info($"Station {id}: full recipe begun, in the pack: " + string.Join(", ", paidFrom.Select(kv => kv.Key + " " + kv.Value)));
         }
         catch (Exception e) { Safe.Log("Station materials at start", e); }
+    }
+
+    /// <summary>The hacksaw wears by the hours worked (11-15 owner: it lost nothing; the game's own wear per crafting hour is zero for it).</summary>
+    const float WearPerHour = .005f;
+    static float toolHp = -1f;
+
+    static void Wear(CraftingOperation op, string id, float hours)
+    {
+        try
+        {
+            var g = op.m_Tool != null ? op.m_Tool.GetComponent<GearItem>() : null;
+            if (g == null || hours <= 0f) return;
+            if (toolHp >= 0f && g.m_CurrentHP < toolHp - .001f) return;      // the game wore it itself
+            float norm = g.GetNormalizedCondition();
+            float max = norm > .001f ? g.m_CurrentHP / norm : 100f;
+            float was = g.m_CurrentHP;
+            g.m_CurrentHP = Math.Max(0f, was - max * WearPerHour * hours);
+            MelonLogger.Msg($"Station {id}: {Defs.Clean(g.name)} worn by {hours:0.00} h of work, {was:0.0} -> {g.m_CurrentHP:0.0} of {max:0.0}");
+        }
+        catch (Exception e) { Safe.Log("Station tool wear", e); }
     }
 
     static string? Ours(CraftingOperation op)
@@ -455,6 +478,9 @@ internal static class Crafting
                 if (panel != null) offeredHours = panel.GetAdjustedCraftingTime() / 60f;
             }
             catch (Exception e) { Safe.Log("Station build offered time", e); }
+            toolHp = -1f;
+            try { var tg = __instance.m_Tool != null ? __instance.m_Tool.GetComponent<GearItem>() : null; if (tg != null) toolHp = tg.m_CurrentHP; }
+            catch (Exception e) { Safe.Log("Station tool at start", e); }
             Safe.Info($"Station {id}: work begun, done before {(Unfinished(id)?.Done ?? 0f):0.00}, in the pack {(baseline.TryGetValue(id, out var n) ? n : 0)}");
         }
         catch (Exception e) { Safe.Log("Station build start", e); }
@@ -488,6 +514,7 @@ internal static class Crafting
             float share = Mathf.Clamp01(go * part / full);
             float after = before + (1f - before) * share;
             MelonLogger.Msg($"Station {id}: go over ({(success ? "worked through" : "broken off")}), {spent:0.0}/{total:0.0} s, {go:0.00} h chosen of {full:0.00} h offered ({left:0.00} h by the recipe), done {before:0.00} -> {after:0.00}");
+            Wear(op, id, go * part);
             if (share >= .97f)
             {
                 if (job != null) { Barrels.Jobs.Remove(job); Barrels.SaveJobs(); }

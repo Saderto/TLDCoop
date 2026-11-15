@@ -93,8 +93,8 @@
   {
    "id": "SmokehouseBySeagull",
    "zip": "SmokehouseByEMPEROR.zip",
-   "version": "0.4.30",
-   "size": 111798374,
+   "version": "0.4.32",
+   "size": 111798903,
    "detect": "Mods/SmokehouseByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokehouseBySeagull.dll",
