@@ -152,6 +152,21 @@
    }
   },
   {
+   "id": "MatchboxesByEMPEROR",
+   "zip": "MatchboxesByEMPEROR.zip",
+   "version": "0.3.4",
+   "size": 46353247,
+   "detect": "Mods/MatchboxesByEMPEROR.dll",
+   "title": {
+    "ru": "Спичечные коробки",
+    "en": "Matchboxes"
+   },
+   "desc": {
+    "ru": "Коробки спичек с 120 этикетками в 12 сериях, коллекция в журнале. Без других модов.",
+    "en": "Matchboxes with 120 labels in 12 series, a collection in the journal. No other mods needed."
+   }
+  },
+  {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
    "version": "1.1.2",

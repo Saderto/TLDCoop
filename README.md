@@ -22,6 +22,7 @@ does it when updating. Game saves are kept: their keys did not change.
 | `SmokehouseByEMPEROR` | Коптильня, котёл для консервов и стол для колбас / Smokehouse, canning kettle and sausage table |
 | `FeatsByEMPEROR` | Новые подвиги / New feats |
 | `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |
+| `MatchboxesByEMPEROR` | Спичечные коробки: 120 этикеток для коллекции / Matchboxes: 120 collectible labels |
 | `TrainerByEMPEROR` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
 | `SmokehouseByEMPEROR` | плагин `SmokesAudioOnByEMPEROR.dll` в папке `Plugins` для звука кипения котла (лаунчер ставит его сам) / the `SmokesAudioOnByEMPEROR.dll` plugin in `Plugins` for the kettle's boiling sound (the launcher installs it) |
 | `FoodPackByEMPEROR` | Новая еда и напитки с эффектами / New food and drinks with effects |
