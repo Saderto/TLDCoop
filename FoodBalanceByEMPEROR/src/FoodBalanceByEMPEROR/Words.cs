@@ -21,6 +21,8 @@ internal static class Words
 		["FOODBALANCE_MOD_DESC"] = ("Сколько еды этого мода на картах и в контейнерах. На картах шанс не поднимается выше 100%, поэтому 200% дают немного меньше двойного количества.", "How much of this mod's food on maps and in containers. On maps a chance stops at 100%, so 200% gives a little less than double."),
 		["FOODBALANCE_SEAGULL"] = ("Food Pack by EMPEROR", "Food Pack by EMPEROR"),
 		["FOODBALANCE_SEAGULL_DESC"] = ("Сколько еды Food Pack by EMPEROR на картах и в контейнерах. Саке и карточки рецептов не меняются.", "How much Food Pack by EMPEROR food on maps and in containers. Sake and recipe cards don't change."),
+		["FOODBALANCE_DRINKS"] = ("Drinks by EMPEROR", "Drinks by EMPEROR"),
+		["FOODBALANCE_DRINKS_DESC"] = ("Сколько газировок и других напитков в банках и бутылках на картах и в контейнерах.", "How many sodas and other canned and bottled drinks on maps and in containers."),
 		["FOODBALANCE_SNACKS"] = ("Snacks by EMPEROR", "Snacks by EMPEROR"),
 		["FOODBALANCE_SNACKS_DESC"] = ("Сколько снеков (чипсы, сухарики, орешки) в контейнерах.", "How many snacks (crisps, croutons, nuts) in containers."),
 		["FOODBALANCE_NOODLES"] = ("Noodles by EMPEROR", "Noodles by EMPEROR"),

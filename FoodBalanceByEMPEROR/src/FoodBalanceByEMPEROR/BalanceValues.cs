@@ -14,6 +14,8 @@ public class BalanceValues
 
 	public float Seagull = 100f;
 
+	public float Drinks = 100f;
+
 	public float Snacks = 100f;
 
 	public float Noodles = 100f;

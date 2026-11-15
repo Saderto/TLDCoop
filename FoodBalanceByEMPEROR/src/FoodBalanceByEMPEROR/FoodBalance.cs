@@ -107,6 +107,10 @@ public static class FoodBalance
 		{
 			return "Smokes";
 		}
+		if (text.StartsWith("seagull_drink"))
+		{
+			return "Drinks";
+		}
 		if (text.StartsWith("seagull_"))
 		{
 			if (!text.StartsWith("seagull_sake_") && !text.StartsWith("seagull_card_"))
@@ -131,6 +135,7 @@ public static class FoodBalance
 			"RetroFood" => v.RetroFood, 
 			"AutumnComforts" => v.AutumnComforts, 
 			"Seagull" => v.Seagull, 
+			"Drinks" => v.Drinks, 
 			"Snacks" => v.Snacks, 
 			"Noodles" => v.Noodles, 
 			"TeaCoffee" => v.TeaCoffee, 
