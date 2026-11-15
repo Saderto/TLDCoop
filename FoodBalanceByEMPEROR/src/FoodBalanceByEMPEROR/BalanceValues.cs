@@ -14,6 +14,14 @@ public class BalanceValues
 
 	public float Seagull = 100f;
 
+	public float Snacks = 100f;
+
+	public float Noodles = 100f;
+
+	public float TeaCoffee = 100f;
+
+	public float Smokes = 100f;
+
 	public float GameContainers = 100f;
 
 	public float GameMaps = 100f;

@@ -90,6 +90,23 @@ public static class FoodBalance
 	private static string SourceOf(string name)
 	{
 		string text = Key(name);
+		// 1.0.7: finds of the user's other mods (added by name to a container's list, see the loot rule of 11-15)
+		if (text.StartsWith("snk_"))
+		{
+			return "Snacks";
+		}
+		if (text.StartsWith("ndl_"))
+		{
+			return "Noodles";
+		}
+		if (text.StartsWith("tc_"))
+		{
+			return "TeaCoffee";
+		}
+		if (text.StartsWith("seagullsmoke_"))
+		{
+			return "Smokes";
+		}
 		if (text.StartsWith("seagull_"))
 		{
 			if (!text.StartsWith("seagull_sake_") && !text.StartsWith("seagull_card_"))
@@ -114,6 +131,10 @@ public static class FoodBalance
 			"RetroFood" => v.RetroFood, 
 			"AutumnComforts" => v.AutumnComforts, 
 			"Seagull" => v.Seagull, 
+			"Snacks" => v.Snacks, 
+			"Noodles" => v.Noodles, 
+			"TeaCoffee" => v.TeaCoffee, 
+			"Smokes" => v.Smokes, 
 			_ => 100f, 
 		};
 	}

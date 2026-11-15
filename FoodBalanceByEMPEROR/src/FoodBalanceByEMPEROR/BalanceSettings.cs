@@ -38,6 +38,26 @@ internal class BalanceSettings : JsonModSettings
 	[Slider(0f, 200f, 21)]
 	public float Seagull = 100f;
 
+	[Name("FOODBALANCE_SNACKS", Localize = true)]
+	[Description("FOODBALANCE_SNACKS_DESC")]
+	[Slider(0f, 200f, 21)]
+	public float Snacks = 100f;
+
+	[Name("FOODBALANCE_NOODLES", Localize = true)]
+	[Description("FOODBALANCE_NOODLES_DESC")]
+	[Slider(0f, 200f, 21)]
+	public float Noodles = 100f;
+
+	[Name("FOODBALANCE_TEACOFFEE", Localize = true)]
+	[Description("FOODBALANCE_TEACOFFEE_DESC")]
+	[Slider(0f, 200f, 21)]
+	public float TeaCoffee = 100f;
+
+	[Name("FOODBALANCE_SMOKES", Localize = true)]
+	[Description("FOODBALANCE_SMOKES_DESC")]
+	[Slider(0f, 200f, 21)]
+	public float Smokes = 100f;
+
 	[Section("FOODBALANCE_SECTION_GAME", Localize = true)]
 	[Name("FOODBALANCE_GAME_BOXES", Localize = true)]
 	[Description("FOODBALANCE_GAME_BOXES_DESC")]
@@ -65,6 +85,10 @@ internal class BalanceSettings : JsonModSettings
 					RetroFood = instance.RetroFood,
 					AutumnComforts = instance.AutumnComforts,
 					Seagull = instance.Seagull,
+					Snacks = instance.Snacks,
+					Noodles = instance.Noodles,
+					TeaCoffee = instance.TeaCoffee,
+					Smokes = instance.Smokes,
 					GameContainers = instance.GameContainers,
 					GameMaps = instance.GameMaps
 				};
