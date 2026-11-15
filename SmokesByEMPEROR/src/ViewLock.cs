@@ -68,6 +68,9 @@ internal static class ViewLock
             last = c.worldToCameraMatrix * Eye.localToWorldMatrix;
             haveLast = true;
             cam = c;
+            // 11-15: a struggle or a scene carries the camera away from the player's own eyes (a friend's log: 45..550 here, 1.75 as usual)
+            float away = Eye.InverseTransformPoint(c.transform.position).magnitude;
+            if (away > 20f) { if (awaySince < 0f || Time.unscaledTime - awayAt > .25f) awaySince = Time.unscaledTime; awayAt = Time.unscaledTime; } else awaySince = -1f;
             if (Prop != null && Prop)
             {
                 var cp = c.worldToCameraMatrix * Prop.localToWorldMatrix;
@@ -100,6 +103,9 @@ internal static class ViewLock
     // rest in the hand. Whatever moves the hand and the smoke (look up/down, walking, the game's own arm motion, even after our LateUpdate)
     // moves the camera with it, so the picture of the hand stays exactly the same; only our own moves (the drag to the mouth, the pipe going
     // into the teeth) are kept, because they are taken out first: the camera follows the smoke's "virtual rest" pose = smoke now * our move^-1.
+    static float awaySince = -1f, awayAt = -10f;
+    /// <summary>The hands camera has stood far from the player's eyes for a third of a second, and still does.</summary>
+    public static bool CameraAway => awaySince >= 0f && Time.unscaledTime - awayAt < .25f && awayAt - awaySince > .3f;
     public static bool Locked;
     public static Transform? Frame;     // the arms frame (Camera_Weapon_Offset): our moves are measured in it
     public static Transform? Bone;      // what the camera rides: the right clavicle (above our arm IK), else the smoke

@@ -33,6 +33,7 @@ public static class Smoking
         public float LostAt = -1f;      // unscaled time the hand went empty (inventory, a menu): put back when it closes
         public float NextReequip;
         public Action? Refund;
+        public bool QuietSeen;          // no scene was being played on the player at some moment of this smoke (so one that starts is new)
         public float GoneAt = -1f;      // unscaled time the item vanished (a scene change)          // gives back what lighting took, should the smoke never reach the hand
     }
 
@@ -57,6 +58,10 @@ public static class Smoking
         if (OwnUnequip || s == null || s.Ending || !s.Equipped || s.Item == null) return false;
         var pm = GameManager.GetPlayerManagerComponent();
         if (pm == null || pm.m_ItemInHands == null || pm.m_ItemInHands.Pointer != s.Item.Pointer) return false;
+        // 11-15 (a friend's log: a bear, a wolf and four harvests with a pipe burning, every put-away refused here because the game's
+        // own panels were up; the smoke went on through all of it and the revolver was left broken in the hand afterwards): what
+        // takes the hands for itself ends the smoke, and the game's own put-away goes through untouched
+        if (Busy(pm, out string busy)) { Stop(busy + ", " + what, false); return false; }
         bool overlay = false, inv = false;
         try { overlay = InterfaceManager.IsOverlayActiveImmediate(); } catch { }
         try { var p = InterfaceManager.GetPanel<Panel_Inventory>(); inv = p != null && p.IsEnabled(); } catch { }
@@ -156,6 +161,7 @@ public static class Smoking
             Refund = refund,
         };
         Visual.Reset();
+        TimeFlow.Reset();
         Use.Say("SMOKES_MSG_LIT_" + how);
         Safe.Info($"Smoking {lit.Id} ({gi.name}): {s.Length:0.###} {(Settings.RealTime.Value ? "s" : "game h")}, effect x{effectMul}");
     }
@@ -246,13 +252,14 @@ public static class Smoking
         if (s == null) return;
         var pm = GameManager.GetPlayerManagerComponent();
         // between scenes there is no player: the smoke waits for its item to come back with the new scene (TidyOrphans)
-        if (pm == null) return;
+        if (pm == null) { TimeFlow.Reset(); return; }
         SwitchKey(pm);
         if (s.Ending)
         {
             Finish();
             return;
         }
+        TimeFlow.Tick();
         var hand = pm.m_ItemInHands;
         bool inHand = s.Item != null && hand != null && hand.Pointer == s.Item.Pointer;
         if (inHand && !s.Equipped)
@@ -287,6 +294,8 @@ public static class Smoking
             return;
         }
         s.GoneAt = -1f;
+        // a struggle, a scene played on the player, an action that takes time (harvesting, crafting...): the smoke is over
+        if (Busy(pm, out string busy)) { Stop(busy, true); return; }
         if (!s.Equipped)
         {
             if (!TryEquip(pm))
@@ -306,7 +315,17 @@ public static class Smoking
             bool overlay = false;
             try { overlay = InterfaceManager.IsOverlayActiveImmediate(); } catch { }
             if (s.LostAt < 0f) { s.LostAt = Time.unscaledTime; Safe.Info($"The hand went empty (overlay {overlay}): the smoke waits"); }
-            if (overlay) { s.LostAt = Time.unscaledTime; return; }
+            if (overlay)
+            {
+                s.LostAt = Time.unscaledTime;
+                // waiting or sleeping with the hand emptied by the game: the smoke still burns along with the world's time
+                if (Settings.RealTime.Value && TimeFlow.ExtraSeconds > 0f)
+                {
+                    s.Smoked += TimeFlow.ExtraSeconds;
+                    if (Share >= 1f) { Use.Say(s.Lit.Smoke == SmokeType.Pipe ? "SMOKES_MSG_PIPE_DONE" : "SMOKES_MSG_DONE"); End(false); }
+                }
+                return;
+            }
             if (Time.unscaledTime - s.LostAt < 6f)
             {
                 if (Time.unscaledTime >= s.NextReequip)
@@ -356,6 +375,13 @@ public static class Smoking
         if (Settings.RealTime.Value)
         {
             if (!GameManager.m_IsPaused && Time.timeScale > 0f) s.Smoked += Time.unscaledDeltaTime;
+            // 11-15 (the owner: waiting through the wheel left the smoke at its own pace): time the world skips or hurries burns it too
+            if (TimeFlow.ExtraSeconds > 0f)
+            {
+                if (!fastLogged) { fastLogged = true; Safe.Info($"The world's time runs fast: the smoke burns with it ({s.Smoked:F0} of {s.Length:F0} s)"); }
+                s.Smoked += TimeFlow.ExtraSeconds;
+            }
+            else if (!TimeFlow.Fast) fastLogged = false;
         }
         else
         {
@@ -463,6 +489,74 @@ public static class Smoking
         Visual.Late(s.Item, s.Lit, s.Lit.Smoke == SmokeType.Pipe ? 0f : DragAmount(), Since(), s.OutroAt >= 0f ? Time.unscaledTime - s.OutroAt : -1f);
     }
 
+    static bool fastLogged, timelineOn;
+
+    /// <summary>The hands are wanted for something else right now: a struggle with an animal, a scene the game plays on the player (the
+    /// cougar's arrival, the harvesting hands), an action that takes game time (harvesting, crafting, breaking down, repairing, reading).
+    /// 11-15, the owner: «когда начинаешь какое-то действие во время курения, курение должно заканчиваться».</summary>
+    static bool Busy(PlayerManager pm, out string why)
+    {
+        why = "";
+        if (s == null) return false;
+        try { var st = GameManager.GetPlayerStruggleComponent(); if (st != null && st.InStruggle()) { why = "a struggle"; return true; } } catch { }
+        try
+        {
+            var mode = pm.GetControlMode();
+            if (mode == PlayerControlMode.Struggle || mode == PlayerControlMode.BearSpear || mode == PlayerControlMode.Dead || mode == PlayerControlMode.InFPCinematic)
+            { why = "control mode " + mode; return true; }
+        }
+        catch { }
+        // a cutscene: only one that began during this smoke (a flag found set from the start is not trusted)
+        bool film = false;
+        try { film = CinematicManager.s_IsCutsceneActive; } catch { }
+        if (!film) s.QuietSeen = true;
+        else if (s.QuietSeen) { why = "a cutscene"; return true; }
+        // the game's small scenes of the player's hands (prying, harvesting): only noted, the starts that matter have their own hooks
+        try
+        {
+            bool tl = TLD_TimelineDirector.s_IsGameplayPlayerTimelineActive;
+            if (tl != timelineOn) { timelineOn = tl; Safe.Debug($"A scene of the player's hands {(tl ? "begins" : "ends")} while smoking"); }
+        }
+        catch { }
+        if (ViewLock.CameraAway) { why = "the camera left the player"; return true; }
+        bool overlay = false;
+        try { overlay = InterfaceManager.IsOverlayActiveImmediate(); } catch { }
+        if (!overlay) return false;
+        try { if (InterfaceManager.IsPanelEnabled<Panel_BodyHarvest>() && InterfaceManager.TryGetPanel<Panel_BodyHarvest>(out var bh) && bh != null && bh.IsHarvestingOrQuartering()) { why = "harvesting"; return true; } } catch { }
+        try { if (InterfaceManager.IsPanelEnabled<Panel_BreakDown>() && InterfaceManager.TryGetPanel<Panel_BreakDown>(out var bd) && bd != null && bd.IsBreakingDown()) { why = "breaking down"; return true; } } catch { }
+        // anything else that hurries the world's time from a panel, but for waiting and sleep (those only burn the smoke faster)
+        if (TimeFlow.Fast && TimeFlow.FastMinutes >= 2f && !TimeFlow.WaitingLately) { why = "an action that takes time"; return true; }
+        return false;
+    }
+
+    /// <summary>An action begins (called by the game's own start of it, before the hands are taken).</summary>
+    public static void StopFor(string why)
+    {
+        try { if (Active) Stop(why, true); } catch (Exception e) { Safe.Log("Stop the smoke for an action", e); }
+    }
+
+    /// <summary>Over at once, with no animation of the hand: a pipe is put out, anything else thrown away; the effects count by the share
+    /// smoked. takeOut: the hand is emptied by us (false when the game is emptying it this very moment).</summary>
+    static void Stop(string why, bool takeOut)
+    {
+        if (s == null || s.Ending) return;
+        Safe.Info($"The smoke ends at once: {why} ({Share:P0} smoked)");
+        Use.Say(s.Lit.Smoke == SmokeType.Pipe ? "SMOKES_MSG_PIPE_OUT" : "SMOKES_MSG_THROWN");
+        var item = s.Item;
+        End(false);
+        if (!takeOut || item == null) return;
+        try
+        {
+            var pm = GameManager.GetPlayerManagerComponent();
+            if (pm != null && pm.m_ItemInHands != null && pm.m_ItemInHands.Pointer == item.Pointer)
+            {
+                OwnUnequip = true;
+                try { pm.UnequipImmediate(false); } finally { OwnUnequip = false; }
+            }
+        }
+        catch (Exception e) { Safe.Log("Take the smoke out at once", e); }
+    }
+
     /// <summary>finished: smoked to the end, or thrown away by the player; either way the effects count by the share smoked.</summary>
     public static void End(bool byPlayer)
     {
@@ -536,6 +630,17 @@ public static class Smoking
     static void Destroy(GearItem? item)
     {
         if (item == null) return;
+        // the game remembers what it last took from the hand and puts it back after an interaction: never the smoke that is gone
+        try
+        {
+            var pm = GameManager.GetPlayerManagerComponent();
+            if (pm != null)
+            {
+                if (pm.m_LastUnequippedItem != null && pm.m_LastUnequippedItem.Pointer == item.Pointer) pm.m_LastUnequippedItem = null;
+                if (pm.m_QueuedEquipItem != null && pm.m_QueuedEquipItem.Pointer == item.Pointer) pm.m_QueuedEquipItem = null;
+            }
+        }
+        catch (Exception e) { Safe.Log("Forget the smoke", e); }
         try
         {
             var inv = GameManager.GetInventoryComponent();
@@ -602,6 +707,7 @@ public static class Smoking
                 LastGameHour = Habit.Now, StartedAt = Time.unscaledTime, NextDrag = Time.time + 6f, NextEquip = Time.unscaledTime + 2f,
             };
             Habit.State.Pending = null;
+            TimeFlow.Reset();
             SourcePipe = null;
             if (lit.Smoke == SmokeType.Pipe)
             {
@@ -794,5 +900,76 @@ internal static class SmokingRules
     static void NotATorch(ref bool __result)
     {
         if (Smoking.Active && Smoking.IsOurs(GameManager.GetPlayerManagerComponent()?.m_ItemInHands)) __result = false;
+    }
+}
+
+/// <summary>11-15: the game's own starts of what takes the hands. The smoke ends before the game puts the hand's item away, so nothing
+/// of the game's is refused. Patched by hand, one method at a time: a missing or renamed one only skips itself (Smoking.Busy still
+/// catches the action a frame later).</summary>
+internal static class SmokingStops
+{
+    public static void Apply(HarmonyLib.Harmony h)
+    {
+        Hook(h, typeof(PlayerStruggle), "Begin", nameof(Struggle));
+        Hook(h, typeof(PlayerStruggle), "BeginSpearStruggle", nameof(Struggle));
+        Hook(h, typeof(Panel_BodyHarvest), "StartHarvest", nameof(Harvest));
+        Hook(h, typeof(Panel_BodyHarvest), "StartQuarter", nameof(Harvest));
+        Hook(h, typeof(Panel_Crafting), "CraftingStart", nameof(Craft));
+        Hook(h, typeof(Panel_BreakDown), "OnBreakDown", nameof(BreakDown));
+        Hook(h, typeof(Il2CppTLD.AI.CougarIntroCinematic), "PlayTimelineAnimation", nameof(Scene));
+    }
+
+    static void Hook(HarmonyLib.Harmony h, Type t, string name, string prefix)
+    {
+        try
+        {
+            var pre = new HarmonyLib.HarmonyMethod(typeof(SmokingStops).GetMethod(prefix, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic));
+            int n = 0;
+            foreach (var m in t.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly))
+            {
+                if (m.Name != name) continue;
+                try { h.Patch(m, prefix: pre); n++; }
+                catch (Exception e) { Safe.Log($"Smoke stop patch {t.Name}.{name}", e); }
+            }
+            if (n == 0) Safe.Info($"Smoke stops: {t.Name}.{name} not found");
+        }
+        catch (Exception e) { Safe.Log($"Smoke stop hook {t.Name}.{name}", e); }
+    }
+
+    static void Struggle() => Smoking.StopFor("a struggle begins");
+    static void Harvest() => Smoking.StopFor("harvesting begins");
+    static void Craft() => Smoking.StopFor("crafting begins");
+    static void BreakDown() => Smoking.StopFor("breaking down begins");
+    static void Scene() => Smoking.StopFor("the cougar's scene begins");
+}
+
+/// <summary>11-15 (a friend: the revolver was not seen in the hand after a smoke that went through struggles; shown for a second when
+/// aiming): what the hand holds and the state of the game's hands animation go to the log on every change of the item, so the
+/// next such log names the state the hands were left in.</summary>
+internal static class HandWatch
+{
+    static IntPtr last;
+    static float again = -1f;
+
+    public static void Tick()
+    {
+        if (!Settings.DebugLog.Value) return;
+        var pm = GameManager.GetPlayerManagerComponent();
+        if (pm == null) return;
+        var h = pm.m_ItemInHands;
+        IntPtr now = h != null && h ? h.Pointer : IntPtr.Zero;
+        if (now != last) { last = now; again = Time.unscaledTime + 2f; Say(pm, h, "now"); }
+        else if (again > 0f && Time.unscaledTime >= again) { again = -1f; if (now != IntPtr.Zero) Say(pm, h, "2 s on"); }
+    }
+
+    static void Say(PlayerManager pm, GearItem? h, string when)
+    {
+        try
+        {
+            var pa = GameManager.GetPlayerAnimationComponent();
+            string anim = pa == null ? "none" : $"state {pa.m_State}, stowed {pa.IsStowed()}, showing {pa.IsShowing()}, dequipping {pa.IsDequipping()}";
+            Safe.Info($"Hand {when}: {(h != null && h ? h.name : "empty")}; {anim}; control {pm.GetControlMode()}; restore pending {pm.m_ItemInHandsRestorePending}");
+        }
+        catch (Exception e) { Safe.Log("Hand watch", e); }
     }
 }

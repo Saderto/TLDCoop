@@ -8,7 +8,7 @@ namespace SmokesByEMPEROR;
 /// <summary>Cigarettes, cigars and pipes: smoked on the move, held like a torch, with drags, exhaled smoke and the effects the owner chose.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.1.168";
+    public const string VersionText = "0.1.169";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SmokesByEMPEROR");
 
@@ -20,6 +20,7 @@ public class Mod : MelonMod
         Settings.Create();
         Texts.Load(Root);
         ContainerOpenPatch.Apply(HarmonyInstance);
+        SmokingStops.Apply(HarmonyInstance);
         // Synth.Warm(): cut sounds are off (0.1.62), so no helper process is started with the game
         LoggerInstance.Msg($"SmokesByEMPEROR {VersionText}: {Defs.All.Count} items, {Texts.Count} text keys.");
     }
@@ -40,6 +41,7 @@ public class Mod : MelonMod
         try { Journal.Tick(); } catch (Exception e) { Safe.Log("Journal tick", e); }
         try { InspectIcon.Tick(); } catch (Exception e) { Safe.Log("Inspect icon", e); }
         try { Smoking.HealHand(); } catch (Exception e) { Safe.Log("Broken hand", e); }
+        try { HandWatch.Tick(); } catch (Exception e) { Safe.Log("Hand watch tick", e); }
         try
         {
             Smoking.Tick();
