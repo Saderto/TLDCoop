@@ -154,8 +154,8 @@
   {
    "id": "MatchboxesByEMPEROR",
    "zip": "MatchboxesByEMPEROR.zip",
-   "version": "0.3.4",
-   "size": 46353247,
+   "version": "0.3.5",
+   "size": 46354512,
    "detect": "Mods/MatchboxesByEMPEROR.dll",
    "title": {
     "ru": "Спичечные коробки",

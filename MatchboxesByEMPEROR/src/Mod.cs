@@ -8,13 +8,14 @@ namespace MatchboxesByEMPEROR;
 /// SmokesByEMPEROR lights cigarettes with them); every new label goes into the journal's Collections, per world.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.3.4";
+    public const string VersionText = "0.3.5";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "MatchboxesByEMPEROR");
 
     public override void OnInitializeMelon()
     {
         Settings.Create();
+        try { ContainerOpenPatch.Apply(HarmonyInstance); } catch (Exception e) { Safe.Log("Loot patches", e); }
         LoggerInstance.Msg($"MatchboxesByEMPEROR {VersionText}: {Defs.All.Count} matchboxes in {Catalog.Series.Length} series, {Texts.Count} text keys.");
     }
 

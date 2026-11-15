@@ -20,12 +20,14 @@ our own match and box in your hands, and the labels you have collected show in t
 
 - Коробки попадаются в контейнерах, которые обыскиваешь впервые, и часть обычных игровых спичек становится коробком с этикеткой.
   Найденный коробок заполнен на 40–100%.
+- На один шкаф или комод приходится одна находка: в соседних дверцах и ящиках одинаковых коробков не бывает. Коробок появляется, когда контейнер открывают в первый раз.
 - Что где лежит, зависит от зерна мира, сцены и места, поэтому в кооперативе у обоих игроков одинаково. Напарник видит у тебя
   в руках обычную игровую спичку.
 - Собранные этикетки видны в журнале, раздел «Коллекции» → «Спичечные этикетки» (N / 120).
 
 - Boxes turn up in containers you search for the first time, and part of the game's own matches become a labelled box.
   A found box is 40–100% full.
+- One find per piece of furniture: the doors and drawers of one cupboard never hold the same box. The box is made when the container is first opened.
 - What is found where depends on the world seed, the scene and the spot, so both players get the same in co-op. Your co-op
   partner sees the game's plain match in your hands.
 - The labels you have collected are in the journal, under "Collections" → "Matchbox labels" (N / 120).
