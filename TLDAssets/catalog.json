@@ -232,8 +232,8 @@
   {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
-   "version": "1.1.6",
-   "size": 373678316,
+   "version": "1.1.7",
+   "size": 416787099,
    "detect": "Mods/FoodPackByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodPackBySeagull.dll",
