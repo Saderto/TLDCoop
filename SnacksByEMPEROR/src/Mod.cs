@@ -8,7 +8,7 @@ namespace SnacksByEMPEROR;
 /// They turn up in kitchen cupboards, fridges and other containers, and the Trader sells a couple each aurora.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.7.3";
+    public const string VersionText = "0.7.4";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SnacksByEMPEROR");
 

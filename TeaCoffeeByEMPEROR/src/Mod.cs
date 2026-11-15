@@ -9,7 +9,7 @@ namespace TeaCoffeeByEMPEROR;
 /// Effects are the game's own buffs (warmth, alertness, rest, condition over time), scaled per product. Coop: ordinary items, nothing shared.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.5.5";
+    public const string VersionText = "0.5.6";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "TeaCoffeeByEMPEROR");
 

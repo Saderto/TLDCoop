@@ -8,7 +8,7 @@ namespace NoodlesByEMPEROR;
 /// Split out of SnacksByEMPEROR 0.1.0 (own prefix GEAR_NDL_). They turn up in kitchen cupboards, fridges and other containers, and the Trader sells two each aurora.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.6.7";
+    public const string VersionText = "0.6.8";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "NoodlesByEMPEROR");
 

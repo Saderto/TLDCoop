@@ -6,7 +6,7 @@ Snacks for The Long Dark: 1546 kinds from 159 brands of 31 countries (crisps, cr
 
 ![Пачки снеков / Snack packs](preview.jpg)
 
-Версия / Version: **0.7.3**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
+Версия / Version: **0.7.4**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Скачать и установить / Download and install
 

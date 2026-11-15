@@ -108,11 +108,15 @@ public static class TraderTea
         var trade = state?.m_ActiveTrade;
         if (state == null || trade?.m_ExchangeStates == null) return;
         int aurora = state.m_LastAuroraNum;
+        TraderDelivery.ClearOwed(state);
         foreach (var es in trade.m_ExchangeStates)
         {
             var d = es?.m_Exchange;
             var id = d != null ? IdOf(d) : null;
             if (id == null) continue;
+            // only a paid one is bought and owed (before 11-15 every offer of ours in the trade was marked)
+            if (!d!.IsFullyExchanged()) { Safe.Info($"Trader: {id} in the trade, not paid"); continue; }
+            TraderDelivery.Owe(state, id, d.m_GainedItemAmount);
             state.m_UnlockedExchangeNames ??= new Il2CppSystem.Collections.Generic.List<string>();
             if (state.m_UnlockedExchangeNames.Contains(Bought(id, aurora))) continue;
             state.m_UnlockedExchangeNames.Add(Bought(id, aurora));
