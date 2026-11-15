@@ -1,0 +1,413 @@
+FireChicken
+=
+=
+Курица на пачке уже горит, теперь ваша очередь. На острове наконец нашлось то, что жжёт сильнее мороза в метель.
+The chicken on the pack is already on fire, now it is your turn. At last the island has something that burns worse than a blizzard.
+
+Buldak2x
+=
+=
+Вдвое острее оригинала. Волки чуют её за километр и вежливо обходят дом стороной.
+Twice as hot as the original. Wolves smell it a mile off and politely walk around the house.
+
+BuldakCarbo
+=
+=
+Розовый соус, нежный вид, сливочный запах. Доверять ей можно примерно как тонкому льду на Загадочном озере.
+Pink sauce, gentle looks, creamy smell. Trust it about as much as thin ice on Mystery Lake.
+
+BuldakCheese
+=
+=
+Сыр расплавился и лёг сверху одеялом. Под одеялом всё ещё пожар, но теперь он уютный.
+The cheese melted and lay on top like a blanket. There is still a fire under the blanket, but now it is a cosy one.
+
+BuldakJjajang
+=
+=
+Чёрная, блестящая и горячая, как уголь из заброшенной шахты. Разница одна: уголь не кусается в ответ.
+Black, shiny and hot, like coal from the abandoned mine. One difference: coal does not bite back.
+
+BuldakCurry
+=
+=
+Жёлтая, пряная и злая. Запах карри держится в хижине дольше, чем вы на этом острове.
+Yellow, fragrant and angry. The smell of curry will last in the cabin longer than you will on this island.
+
+BuldakRose
+=
+=
+Томат, сливки и подвох. Первая вилка как закат над Прибрежным шоссе, вторая как встреча с медведем.
+Tomato, cream and a catch. The first forkful is a sunset over Coastal Highway, the second is a meeting with the bear.
+
+BuldakKimchi
+=
+=
+Капуста квасилась, перец зрел, а отдуваться вам. Снег вокруг дома после неё тает сам.
+The cabbage fermented, the pepper ripened, and you get to pay for it. The snow around the house melts on its own afterwards.
+
+BuldakStew
+=
+=
+Жидкий огонь в миске. Пить маленькими глотками и помнить: аптечка лежит в рюкзаке, а не в соседнем регионе.
+Liquid fire in a bowl. Sip it slowly and remember: the first aid kit is in your pack, not in the next region.
+
+BuldakHabanero
+=
+=
+Лайм пахнет летом, хабанеро напоминает, что лета тут не будет. Зато минут десять вам будет жарко.
+The lime smells of summer, the habanero reminds you there will be no summer here. Still, you will be hot for ten minutes or so.
+
+BuldakCream
+=
+=
+Сливочная и почти ласковая. По меркам «Больдака» это колыбельная, по меркам острова всё равно сигнальная ракета во рту.
+Creamy and almost tender. By Burndak standards it is a lullaby, by island standards it is still a flare in your mouth.
+
+BuldakQuattro
+=
+=
+Четыре сыра тянутся за вилкой, как выживший за последней спичкой. Курица из-под них всё равно достанет.
+Four cheeses stretch after the fork like a survivor reaching for the last match. The chicken will get you from under them anyway.
+
+BuldakYakisoba
+=
+=
+Сладковатый соус, дымок и перец на прощание. Пахнет ярмаркой, которой на Великом Медведе не было и не будет.
+Sweetish sauce, a whiff of smoke and pepper for goodbye. It smells of a street fair Great Bear never had and never will.
+
+BuldakCorn
+=
+=
+Кукуруза сладкая, соус сливочный, всё мирно. Потом приходит курица, и мир заканчивается.
+The corn is sweet, the sauce is creamy, all is peaceful. Then the chicken arrives and the peace is over.
+
+BuldakMala
+=
+=
+Язык онемел, губ не чувствуете. Обморожение? Нет, сычуаньский перец. Обморожение будет завтра.
+Tongue numb, lips gone. Frostbite? No, Sichuan pepper. The frostbite comes tomorrow.
+
+BuldakCup
+=
+=
+Стакан горячий снаружи и ещё горячее внутри. Держите крепче: ронять такое на деревянный пол жалко и опасно.
+The cup is hot outside and hotter inside. Hold it tight: dropping this on a wooden floor is both a pity and a hazard.
+
+Buldak2xCup
+=
+=
+Двойная острота, пар столбом. Если заблудитесь в метель, вас найдут по этому запаху. Вопрос, кто именно.
+Double heat, steam rising in a column. If you get lost in a blizzard they will find you by this smell. The question is who.
+
+BuldakCarboCup
+=
+=
+Розовое, горячее и опасное. Примерно как рассвет на Волчьей горе, только рассвет не надо запивать литром воды.
+Pink, hot and dangerous. Much like dawn on Timberwolf Mountain, except you do not chase a dawn with a litre of water.
+
+BuldakCheeseBowl
+=
+=
+Миска размером с таз, сыр тянется до соседнего региона. Доедать в одиночку считается подвигом.
+A bowl the size of a basin, the cheese stretches to the next region. Finishing it alone counts as a feat.
+
+Shine
+Красная пачка с чёрным иероглифом. Говорят, он значит «острый». На острове проверить некому, придётся варить.
+A red pack with a black character on it. They say it means "spicy". Nobody on the island can confirm, so you will have to cook it.
+Говядина, грибы и перец в красном бульоне. Корейцы едят такое в горах, а гор у нас тут хватает.
+Beef, mushrooms and pepper in a red broth. Koreans eat this in the mountains, and mountains we have plenty of.
+
+ShineBlack
+Чёрная пачка для тех, кто считает обычную слишком простой. Внутри костный бульон и чеснок, снаружи пафос.
+A black pack for those who find the regular one too plain. Bone broth and garlic inside, swagger outside.
+Бульон густой, белёсый и пахнет чесноком так, что медведь в берлоге перевернулся на другой бок.
+The broth is thick, milky and smells of garlic so hard the bear in its den rolled over.
+
+ShineRed
+На пачке написано, что она острее обычной. Обычная при этом тоже никого не жалела.
+The pack says it is hotter than the regular one. The regular one never spared anyone either.
+Красная, как сигнальная ракета, и действует похоже: вас видно издалека, и вы светитесь.
+Red as a flare and works much the same: you can be seen from afar, and you glow.
+
+ShineGold
+Золотая пачка. Золота на острове нет, зато есть курица с чесноком, а она полезнее.
+A golden pack. There is no gold on the island, but there is chicken with garlic, and that is more useful.
+Куриный бульон с чесноком, золотистый и честный. Лечит простуду, тоску и последствия прогулки до плотины.
+Chicken broth with garlic, golden and honest. It cures a cold, the blues and the after-effects of a walk to the dam.
+
+ShineStirFry
+Та же лапша, только жареная и без бульона. Воду всё равно придётся топить, не расслабляйтесь.
+The same noodles, only stir-fried and without broth. You still have to melt the water, so do not relax.
+Блестит от соуса и липнет к вилке. Бульона нет, запивать нечем, перец об этом знает.
+Glossy with sauce and clinging to the fork. No broth, nothing to wash it down, and the pepper knows it.
+
+ShineCup
+Стакан с красной крышкой. Крышку не выбрасывайте: на острове всё когда-нибудь пригождается.
+A cup with a red lid. Do not throw the lid away: on the island everything comes in handy one day.
+Говядина с грибами прямо в стакане. Руки греет не хуже костра, и дров при этом не просит.
+Beef and mushrooms right in the cup. It warms the hands as well as a campfire and asks for no firewood.
+
+ShineBowl
+Большая миска, в которую после еды можно собирать снег. Производитель такого не планировал.
+A big bowl you can gather snow in once you are done. The maker never planned for that.
+Миска красного бульона на одного очень голодного человека. Других на Великом Медведе и не водится.
+A bowl of red broth for one very hungry person. Great Bear does not have any other kind.
+
+JinMild
+Мягкая, для тех, кто не хочет приключений. Приключения на этом острове и так выдают бесплатно.
+Mild, for people who want no adventures. On this island adventures are handed out for free anyway.
+Спокойный говяжий бульон без единой перчинки. Самое мирное, что случалось с вами за последнюю неделю.
+A calm beef broth without a speck of pepper. The most peaceful thing that has happened to you all week.
+
+JinSpicy
+Синяя пачка была мягкая, эта красная. Цвета тут как в природе: красное предупреждает.
+The blue pack was the mild one, this one is red. Colours work as they do in nature: red is a warning.
+Говяжий бульон с перцем, без фокусов. Греет ровно и долго, как хорошая печка в охотничьем домике.
+Beef broth with pepper, no tricks. It warms steadily and long, like a good stove in a trapper's cabin.
+
+JinCup
+Острый бульон в стакане, удобно брать в дорогу. Дорог, правда, нет, есть рельсы и сугробы.
+Spicy broth in a cup, handy for the road. There are no roads though, only rails and snowdrifts.
+Пар из стакана идёт вверх, вы сидите на рельсах и смотрите на сияние. Почти романтика, если бы не волки.
+Steam rises from the cup, you sit on the rails and watch the aurora. Almost romantic, if not for the wolves.
+
+NeoguriSpicy
+На пачке енот. Что он делает на лапше с морепродуктами, не знает даже сам енот.
+There is a raccoon on the pack. What it is doing on seafood noodles, not even the raccoon knows.
+Толстый удон, ламинария и перец. Пахнет морем, которое здесь замёрзло до самого горизонта.
+Thick udon, kelp and pepper. It smells of the sea, which around here is frozen all the way to the horizon.
+
+NeoguriMild
+Тот же енот, только добрый. Толстая лапша и морская капуста для тех, кто бережёт желудок.
+The same raccoon, only a kind one. Thick noodles and kelp for those who look after their stomach.
+Мягкий морской бульон и лапша толщиной с верёвку альпиниста. По верёвке лезут вверх, эту тянут в рот.
+Mild sea broth and noodles as thick as a climbing rope. You climb a rope, this one you pull into your mouth.
+
+Chapagetti
+Лапша с соусом из чёрных бобов. В Корее её ест вся семья по воскресеньям, на острове воскресенье отменили.
+Noodles with black bean sauce. In Korea the whole family eats it on Sundays, on the island Sundays have been cancelled.
+Чёрная, сладковатая и пачкает всё вокруг. После неё улыбаться волкам не стоит: зубы тоже чёрные.
+Black, sweetish and it stains everything. Do not smile at the wolves afterwards: your teeth are black too.
+
+ChapaSichuan
+Чёрные бобы с перцем. Кто-то решил, что тёмному соусу не хватало тёмных намерений.
+Black beans with pepper. Someone decided the dark sauce was short of dark intentions.
+Чёрный соус, красное масло, язык слегка немеет. В полярную ночь это блюдо можно потерять прямо в миске.
+Black sauce, red oil, a slightly numb tongue. In the polar night you could lose this dish right in the bowl.
+
+Ansung
+Бульон на соевой пасте, спокойный и домашний. Назван в честь города, где её делают; города у нас кончились, лапша осталась.
+A soybean paste broth, calm and homely. Named after the town that makes it; we ran out of towns, the noodles remained.
+Мягкий, чуть ореховый бульон. Пахнет чужой кухней, где тепло, горит свет и никто не слышал про геомагнитную бурю.
+A mild, slightly nutty broth. It smells of someone's kitchen where it is warm, the lights are on and nobody has heard of the geomagnetic storm.
+
+SamjanOriginal
+Первая корейская лапша, с шестьдесят третьего года. Пачка, которую вы нашли, возможно, тоже оттуда.
+The first Korean noodles, since sixty-three. The pack you found may well be from back then too.
+Бульон с ветчиной, простой, как табуретка. Табуретку вы вчера сожгли, так что цените то, что осталось.
+A ham broth, plain as a stool. You burned the stool yesterday, so value what you have left.
+
+SamjanCheese
+Ветчина и сыр, почти бутерброд, только лапша. На острове, где хлеба нет, это считается за выпечку.
+Ham and cheese, nearly a sandwich, only it is noodles. On an island with no bread this counts as baking.
+Сыр растаял в бульоне с ветчиной. Серая Мать такое бы не одобрила, но съела бы.
+The cheese has melted into the ham broth. Grey Mother would not approve, but she would eat it.
+
+PaltoBibim
+Вообще-то её едят холодной. Холода здесь больше, чем нужно, поэтому варим как все.
+Strictly speaking it is eaten cold. There is more cold here than anyone needs, so we cook it like the rest.
+Кисло, сладко, остро и всё сразу. Как погода на здешних болотах, только вкусно.
+Sour, sweet and hot all at once. Like the weather at Forlorn Muskeg, only tasty.
+
+PaltoKoko
+Прозрачный куриный бульон с зелёным перцем. Выглядит как лекарство, действует как сюрприз.
+A clear chicken broth with green pepper. Looks like medicine, works like a surprise.
+Бульон светлый, перец зелёный и коварный. Курица тут ни при чём, она сама в шоке.
+The broth is clear, the pepper green and sneaky. The chicken has nothing to do with it, it is in shock itself.
+
+PaltoKing
+«Королевская крышка»: крышка такая широкая, что на ней можно разложить карту региона.
+The "king lid": a lid so wide you could spread a region map on it.
+Большая порция острой говядины. Король на этом острове один, он бурый, и делиться с ним не надо.
+A big helping of spicy beef. This island has only one king, he is brown, and you need not share with him.
+
+Yukgae
+Тонкая лапша и острый говяжий суп. Корейцы берут её в поход, вы в походе уже который месяц.
+Thin noodles and spicy beef soup. Koreans take it hiking, and you have been on a hike for months now.
+Красный суп, тонкая лапша, пар в лицо. На секунду забываешь, что за дверью минус тридцать и кто-то воет.
+Red soup, thin noodles, steam in your face. For a second you forget it is minus thirty outside and something is howling.
+
+KimchiMyun
+Лапша с квашеной капустой. Капуста пережила ферментацию, перелёт и конец света, переживёт и вас.
+Noodles with fermented cabbage. The cabbage survived fermenting, the flight and the end of the world, it will outlive you too.
+Кисло-острый бульон с кимчи. Запах такой, что хижину можно не запирать: никто не войдёт.
+A sour and spicy kimchi broth. The smell is such that you can leave the cabin unlocked: nobody will come in.
+
+KimchiCup
+Кимчи в стакане. Открывать на улице не советуем: вороны запомнят вас надолго.
+Kimchi in a cup. We advise against opening it outdoors: the crows will remember you for a long time.
+Горячий стакан с капустой и перцем. Держишь в руках и чувствуешь себя человеком, а не добычей.
+A hot cup of cabbage and pepper. You hold it and feel like a person, not like prey.
+
+Gomtang
+Белый бульон на говяжьих костях. Кости варили сутки, вам хватит пяти минут и котелка.
+A white broth on beef bones. The bones were simmered for a day, you will need five minutes and a pot.
+Молочно-белый, густой и совсем не острый. После него хочется лечь у печки и никуда не идти. Вот и не ходите.
+Milky white, thick and not hot at all. It makes you want to lie down by the stove and go nowhere. So do not go.
+
+Jjamppong
+Острый суп с морепродуктами и дымком. Дымок настоящий, на пачке так и написано, а мы верим пачкам.
+A spicy seafood soup with a smoky note. The smoke is real, the pack says so, and we believe packs.
+Красный бульон пахнет морем и костром сразу. Примерно как Прибрежное шоссе в хороший день, только хороших дней там нет.
+The red broth smells of sea and campfire at once. Much like Coastal Highway on a good day, only it has no good days.
+
+Teumsae
+Одна из самых острых в Корее. Название значит «щель»: через неё, видимо, и уходит душа.
+One of the hottest in Korea. The name means "gap": apparently that is where the soul leaves through.
+Красный бульон-огонь. Мороз за окном минус сорок, у вас внутри плюс сорок, в среднем нормально.
+A red broth of pure fire. It is minus forty outside the window, plus forty inside you, fine on average.
+
+Yeul
+«Ёль» значит «жар». Корейцы называют вещи прямо, им некогда.
+"Yeul" means "heat". Koreans call things what they are, they have no time to waste.
+Жгучий говяжий бульон. Одна миска заменяет вязанку дров, только дрова так не жалуются на утро.
+A scorching beef broth. One bowl replaces a bundle of firewood, only firewood does not complain like this in the morning.
+
+Kalguksu
+Плоская лапша «из-под ножа» в бульоне из анчоусов. Нож у вас есть, анчоусов нет, поэтому пачка.
+Flat "knife-cut" noodles in anchovy broth. You have a knife, you have no anchovies, hence the pack.
+Широкая мягкая лапша в светлом рыбном бульоне. Рыбаки с Загадочного озера оценили бы, если бы там остались рыбаки.
+Wide soft noodles in a light fish broth. The fishermen of Mystery Lake would approve, if any fishermen were left there.
+
+SesameCup
+Кунжут и яичные хлопья в большом стакане. Яйцо на острове можно увидеть только здесь, любуйтесь.
+Sesame and egg flakes in a big cup. This is the only place on the island to see an egg, so enjoy the view.
+Острый бульон, сверху плавает кунжут. Пахнет так уютно, что хочется позвать гостей. Не зовите, придут волки.
+Spicy broth with sesame floating on top. It smells so cosy you want to invite guests. Do not, the wolves will come.
+
+SesamePack
+Та же кунжутная, только в пачке. Яичный брикетик внутри выглядит странно, но это еда, честное слово.
+The same sesame one, only in a pack. The little egg block inside looks odd, but it is food, honest.
+Яичные хлопья распустились в бульоне, как цветы. Других цветов до весны не будет, а весны не будет вообще.
+The egg flakes have opened in the broth like flowers. There will be no other flowers until spring, and there will be no spring.
+
+Chikin
+Первая лапша быстрого приготовления в мире. С неё всё началось, а закончилось вами на острове с котелком.
+The first instant noodles in the world. It all began with them and ended with you on an island with a pot.
+Простой куриный вкус, которому больше шестидесяти лет. Старше него на острове только Серая Мать и медведь.
+A plain chicken taste more than sixty years old. Only Grey Mother and the bear are older on this island.
+
+ChikinDon
+Миска с ямкой для яйца. Яйца нет, ямка есть. На Великом Медведе вообще много пустых мест.
+A bowl with a dent for an egg. There is no egg, but there is a dent. Great Bear has a lot of empty places in general.
+Куриная лапша под сушёным яйцом. Залил, накрыл, подождал. Три минуты покоя, редкая роскошь.
+Chicken noodles under a dried egg. Pour, cover, wait. Three minutes of peace, a rare luxury.
+
+KappNoodle
+Стакан, который летал в космос. Теперь он лежит в шкафчике на заправке, и это тоже своего рода космос.
+A cup that has been to space. Now it sits in a cupboard at a gas station, which is a kind of space too.
+Креветки, кальмар и яйцо в белом бульоне. Море в стакане, пока настоящее стоит под метровым льдом.
+Shrimp, squid and egg in a white broth. The sea in a cup while the real one lies under a metre of ice.
+
+KappSoy
+Оригинальный вкус семьдесят первого года. Мясные кубики внутри прозвали «загадочным мясом», и загадку так и не раскрыли.
+The original taste of seventy-one. The meat cubes inside were nicknamed "mystery meat", and the mystery was never solved.
+Соевый бульон, креветки и те самые кубики. Загадочное мясо у Загадочного озера: всё сошлось.
+Soy broth, shrimp and those very cubes. Mystery meat by Mystery Lake: it all adds up.
+
+KappCurry
+Карри в стакане, густое, как туман над болотом. Ложка стоит, если у вас есть ложка.
+Curry in a cup, thick as the fog over the muskeg. A spoon stands up in it, if you have a spoon.
+Густое японское карри с лапшой. Одежду потом не отстирать, но стиральных машин тут всё равно нет.
+Thick Japanese curry with noodles. It will never wash out of your clothes, but there are no washing machines here anyway.
+
+KappChili
+Томат и перец, красный стакан. По виду суп, по характеру предупреждение.
+Tomato and pepper, a red cup. A soup by the look of it, a warning by nature.
+Томатный бульон с перцем. Кисловатый, бодрый, красный. Самое яркое пятно в этом белом пейзаже.
+Tomato broth with pepper. Tangy, lively, red. The brightest spot in this white landscape.
+
+KappMiso
+Мисо с имбирём. Имбирь от простуды, мисо от тоски, стакан от голода. Аптечка, а не еда.
+Miso with ginger. Ginger for a cold, miso for the blues, the cup for hunger. A first aid kit, not a meal.
+Мутный тёплый бульон пахнет имбирём. Греет изнутри тихо и надёжно, как свитер, который связала бабушка.
+A cloudy warm broth that smells of ginger. It warms you from inside quietly and surely, like a sweater your grandmother knitted.
+
+KappCheese
+Карри с сыром. Кто-то в Японии решил, что карри недостаточно густое, и исправил это.
+Curry with cheese. Someone in Japan decided curry was not thick enough and fixed that.
+Сыр расплавился в карри. Калорий столько, что можно дойти до Волчьей горы. Обратно уже сами.
+The cheese has melted into the curry. Enough calories to walk to Timberwolf Mountain. Getting back is up to you.
+
+KappBig
+Королевский размер. Двойная порция для тех, кто весь день рубил дрова и убегал.
+King size. A double helping for those who spent the day chopping wood and running away.
+Двойная порция в соевом бульоне. Стакан кончается не скоро, и это единственное, что на острове не кончается быстро.
+A double helping in soy broth. The cup takes a while to finish, the only thing on the island that does not run out fast.
+
+SappuroShoyu
+Соевый бульон из города, где снега выпадает по пять метров. Там бы ваши жалобы на погоду не поняли.
+A soy broth from a city that gets five metres of snow. They would not understand your complaints about the weather there.
+Тёмный прозрачный бульон, простой и правильный. Северная еда для северных людей, даже если вы тут случайно.
+A dark clear broth, simple and right. Northern food for northern people, even if you are here by accident.
+
+SappuroMiso
+Мисо с овощами. В Саппоро этим греются после лыж, а вы греетесь после волков.
+Miso with vegetables. In Sapporo they warm up with it after skiing, you warm up after wolves.
+Густой бульон на мисо. Овощи в нём сушёные, но это больше овощей, чем вы видели с самого крушения.
+A thick miso broth. The vegetables in it are dried, but that is still more vegetables than you have seen since the crash.
+
+SappuroShio
+Светлый солёный бульон с кунжутом. Самый скромный в семье, зато его никто не ругает.
+A light salt broth with sesame. The most modest of the family, yet nobody ever scolds it.
+Прозрачный, как лёд на озере, только тёплый и в него можно лапшу. Со льдом так не получится.
+Clear as lake ice, only warm and you can put noodles in it. That does not work with ice.
+
+SappuroTonkotsu
+Густой свиной бульон. Свиней на острове нет, поэтому берегите пачку.
+A thick pork broth. There are no pigs on the island, so look after the pack.
+Белый, жирный и сытный. После миски такого можно час не думать о еде. На острове это отпуск.
+White, rich and filling. After a bowl of it you can spend an hour not thinking about food. On the island that is a holiday.
+
+SappuroYakisoba
+Жареная лапша в соусе. Жарить не надо, заливать и сливать. Сливать воду на острове обидно, но так велит рецепт.
+Fried noodles in sauce. No frying needed, pour and drain. Draining water on the island hurts, but the recipe says so.
+Соус сладковатый, лапша упругая, бульона нет. Еда уличных праздников для места, где на улице лучше не задерживаться.
+Sweetish sauce, springy noodles, no broth. Street festival food for a place where you had better not linger in the street.
+
+SappuroMisoCup
+Мисо в миске с крышкой. Крышку придавите чем-нибудь тяжёлым. Топор подойдёт.
+Miso in a bowl with a lid. Weigh the lid down with something heavy. A hatchet will do.
+Бульон на мисо с овощами, пар валит из-под крышки. В хижине сразу пахнет так, будто тут кто-то живёт.
+Miso broth with vegetables, steam pouring from under the lid. At once the cabin smells as if somebody lives here.
+
+AkaiKitsune
+«Красная лиса». По легенде лисы обожают жареный тофу. Местные волки легенду не читали.
+"Red Fox". Legend says foxes adore fried tofu. The local wolves have not read the legend.
+Толстый удон и сладкий кусок тофу размером с ладонь. Лиса бы оценила, а вы просто съешьте.
+Thick udon and a sweet slab of tofu the size of your palm. A fox would appreciate it, you just eat it.
+
+MidoriTanuki
+«Зелёный тануки». Тануки в сказках превращается во что угодно, этот превратился в гречневую лапшу.
+"Green Tanuki". In the tales a tanuki turns into anything, this one turned into buckwheat noodles.
+Гречневая соба, сверху диск темпуры. Сначала он хрустит, потом размокает. Всё как с вашими ботинками.
+Buckwheat soba with a disc of tempura on top. First it crunches, then it goes soggy. Just like your boots.
+
+KuroiButa
+«Чёрная свинья» в карри. Звучит как прозвище медведя с Волчьей горы, а это просто ужин.
+"Black Pig" in curry. Sounds like a nickname for the bear of Timberwolf Mountain, but it is just dinner.
+Удон тонет в карри со свининой. Густо, сытно, коричнево. После такой миски в спальник падают без снотворного.
+Udon sinking in pork curry. Thick, filling, brown. After a bowl like this you drop into the bedroll with no sleeping aid.
+
+SeimenShoyu
+Лапша, которая притворяется свежей. У неё получается лучше, чем у вас притворяться спокойным при виде медведя.
+Noodles that pretend to be fresh. They do it better than you pretend to be calm at the sight of the bear.
+Соевый бульон и лапша как из лапшичной. Закрой глаза, и ты в Токио. Открой, и ты опять в рыбацкой будке.
+Soy broth and noodles as if from a noodle shop. Close your eyes and you are in Tokyo. Open them and you are back in a fishing hut.
+
+SeimenMiso
+Мисо и лапша «как свежая». Свежего на острове только снег, и тот вчерашний.
+Miso and "fresh-style" noodles. The only fresh thing on the island is snow, and that is yesterday's.
+Густое мисо обнимает упругую лапшу. Больше вас на этом острове никто обнимать не собирается.
+Thick miso hugs the springy noodles. Nobody else on this island is planning to hug you.

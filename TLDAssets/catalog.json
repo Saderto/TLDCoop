@@ -188,6 +188,48 @@
    }
   },
   {
+   "id": "NoodlesByEMPEROR",
+   "zip": "NoodlesByEMPEROR.zip",
+   "version": "0.6.7",
+   "size": 103049681,
+   "detect": "Mods/NoodlesByEMPEROR.dll",
+   "needs": [
+    "AfflictionComponent",
+    "ModData",
+    "ComplexLogger",
+    "ModSettings"
+   ],
+   "title": {
+    "ru": "Лапша",
+    "en": "Noodles"
+   },
+   "desc": {
+    "ru": "280 видов лапши быстрого приготовления от 92 марок. Заваривается в посуде на огне. Свои эффекты, находки в шкафах, у Торговца.",
+    "en": "280 kinds of instant noodles from 92 brands. Cooked in a pot over a fire. Own effects, finds in cupboards, sold by the Trader."
+   }
+  },
+  {
+   "id": "TeaCoffeeByEMPEROR",
+   "zip": "TeaCoffeeByEMPEROR.zip",
+   "version": "0.5.5",
+   "size": 512961708,
+   "detect": "Mods/TeaCoffeeByEMPEROR.dll",
+   "needs": [
+    "AfflictionComponent",
+    "ModData",
+    "ComplexLogger",
+    "ModSettings"
+   ],
+   "title": {
+    "ru": "Чай и кофе",
+    "en": "Tea and coffee"
+   },
+   "desc": {
+    "ru": "283 вида чая, кофе, какао и других напитков. Пачку заваривают в котелке на огне, напиток получается в своей посуде. Свои эффекты.",
+    "en": "283 kinds of tea, coffee, cocoa and other drinks. Brew a pack in a pot over a fire to get a drink in its own vessel. Own effects."
+   }
+  },
+  {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
    "version": "1.1.6",

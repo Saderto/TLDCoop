@@ -24,6 +24,8 @@ does it when updating. Game saves are kept: their keys did not change.
 | `JellyfishByEMPEROR` | Медузы северного моря: банка, аквариум, свечение / Jellyfish of the northern sea: jar, aquarium, glow |
 | `MatchboxesByEMPEROR` | Спичечные коробки: 120 этикеток для коллекции / Matchboxes: 120 collectible labels |
 | `SnacksByEMPEROR` | Снеки: 1546 видов от 159 марок, свои эффекты / Snacks: 1546 kinds from 159 brands, own effects |
+| `NoodlesByEMPEROR` | Лапша: 280 видов от 92 марок, свои эффекты / Noodles: 280 kinds from 92 brands, own effects |
+| `TeaCoffeeByEMPEROR` | Чай и кофе: 283 напитка в своей посуде, свои эффекты / Tea and coffee: 283 drinks in their own vessels, own effects |
 | `TrainerByEMPEROR` | Трейнер: окно + модуль в игре / Trainer: window + in-game module |
 | `SmokehouseByEMPEROR` | плагин `SmokesAudioOnByEMPEROR.dll` в папке `Plugins` для звука кипения котла (лаунчер ставит его сам) / the `SmokesAudioOnByEMPEROR.dll` plugin in `Plugins` for the kettle's boiling sound (the launcher installs it) |
 | `FoodPackByEMPEROR` | Новая еда и напитки с эффектами / New food and drinks with effects |
@@ -57,6 +59,8 @@ original sources were lost): it builds and works the same, but has no comments a
 | `FoodPackByEMPEROR` | AfflictionComponent, ModData, ComplexLogger, ModSettings, AlcoholMod (+ ModComponent, его требует сам AlcoholMod / required by AlcoholMod itself); с AlcoholMod напитки пьянят / with AlcoholMod drinks make you drunk |
 | `FoodBalanceByEMPEROR` | ModSettings |
 | `SnacksByEMPEROR` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself) |
+| `NoodlesByEMPEROR` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself) |
+| `TeaCoffeeByEMPEROR` | AfflictionComponent (+ ComplexLogger, ModData и ModSettings, их требует сам AfflictionComponent / required by AfflictionComponent itself) |
 | `ContainerLabelsByEMPEROR` | ModData |
 | остальные / the rest | ничего / nothing |
 

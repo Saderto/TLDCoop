@@ -1,0 +1,449 @@
+SuanLaFen
+=
+=
+Стеклянная лапша скользит, как вы по льду в первый день. Кисло, остро, и ложка сама тянется за следующей порцией.
+Glass noodles as slippery as you on the ice on day one. Sour, hot, and the spoon reaches for more by itself.
+
+SuanLaFenMala
+Батат, уксус и онемляющий перец. Ведёрко честно предупреждает иероглифом «ма»: рта вы не почувствуете.
+Sweet potato, vinegar and numbing pepper. The bucket warns you fairly with the character "ma": you will not feel your mouth.
+Прозрачная лапша в красном бульоне. Губы немеют, как пальцы без варежек, только это приятно и проходит само.
+Clear noodles in a red broth. Your lips go numb like fingers without mittens, only it is pleasant and wears off.
+
+Xiaomian
+Уличная лапша из Чунцина, города на горах, где её едят в шесть утра на табуретке. Табуретку вы уже сожгли.
+Street noodles from Chongqing, a city on hills where they eat them at six in the morning on a stool. You have burned the stool already.
+Масло чили плавает красными кругами. Чунцин называют городом-печкой. Печка в миске, как заказывали.
+Chilli oil floats in red rings. Chongqing is called the furnace city. A furnace in a bowl, as ordered.
+
+XiaomianPea
+С жёлтым горохом и фаршем. Горох разварен в кашу, и это не брак, а лучшая часть.
+With yellow peas and minced meat. The peas are boiled to a mash, and that is not a defect but the best part.
+Горох, мясо, красное масло, почти без бульона. Сытно так, что до утра можно не вспоминать про банку собачьих консервов.
+Peas, meat, red oil, hardly any broth. So filling you can forget the can of dog food until morning.
+
+LaoTanFish
+=
+=
+Кислый рыбный бульон с перцем и горчицей. Сиг из лунки смотрит на это с завистью: его просто жарят.
+A sour fish broth with chilli and mustard greens. The whitefish from the ice hole looks on with envy: it just gets fried.
+
+Reganmian
+=
+=
+Густая кунжутная паста облепила лапшу. Горячая, сухая, тяжёлая. Завтрак грузчиков Уханя, а вы сегодня тот ещё грузчик.
+Thick sesame paste clings to the noodles. Hot, dry, heavy. The breakfast of Wuhan dockers, and you were quite a docker today.
+
+WeiLiZhajiang
+Тайваньская лапша с мясной пастой. В коробке две миски: одна под лапшу, вторая под суп. Сервиз, считайте.
+Taiwanese noodles with meat paste. The box holds two bowls: one for the noodles, one for the soup. A dinner set, basically.
+Тёмная мясная паста на лапше, бульон отдельно. Два блюда из одной коробки, а вы думали, что на острове не бывает обедов из двух блюд.
+Dark meat paste on noodles, broth on the side. Two courses from one box, and you thought the island had no two-course dinners.
+
+WeiLiSesame
+=
+=
+Кунжутное масло, имбирь, курица. Тайваньские бабушки дают это всем, кто замёрз. Вы подходите по всем пунктам.
+Sesame oil, ginger, chicken. Taiwanese grannies give this to anyone who is cold. You qualify on every count.
+
+PopMiAyam
+Индонезийский стакан с курицей. В комплекте складная вилка, инженерное чудо размером с палец.
+An Indonesian cup with chicken. A folding fork is included, an engineering marvel the size of a finger.
+Куриный бульон с хрустящим луком. Стакан из страны, где не бывает зимы. Он тоже удивлён, что оказался здесь.
+Chicken broth with crispy onion. A cup from a country that has no winter. It is surprised to be here too.
+
+PopMiBawang
+Курица с жареным луком. «Баванг» значит «лук», запомните, вдруг пригодится в следующей жизни.
+Chicken with fried onion. "Bawang" means "onion", remember it, it may be useful in your next life.
+Бульон пахнет жареным луком на весь дом. Запах кухни, где кто-то готовит для вас. Этот кто-то сегодня вы сами.
+The broth fills the house with the smell of fried onion. The smell of a kitchen where someone cooks for you. Today that someone is you.
+
+PopMiBaso
+С говяжьими фрикадельками басо. В Индонезии их продают с тележек под стук ложки о миску.
+With bakso beef meatballs. In Indonesia they are sold from carts to the sound of a spoon tapping a bowl.
+Маленькие фрикадельки всплыли в бульоне. Пересчитайте их и ешьте по одной, растягивая праздник.
+Little meatballs have surfaced in the broth. Count them and eat one at a time to make the feast last.
+
+PopMiPedas
+Курица с перцем «до распухших губ». Так и написано на стакане, и это не метафора.
+Chicken with chilli "till your lips swell". It says so on the cup, and it is no metaphor.
+Красный бульон, губы горят и пухнут. Зато на морозе они теперь точно не потрескаются. Наверное.
+A red broth, lips burning and swelling. At least now they will certainly not crack in the frost. Probably.
+
+SarimiBawang
+Курица с жареным луком в жёлтой пачке. Скромная индонезийская лапша, которая ничего из себя не строит.
+Chicken with fried onion in a yellow pack. Modest Indonesian noodles that put on no airs.
+Светлый бульон с луком. Простая еда для простого вечера: печка трещит, ветер воет, вы живы. Уже неплохо.
+A light broth with onion. Simple food for a simple evening: the stove crackles, the wind howls, you are alive. Not bad already.
+
+SarimiSoto
+Жёлтый суп сото с лаймом. Пачка обещает солнце, и другого солнца сегодня не будет.
+Yellow soto soup with lime. The pack promises sunshine, and there will be no other sunshine today.
+Жёлтый, кислый и тёплый. Солнце в котелке при полярной ночи за окном. Наливайте полнее.
+Yellow, sour and warm. A sun in a pot with the polar night outside. Fill it fuller.
+
+SarimiDuo
+Две лепёшки в одной пачке. Вторая не для друга, а для вас через час.
+Two noodle cakes in one pack. The second is not for a friend, it is for you in an hour.
+Двойная порция жареной лапши в сладком соусе. Сначала кажется, что много. Потом вы вспоминаете, сколько прошли за день.
+A double helping of fried noodles in a sweet sauce. At first it seems a lot. Then you recall how far you walked today.
+
+SupermiBawang
+=
+=
+Бульон, на котором выросла целая страна. Вы на нём не выросли, но за один вечер тоже можно привязаться.
+The broth a whole country grew up on. You did not grow up on it, but one evening is enough to get attached.
+
+SupermiKaldu
+Простой куриный бульон. «Калду» значит «бульон», и больше пачке сказать нечего. Уважаем.
+Plain chicken broth. "Kaldu" means "broth", and the pack has nothing more to say. Respect.
+Прозрачный куриный бульон без затей. Когда вокруг всё сложно, приятно съесть что-то простое.
+A clear chicken broth with no frills. When everything around is complicated, it is nice to eat something simple.
+
+SupermiGoreng
+Жареная, со сладким соевым соусом. Соус густой, как патока, и тёмный, как подвал плотины.
+Fried, with sweet soy sauce. The sauce is as thick as molasses and as dark as the basement of the dam.
+Сладкая тёмная лапша. В подвале плотины вас ждал волк, а тут ждёт ужин. Сегодня хороший день.
+Sweet dark noodles. In the basement of the dam a wolf was waiting, here it is dinner. Today is a good day.
+
+MamyMonsterChicken
+=
+=
+Монстр с пачки сварился в бульоне с курицей. Синий, одноглазый и довольный. Самый безобидный монстр в этих лесах.
+The monster from the pack, cooked into chicken broth. Blue, one-eyed and pleased. The most harmless monster in these woods.
+
+MamyMonsterBBQ
+Лапша-снек со вкусом барбекю. Монстр на пачке держит вилку, и это единственное, что у вас с ним общего.
+A noodle snack with barbecue flavour. The monster on the pack holds a fork, the only thing you have in common.
+Сладковатый дымный бульон и мелкая лапша. На один зуб, зато весело. Веселья на острове не выдают, берите.
+A sweetish smoky broth and tiny noodles. One bite's worth, but fun. Fun is not issued on the island, so take it.
+
+GhostPepper
+=
+=
+Чёрная лапша блестит, как мокрый асфальт. Призрак приходит не сразу, зато остаётся дольше всех гостей на этом острове.
+Black noodles shining like wet asphalt. The ghost does not come at once, but it stays longer than any guest on this island.
+
+GhostPepperSoup
+=
+=
+Чёрная лапша в красном бульоне. Тьма за окном, тьма в стакане, огонь внутри. Северное сияние отдыхает.
+Black noodles in a red broth. Darkness outside, darkness in the cup, fire within. The aurora can take the night off.
+
+PenangWhiteCurry
+=
+=
+Белёсое карри с красной ложкой пасты чили. Размешали всю? Смело. Аптечка в рюкзаке, вода в бутылке.
+A pale curry with a red spoonful of chilli paste. Stirred it all in? Brave. The first aid kit is in your pack, the water in the bottle.
+
+PenangPrawn
+Густой креветочный бульон по-хоккиенски. Сварен на креветочных головах, и это комплимент.
+A thick Hokkien-style prawn broth. Made from prawn heads, and that is a compliment.
+Тёмно-оранжевый бульон пахнет креветкой на всю округу. Медведи рыбу любят, про креветок данных нет. Проверять не будем.
+A deep orange broth that smells of prawn for miles. Bears like fish, on prawns there is no data. Let us not check.
+
+PenangTomYum
+Том-ям из Пенанга с лемонграссом. Лемонграсс пахнет лимоном и летом, двумя вещами, которых тут нет.
+Tom yum from Penang with lemongrass. Lemongrass smells of lemon and summer, two things this place lacks.
+Кисло-острый бульон с травами. После него дышится легко, как на вершине. Только лезть никуда не пришлось.
+A sour and spicy broth with herbs. After it you breathe as easily as on a summit. Only there was no climbing involved.
+
+OmachyBeef
+Вьетнамская лапша из картофеля. Реклама обещает, что от неё «не жарко». На острове это не то обещание, которого ждёшь.
+Vietnamese noodles made from potato. The advert promises they "do not overheat you". On the island that is not the promise you want.
+Тушёная говядина в тёмном бульоне, лапша жёлтая и упругая. Картошка и мясо: формула счастья, понятная на любой широте.
+Stewed beef in a dark broth, yellow springy noodles. Potatoes and meat: a formula for happiness understood at any latitude.
+
+OmachyRibs
+Свиные рёбрышки с овощами. Рёбрышки в виде аромата, овощи в виде хлопьев. Воображение своё.
+Pork ribs with vegetables. The ribs come as an aroma, the vegetables as flakes. Bring your own imagination.
+Бульон на рёбрышках, сладковатый и домашний. Обглодать нечего, зато и волкам потом нечего подбирать.
+A rib broth, sweetish and homely. Nothing to gnaw on, but nothing for the wolves to pick up afterwards either.
+
+OmachySpaghetti
+Вьетнамская лапша с соусом для спагетти. Италия через Сайгон до Канады: маршрут, который не строил ни один навигатор.
+Vietnamese noodles with spaghetti sauce. Italy via Saigon to Canada: a route no navigator ever plotted.
+Томатно-мясной соус на картофельной лапше. Не спагетти, не рамен, не пойми что. Вкусно, остальное неважно.
+Tomato and meat sauce on potato noodles. Not spaghetti, not ramen, who knows what. Tasty, the rest does not matter.
+
+SaigonBunBo
+Бун бо хюэ: суп императорской столицы. Императоры ели его во дворце, вы едите его в прицепе у озера.
+Bun bo Hue: the soup of the imperial capital. Emperors ate it in a palace, you eat it in a trailer by the lake.
+Толстая рисовая лапша в красном бульоне с лемонграссом. Остро, пряно, по-царски. Прицеп временно считается дворцом.
+Thick rice noodles in a red lemongrass broth. Hot, fragrant, regal. The trailer counts as a palace for now.
+
+SaigonHuTieu
+Ху тьеу: сайгонский суп со свининой и креветкой. Миска картонная, но держит кипяток и ваше настроение.
+Hu tieu: the Saigon soup with pork and shrimp. The bowl is cardboard, yet it holds boiling water and your mood.
+Светлый сладковатый бульон и прозрачная лапша. Лёгкий, как утро без ветра. Таких утр тут два в месяц, запомните это.
+A light sweetish broth and translucent noodles. As easy as a windless morning. There are two of those a month here, remember this one.
+
+SaigonMienGa
+Стеклянная лапша с курицей. Прозрачная, как лёд, и почти такая же скользкая.
+Glass noodles with chicken. As clear as ice and nearly as slippery.
+Куриный бульон, в нём лапша, которой почти не видно. Ловить её ложкой труднее, чем кролика камнем, но оно того стоит.
+Chicken broth with noodles you can hardly see. Catching them with a spoon is harder than a rabbit with a stone, but worth it.
+
+PaylesChilimansi
+«Экстра Биг»: бюджетная, зато большая. Название значит «платишь меньше». На острове вы не платите вообще, рекорд.
+"Xtra Big": cheap but large. The name means "pay less". On the island you pay nothing at all, a record.
+Жареная лапша с перцем и каламанси, порция с горкой. Дёшево, много и остро: три желания студента и выжившего.
+Fried noodles with chilli and calamansi, a heaped helping. Cheap, plenty and hot: the three wishes of a student and a survivor.
+
+PaylesBatchoy
+=
+=
+Свиной бульон с жареным чесноком. На рынке в Ла-Пасе его едят в жару. В мороз он, честно говоря, ещё лучше.
+Pork broth with fried garlic. At the market in La Paz they eat it in the heat. In the frost it is, frankly, even better.
+
+PaylesBulalo
+Бульон на мозговой кости. Филиппинцы варят булало в прохладных горах. Их «прохладно» это плюс пятнадцать.
+Marrow bone broth. Filipinos cook bulalo in the cool highlands. Their "cool" is plus fifteen.
+Жирный говяжий бульон. Кость из него вы бы сейчас раскололи и высосали, но пакетик справился за вас.
+A rich beef broth. You would crack the bone and suck it dry right now, but the sachet did it for you.
+
+YipeeMagic
+Круглая лепёшка лапши, чтобы ровно ложилась в кастрюлю и не ломалась. Индийские инженеры подумали о вашем котелке.
+A round noodle cake that fits the pan and does not break. Indian engineers were thinking of your pot.
+Жёлтая лапша с масалой, длинная и не слипается. «Йиппи!» на острове кричат редко, но тут можно. Шёпотом.
+Yellow masala noodles, long and never sticky. "Yippee!" is rarely shouted on the island, but here you may. In a whisper.
+
+YipeeMood
+Масала поострее, два пакетика специй. Второй пакетик для настроения, так прямо и называется.
+A hotter masala with two spice sachets. The second sachet is for the mood, and is named exactly that.
+Оранжевая, пряная и бодрая. Настроение после неё поднимается градуса на три. Температура за окном нет.
+Orange, spicy and lively. Your mood goes up about three degrees afterwards. The temperature outside does not.
+
+YipeeAtta
+Лапша из цельнозерновой муки. Полезная. На острове, где полезно всё, что не убивает, это отдельное достижение.
+Whole wheat noodles. Healthy. On an island where anything that does not kill you is healthy, that is an achievement.
+Тёмная лапша с пряностями. Клетчатка, цельное зерно, забота о здоровье. Диетолог был бы доволен, жаль, его съели бы первым.
+Dark noodles with spices. Fibre, whole grain, health care. A dietitian would be pleased, a pity he would be eaten first.
+
+ChoyzChicken
+Со вкусом курицы. Название от слова «выбор», хотя выбора у вас как раз нет: что нашли, то и ужин.
+Chicken flavour. The name comes from "choice", though choice is what you lack: what you find is dinner.
+Жёлтый бульон, лапша волной. Никаких открытий, просто горячо и съедобно. Иногда это и есть открытие.
+Yellow broth, wavy noodles. No discoveries, just hot and edible. Sometimes that is the discovery.
+
+ChoyzBeef
+Со вкусом говядины. Корову для этого вкуса придумал технолог, и у него был талант.
+Beef flavour. The cow for this flavour was invented by a food technologist, and he had talent.
+Коричневый бульон, пар, тишина. Ничего особенного, и именно этого вам сегодня не хватало.
+Brown broth, steam, silence. Nothing special, which is exactly what you were short of today.
+
+ChoyzChili
+Курица с перцем. Тот самый выбор для тех, кто хочет поострее, но без подвигов.
+Chicken with chilli. The very choice for those who want it hotter but without heroics.
+Бульон с красными искрами. Греет как костёр из трёх поленьев: без пожара, но ощутимо.
+A broth with red sparks. It warms like a three-log campfire: no blaze, but you feel it.
+
+ChoyzCup
+Курица в стакане. Просто, быстро, одной рукой. Вторая рука свободна для фонаря или ножа.
+Chicken in a cup. Simple, quick, one-handed. The other hand stays free for a lantern or a knife.
+Горячий стакан куриного бульона. Пить стоя, глядя в окно на метель, с видом человека, у которого всё под контролем.
+A hot cup of chicken broth. Drink it standing, watching the blizzard through the window, with the air of someone in control.
+
+AlexSofaChicken
+=
+=
+Куриный бульон от Александра и Софы. Кто бы они ни были, спасибо им. Больше на этом острове о вас никто не подумал.
+Chicken broth from Alexander and Sofa. Whoever they are, thank them. Nobody else on this island gave you a thought.
+
+AlexSofaBeef
+Говядина от загадочной пары. На пачке ни портрета, ни адреса. Возможно, они тоже где-то выживают.
+Beef from the mysterious couple. No portrait, no address on the pack. Perhaps they are surviving somewhere too.
+Тёмный бульон, мягкая лапша. Александр, наверное, варил, Софа, наверное, солила. Получилось по-семейному.
+Dark broth, soft noodles. Alexander probably cooked, Sofa probably salted. It came out like a family meal.
+
+AlexSofaMushroom
+Грибы от Александра и Софы. Третий вкус, а ясности про них так и не прибавилось.
+Mushrooms from Alexander and Sofa. A third flavour, and still no clarity about them.
+Грибной бульон пахнет осенью. Хочется верить, что Александр и Софа сейчас в тепле, собирают грибы и ни о чём не знают.
+The mushroom broth smells of autumn. You want to believe Alexander and Sofa are warm right now, picking mushrooms, knowing nothing.
+
+HonestChicken
+=
+=
+Бульон бледный, лапша честная. Курицу в нём не найдёт и следователь, но он тёплый, а цену никто не спросит.
+The broth is pale, the noodles honest. Not even a detective would find chicken in it, but it is warm and nobody asks the price.
+
+HonestBeef
+=
+=
+Говядины здесь столько же, сколько оленей в вашем спальнике. Зато горячо, и совесть у производителя чиста: он не обещал.
+There is as much beef here as there are deer in your bedroll. But it is hot, and the maker's conscience is clear: he promised nothing.
+
+KespeBeef
+Казахстанская домашняя лапша. В степи тоже ветер, мороз и ни души на сто километров, так что она поймёт.
+Kazakh home-style noodles. The steppe also has wind, frost and not a soul for a hundred kilometres, so they will understand.
+Широкая лапша в говяжьем бульоне. Как у бабушки в ауле, только бабушка ещё дала бы баурсак и спросила, почему вы такой худой.
+Wide noodles in beef broth. Like at granny's in the village, only granny would add a fried bun and ask why you are so thin.
+
+KespeLamb
+Бульон на баранине. Баранов на Великом Медведе нет, а запах стоит такой, будто отара прошла.
+A mutton broth. Great Bear has no sheep, yet it smells as if a flock just went by.
+Жирный бараний бульон с зеленью. Остывает быстро, поэтому ешьте сразу. Застывший бараний жир не красит ни миску, ни жизнь.
+A rich mutton broth with herbs. It cools fast, so eat at once. Set mutton fat improves neither the bowl nor life.
+
+KespeKazy
+=
+=
+Бульон с духом конской колбасы. Кочевники с такой едой проходили полконтинента. Вам надо всего лишь до соседней долины.
+A broth with the spirit of horse sausage. Nomads crossed half a continent on food like this. You only need to reach the next valley.
+
+KespeCup
+Домашняя лапша в большом стакане. Дом в стакане: удобно, когда своего дома у вас сейчас нет.
+Home-style noodles in a big cup. A home in a cup: handy when you have no home of your own right now.
+Говяжий бульон с широкой лапшой. Стакан большой, как пиала для дорогого гостя. Гость сегодня вы, хозяин тоже вы.
+Beef broth with wide noodles. The cup is as big as a bowl for an honoured guest. Today the guest is you, and so is the host.
+
+LagmanBeef
+Узбекский лагман. Настоящий тянут руками и бьют об стол. Этот не били, он и так всё понял.
+Uzbek lagman. The real one is pulled by hand and slapped on the table. This one was not slapped, it got the idea anyway.
+Густая подлива с говядиной и перцем на длинной лапше. Не суп и не второе, а всё сразу. На острове так и надо.
+A thick gravy of beef and pepper on long noodles. Neither soup nor a main course but both at once. Just right for the island.
+
+LagmanKovurma
+Жареный лагман, без бульона. Казан заменит котелок, а чайхану заменит что угодно с крышей.
+Fried lagman, no broth. The pot stands in for a cauldron, and anything with a roof for a teahouse.
+Лапша в томатной зажарке с перцем. Пахнет базаром, дымом и югом. Юг отсюда в любую сторону, кроме одной.
+Noodles in a fried tomato and pepper sauce. It smells of bazaar, smoke and the south. From here the south is in every direction but one.
+
+AminaRosol
+Польский куриный бульон. В Польше росул варят по воскресеньям и лечат им простуду, тоску и понедельник.
+Polish chicken broth. In Poland rosol is made on Sundays and cures a cold, the blues and Monday.
+Золотой бульон с тонкой вермишелью. Не хватает только морковки и бабушки, которая говорит «ешь, остынет».
+A golden broth with fine vermicelli. All it lacks is a carrot and a granny saying "eat, it will get cold".
+
+AminaBarszcz
+=
+=
+Красный и кисловатый, со свёклой. Борщ из пакетика на канадском острове. Бабушки двух стран хватаются за сердце.
+Red and tangy, with beetroot. Borscht from a sachet on a Canadian island. The grannies of two countries clutch their hearts.
+
+AminaZurek
+Журек: кислый суп на ржаной закваске. Звучит как ошибка повара, а это национальная гордость.
+Zurek: a sour soup on fermented rye. Sounds like a cook's mistake, yet it is a national pride.
+Белёсый кислый бульон с духом копчёной колбасы. В Польше его едят на Пасху. Какой сегодня праздник, решайте сами.
+A pale sour broth with the spirit of smoked sausage. In Poland it is eaten at Easter. What holiday it is today is up to you.
+
+AminaPomidor
+Томатный суп. Тот, что варят из вчерашнего бульона. Вчерашнего у вас нет, поэтому сразу из пачки.
+Tomato soup. The kind made from yesterday's broth. You have no yesterday's, so straight from the pack.
+Оранжево-красный суп с лапшой. Сладковатый, детский, из школьной столовой. Единственная столовая в радиусе острова.
+An orange-red soup with noodles. Sweetish, childish, straight from the school canteen. The only canteen within an island's radius.
+
+PottChicken
+=
+=
+Густой бульон с курицей и грибами, лапша короткая. Британцы едят это вилкой прямо из стакана и считают ужином. На острове вы с ними согласны.
+A thick chicken and mushroom broth with short noodles. The British eat it with a fork straight from the pot and call it dinner. On the island you agree.
+
+PottBeef
+Говядина с томатом. В комплекте пакетик соуса, который британцы торжественно выдавливают сверху.
+Beef and tomato. A sauce sachet is included, which the British solemnly squeeze on top.
+Густая красноватая подлива и лапша. Не изысканно, зато честно, как дождь в Манчестере. Дождю вы бы сейчас обрадовались.
+A thick reddish gravy and noodles. Not refined but honest, like rain in Manchester. You would welcome rain right now.
+
+PottCurry
+Карри из закусочной на углу. Угол остался в Англии, запах доехал целиком.
+Curry from the chip shop on the corner. The corner stayed in England, the smell arrived whole.
+Жёлтый соус, сладковатый и мягкий. Так пахнет пятничный вечер в городе, где горят фонари и ходят автобусы.
+A yellow sauce, sweetish and mild. This is how a Friday night smells in a town with street lights and buses.
+
+PottBadBoy
+=
+=
+«Плохой парень из Бомбея» покраснел и дымится. Для Лондона это дерзко. Корейские пачки на соседней полке тихо смеются.
+The "Bombay Bad Boy" has gone red and is steaming. For London this is daring. The Korean packs on the next shelf chuckle quietly.
+
+PottKing
+=
+=
+Королевский стакан курицы с грибами. Корона не прилагается, но после такой порции на троне из ящиков сидится уверенно.
+A king-size pot of chicken and mushroom. No crown included, but after a helping like this you sit firmly on a throne of crates.
+
+TerrinaRahm
+Немецкая лапша в сливочном соусе. Пять минут по инструкции, и немцы имеют в виду ровно пять.
+German noodles in cream sauce. Five minutes by the instructions, and Germans mean exactly five.
+Белый сливочный соус с зеленью. Аккуратно, сытно, по расписанию. Единственное на острове, что случилось вовремя.
+A white cream sauce with herbs. Neat, filling, on schedule. The only thing on the island that happened on time.
+
+TerrinaBolognese
+=
+=
+Красный мясной соус на коротких макаронах. Итальянец бы заплакал, а вы доедите и вылижете стакан.
+Red meat sauce on short pasta. An Italian would weep, and you will finish it and lick the cup clean.
+
+TerrinaHuhn
+Куриный суп с лапшой, немецкий, обстоятельный. Таким в Германии кормят больных, а здоровых на острове нет.
+Chicken noodle soup, German and thorough. In Germany this is fed to the sick, and nobody on the island is well.
+Светлый суп с лапшой и морковными точками. Порядок в стакане. Хоть где-то на этом острове порядок.
+A light soup with noodles and specks of carrot. Order in a cup. At least somewhere on this island there is order.
+
+SopitaCamaron
+=
+=
+Креветка, лайм и хабанеро в красном бульоне. Мексиканцы едят это на пляже в жару, чтобы стало ещё жарче. Одолжите у них логику.
+Shrimp, lime and habanero in a red broth. Mexicans eat this on a hot beach to get even hotter. Borrow their logic.
+
+SopitaPiquin
+Креветка с перцем пикин. Перец размером с горошину, амбиции размером с Мексику.
+Shrimp with piquin pepper. A pepper the size of a pea with ambitions the size of Mexico.
+Кисловатый красный бульон, мелкая лапша. Острота приходит быстро и уходит быстро, как хорошая погода на побережье.
+A tangy red broth, tiny noodles. The heat comes fast and leaves fast, like good weather on the coast.
+
+SopitaPollo
+Курица с овощами в стакане. Сушёный горошек и морковка внутри считаются за огород.
+Chicken with vegetables in a cup. The dried peas and carrots inside count as a kitchen garden.
+Куриный бульон с горошком и кукурузой. Овощи всплыли и радуются. Вы тоже порадуйтесь, это ваш урожай.
+Chicken broth with peas and corn. The vegetables float up, delighted. Be glad as well, this is your harvest.
+
+SopitaRes
+Говядина. Мексиканский стакан без перца: такое тоже бывает, хотя верится с трудом.
+Beef. A Mexican cup with no chilli: it does happen, hard as it is to believe.
+Тёмный говяжий бульон, спокойный, как сиеста. Сиесту на морозе устраивать нельзя, а бульон можно.
+A dark beef broth, as calm as a siesta. You cannot take a siesta in the frost, the broth you can.
+
+AjiMenGallina
+Перуанский суп из курицы-несушки. В Андах тоже холодно и высоко, и там знают: старая курица даёт лучший бульон.
+Peruvian hen soup. The Andes are cold and high too, and they know: an old hen makes the best broth.
+Жёлтый бульон с тонкой лапшой. В Лиме им встречают рассвет после долгой ночи. Ваша ночь дольше, бульон нужнее.
+A yellow broth with thin noodles. In Lima they greet the dawn with it after a long night. Your night is longer, the broth more needed.
+
+AjiMenCarne
+Говяжий бульон из Перу. Японская лапша, перуанский вкус, канадский мороз. Мир тесен, когда хочется есть.
+Beef broth from Peru. Japanese noodles, Peruvian taste, Canadian frost. It is a small world when you are hungry.
+Тёмный бульон, кудрявая лапша. Ламы в горах жуют траву, вы жуёте лапшу. У каждого свои Анды.
+Dark broth, curly noodles. Llamas in the mountains chew grass, you chew noodles. Everyone has their own Andes.
+
+AjiMenPicante
+Курица с перцем ахи. Жёлтый перуанский перец, фруктовый на запах и коварный на деле.
+Chicken with aji pepper. The yellow Peruvian chilli, fruity to smell and sneaky in action.
+Жёлто-оранжевый бульон, сладкий запах, жгучий глоток. Перец прикинулся фруктом. На острове вы уже ничему не верите, и правильно.
+A yellow-orange broth, a sweet smell, a burning sip. The pepper posed as fruit. On the island you trust nothing by now, and rightly so.
+
+MiojoGalinha
+=
+=
+Жёлтый бульон из деревенской курицы. Три минуты, как обещали. Бразильцы зовут любую лапшу «миожо», вы теперь тоже.
+A yellow country chicken broth. Three minutes, as promised. Brazilians call any instant noodles "miojo", and now so do you.
+
+MiojoCarne
+Говядина по-бразильски. В стране, где мясо жарят на мечах, лапша с говядиной обязана стараться.
+Beef the Brazilian way. In a country that grills meat on swords, beef noodles have to try hard.
+Коричневый бульон, мягкая лапша. В Бразилии сейчас лето, карнавал и плюс тридцать пять. Ешьте молча.
+Brown broth, soft noodles. In Brazil it is summer now, carnival and plus thirty-five. Eat in silence.
+
+MiojoPicanha
+=
+=
+Бульон пахнет углями и жареным мясом. Стейка в миске по-прежнему нет, зато олень за окном есть, и у вас лук.
+The broth smells of embers and grilled meat. Still no steak in the bowl, but there is a deer outside, and you have a bow.
+
+MiojoTomate
+Томатный. Самая простая пачка в семье: красная, честная и без сюрпризов.
+Tomato. The plainest pack in the family: red, honest and with no surprises.
+Красный томатный бульон. Кисловатый, простой, цвета заката. С ним пережидать метель не скучно, а большего от супа никто и не просит.
+A red tomato broth. Tangy, simple, the colour of sunset. Sitting out a blizzard with it is not dull, and nobody asks more of a soup.
