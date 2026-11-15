@@ -248,6 +248,7 @@ internal static class Crafting
                     if (extra != null) { inv.DestroyGear(extra.gameObject); Safe.Info($"Unfinished {s.id}: the item of the broken-off work is taken back"); }
                 }
                 sweep = s.frames > 1 ? (s.id, s.frames - 1) : null;
+                if (sweep == null) Settle(s.id);
                 if (sweep == null && finished == s.id)
                 {
                     working = null; finished = null;
@@ -347,6 +348,83 @@ internal static class Crafting
             Apply();
             MelonLogger.Msg($"Station {r.Id}: the game's own unfinished one ({pct:0.00}) is turned into our unfinished piece");
         }
+    }
+
+    // ---- materials (0.4.30). The game spends a recipe's materials bit by bit, by the share of the work done in a go (a friend's barrel, 11-15:
+    // 2 hours of 64 took one piece of each), and after the first go our recipe asks for the unfinished piece alone. So the rest is taken here,
+    // when the first go is over: the whole recipe is paid by then, however short the go was.
+    static Dictionary<string, int>? paidFrom;      // what lay in the pack when a full recipe was begun
+    static string? paidFor;
+
+    static int Units(string gear)
+    {
+        int n = 0;
+        var inv = GameManager.GetInventoryComponent();
+        if (inv == null) return 0;
+        foreach (var o in inv.m_Items)
+        {
+            var g = o?.m_GearItem;
+            if (g != null && Defs.Clean(g.name) == gear) n += g.m_StackableItem != null ? Math.Max(1, g.m_StackableItem.m_Units) : 1;
+        }
+        return n;
+    }
+
+    static void Take(string gear, int n)
+    {
+        var inv = GameManager.GetInventoryComponent();
+        if (inv == null) return;
+        for (int guard = 0; n > 0 && guard < 200; guard++)
+        {
+            GearItem? pick = null;
+            foreach (var o in inv.m_Items)
+            {
+                var g = o?.m_GearItem;
+                if (g != null && Defs.Clean(g.name) == gear) { pick = g; break; }
+            }
+            if (pick == null) return;
+            int have = pick.m_StackableItem != null ? Math.Max(1, pick.m_StackableItem.m_Units) : 1;
+            if (have > n) { inv.RemoveUnits(pick, n); return; }
+            inv.DestroyGear(pick.gameObject);
+            n -= have;
+        }
+    }
+
+    static void Settle(string id)
+    {
+        try
+        {
+            if (paidFrom == null || paidFor != id) return;
+            var r = Recipes.First(x => x.Id == id);
+            string log = "";
+            foreach (var (gear, need) in r.Needs)
+            {
+                if (!paidFrom.TryGetValue(gear, out int was)) continue;
+                int now = Units(gear), owed = now - Math.Max(0, was - need);
+                if (owed > 0) Take(gear, owed);
+                log += $" {gear} {was}->{now}" + (owed > 0 ? $" (-{owed} more)" : "");
+            }
+            MelonLogger.Msg($"Station {id}: materials of the whole recipe are paid:{log}");
+        }
+        catch (Exception e) { Safe.Log("Station materials", e); }
+        finally { paidFrom = null; paidFor = null; }
+    }
+
+    [HarmonyPrefix, HarmonyPatch(typeof(CraftingOperation), nameof(CraftingOperation.StartCrafting))]
+    static void Starting(CraftingOperation __instance)
+    {
+        try
+        {
+            if (paidFor != null) Settle(paidFor);      // the next go was begun before the last one was settled
+            var id = Ours(__instance);
+            if (id == null) return;
+            var r = Recipes.First(x => x.Id == id);
+            var req = __instance.Blueprint.m_RequiredGear;
+            if (req == null || req.Length != r.Needs.Length) return;      // a begun station: it asks for its piece alone
+            paidFrom = new Dictionary<string, int>();
+            foreach (var (gear, _) in r.Needs) paidFrom[gear] = Units(gear);
+            paidFor = id;
+        }
+        catch (Exception e) { Safe.Log("Station materials at start", e); }
     }
 
     static string? Ours(CraftingOperation op)
