@@ -24,7 +24,7 @@ namespace TrainerByEMPEROR.App
     // Поиск игры, установка MelonLoader и встроенной части трейнера, запуск игры.
     internal static class GameInstaller
     {
-        public const string MelonLoaderUrl = "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip";
+        public const string MelonLoaderUrl = "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.2/MelonLoader.x64.zip";
         private const string SteamAppId = "305620";
         private const string ModFileName = "TrainerByEMPEROR.dll";
         // names of the trainer's files before the mods were renamed to ...ByEMPEROR (11.2026): removed on install
@@ -117,7 +117,7 @@ namespace TrainerByEMPEROR.App
 
             if (!MelonLoaderInstalled(dir))
             {
-                log(L.T("Скачиваю MelonLoader 0.7.1…", "Downloading MelonLoader 0.7.1…"));
+                log(L.T("Скачиваю MelonLoader 0.7.2…", "Downloading MelonLoader 0.7.2…"));
                 string zip = Path.Combine(Path.GetTempPath(), "MelonLoader.x64.zip");
                 using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
                 {

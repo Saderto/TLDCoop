@@ -8,7 +8,7 @@
 
 Окно трейнера (`TrainerByEMPEROR.exe`) — обычная программа для Windows. Кнопкой «Установить» оно кладёт в игру загрузчик модов MelonLoader и свой небольшой модуль `Mods/TrainerByEMPEROR.dll`. Модуль загружается вместе с игрой и выполняет команды, которые присылает окно: включить бессмертие, выдать 5 спичек и т.п. Wand устроен так же, только внедряет свой модуль при каждом запуске.
 
-Связь идёт только внутри вашего компьютера (127.0.0.1, порт 47811). В интернет трейнер выходит один раз: чтобы скачать MelonLoader 0.7.1 с GitHub при установке.
+Связь идёт только внутри вашего компьютера (127.0.0.1, порт 47811). В интернет трейнер выходит один раз: чтобы скачать MelonLoader 0.7.2 с GitHub при установке.
 
 Сделано под версию игры **2.60** (Steam или Epic, Windows).
 
@@ -112,5 +112,5 @@ so they follow the game's language.
 Нужен .NET SDK 8 (https://dotnet.microsoft.com/download/dotnet/8.0). В папке с исходниками запустите `build.cmd`, готовый файл появится в `publish\TrainerByEMPEROR.exe`.
 
 * `Shared/` — общий список функций (названия, диапазоны, горячие клавиши).
-* `Mod/` — модуль для игры (MelonLoader). Сборки игры подтягиваются из NuGet (`STBlade.Modding.TLD.Il2CppAssemblies.Windows`). После обновления игры поднимите версию этого пакета в `Mod/TrainerByEMPEROR.csproj`.
+* `Mod/` — модуль для игры (MelonLoader 0.7.2). Сборки игры (папка `MelonLoader/Il2CppAssemblies`) и библиотеки MelonLoader 0.7.2 (`MelonLoader.dll`, `0Harmony.dll`, `Il2CppInterop.*.dll` из `MelonLoader/net6`) положите в одну папку `refs-2.58` рядом с `Mod`, или укажите свою: `dotnet build Mod -c Release -p:RefsDir=путь`.
 * `App/` — окно трейнера (WPF, .NET 8). Модуль встраивается в .exe при сборке.

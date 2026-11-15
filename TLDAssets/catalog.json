@@ -355,8 +355,8 @@
   {
    "id": "TLDTrainer",
    "zip": "TrainerByEMPEROR.zip",
-   "version": "2.5.27",
-   "size": 66547772,
+   "version": "2.5.28",
+   "size": 66290064,
    "detect": "Mods/TrainerByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDTrainer.dll",
