@@ -14,6 +14,9 @@ namespace FeatsByEMPEROR
             Traveler = "Traveler", Perfect = "Perfectionist", Gunsmith = "Gunsmith", Lucky = "LuckyHand", Train = "Machinist",
             Merchant = "Merchant", Soda = "SodaLover";
 
+        /// <summary>Feats taken out of the game. Their D() entries stay so the other types and badges keep their numbers.</summary>
+        public static readonly HashSet<string> Removed = new() { Together };
+
         static int _n;
         static Def D(string id, float target, string nameRu, string nameEn, string taskRu, string taskEn, string bonusRu, string bonusEn,
             string unitRu = "", string unitEn = "", int dec = 0)

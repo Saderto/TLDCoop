@@ -109,7 +109,7 @@ namespace FeatsByEMPEROR
                 UnitRu = "выстр.", UnitEn = "shots" },
         };
 
-        static Defs() { All.AddRange(Defs2.New); }
+        static Defs() { All.AddRange(Defs2.New.FindAll(d => !Defs2.Removed.Contains(d.Id))); }
 
         static Dictionary<int, Def> _byType;
         static Dictionary<string, Def> _byId;

@@ -17,7 +17,7 @@ namespace FeatsByEMPEROR
     /// </summary>
     public class FeatsMod : MelonMod
     {
-        public const string Version = "0.2.4";
+        public const string Version = "0.2.5";
         internal static FeatsMod Instance;
         internal static string Folder;
         bool _setUp;

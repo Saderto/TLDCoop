@@ -187,11 +187,6 @@ namespace FeatsByEMPEROR
                 if (!sleeping && Effects2.OutdoorScene() && !Effects2.IndoorEnv() && Effects2.SunnyNow()) Progress.Add(Defs2.Sun, (float)dh);
             }
 
-            // co-op friend near
-            bool near = FriendNear(pos);
-            Effects2.NearFriend = near;
-            if (near && dh > 0) Progress.Add(Defs2.Together, (float)dh);
-
             if (w != null && w.FortuneKind < 0 && !sleeping) Effects2.RollFortune();
 
             // streaks
@@ -290,58 +285,6 @@ namespace FeatsByEMPEROR
         public static void OnWake(float hourOfDay)
         {
             if (hourOfDay >= 3f && hourOfDay < 12f) Effects2.RollFortune();
-        }
-
-        // ---- CoopByEMPEROR players (by reflection; no hard link) ----
-        static bool _coopChecked;
-        static FieldInfo _players;
-        static PropertyInfo _localId;
-        static MethodInfo _sceneFn;
-        static FieldInfo _fId, _fX, _fY, _fZ, _fScene, _fLast;
-
-        static bool FriendNear(Vector3 pos)
-        {
-            try
-            {
-                if (!_coopChecked)
-                {
-                    _coopChecked = true;
-                    Type s = null, api = null;
-                    foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
-                    {
-                        s ??= a.GetType("CoopByEMPEROR.Net.Session");
-                        api ??= a.GetType("CoopByEMPEROR.Game.GameApi");
-                    }
-                    if (s != null)
-                    {
-                        _players = s.GetField("Players", BindingFlags.Public | BindingFlags.Static);
-                        _localId = s.GetProperty("LocalId", BindingFlags.Public | BindingFlags.Static);
-                    }
-                    if (api != null) _sceneFn = api.GetMethod("Scene", BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null);
-                    var pt = s?.Assembly.GetType("CoopByEMPEROR.Net.Player");
-                    if (pt != null)
-                    {
-                        _fId = pt.GetField("Id"); _fX = pt.GetField("X"); _fY = pt.GetField("Y"); _fZ = pt.GetField("Z");
-                        _fScene = pt.GetField("Scene"); _fLast = pt.GetField("LastState");
-                    }
-                    if (_players != null && _fX != null) FeatsMod.Log("CoopByEMPEROR найден: подвиг «Вдвоём легче» / co-op found for Better Together");
-                }
-                if (_players == null || _fX == null || _localId == null) return false;
-                if (_players.GetValue(null) is not IDictionary dict || dict.Count < 1) return false;
-                int me = (int)_localId.GetValue(null);
-                string myScene = _sceneFn != null ? _sceneFn.Invoke(null, null) as string : Effects2.Scene();
-                float t = Time.unscaledTime;
-                foreach (var p in dict.Values)
-                {
-                    if (p == null || (int)_fId.GetValue(p) == me) continue;
-                    if (t - (float)_fLast.GetValue(p) > 10f) continue;
-                    if (!string.Equals(_fScene.GetValue(p) as string, myScene, StringComparison.OrdinalIgnoreCase)) continue;
-                    var v = new Vector3((float)_fX.GetValue(p), (float)_fY.GetValue(p), (float)_fZ.GetValue(p));
-                    if ((v - pos).sqrMagnitude <= 20f * 20f) return true;
-                }
-            }
-            catch { }
-            return false;
         }
     }
 }

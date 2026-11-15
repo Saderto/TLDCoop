@@ -863,7 +863,6 @@ namespace FeatsByEMPEROR
         }
 
         internal static double NoFatigueUntil = -1;
-        internal static bool NearFriend;
         static int _fatDepth;
 
         static void FatiguePre(ref float fatigueValue, out bool __state)
@@ -875,7 +874,6 @@ namespace FeatsByEMPEROR
             {
                 if (NoFatigueUntil > 0 && Hours() < NoFatigueUntil) { fatigueValue = 0f; return; }
                 float k = 1f;
-                if (NearFriend && On(Defs2.Together)) k *= 0.85f;
                 if (FortuneNow(1)) k *= 0.9f;
                 fatigueValue *= k;
             }

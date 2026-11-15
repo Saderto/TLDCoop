@@ -6,7 +6,7 @@ New feats for The Long Dark. New feats with their own badges.
 
 ![Подвиг «Сладкоежка» / The Sweet Tooth feat](screenshot.jpg)
 
-Версия / Version: **0.2.4**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
+Версия / Version: **0.2.5**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Скачать и установить / Download and install
 

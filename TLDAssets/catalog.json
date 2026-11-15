@@ -116,8 +116,8 @@
   {
    "id": "FeatsBySeagull",
    "zip": "FeatsByEMPEROR.zip",
-   "version": "0.2.4",
-   "size": 2894431,
+   "version": "0.2.5",
+   "size": 2893709,
    "detect": "Mods/FeatsByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FeatsBySeagull.dll",
