@@ -49,7 +49,7 @@ internal static class LootPatch
 				{
 					continue;
 				}
-				float num = Loot.Roll(gameRandomSeed, position, i);
+				float num = Loot.Roll(gameRandomSeed, position, i + Loot.Door(__instance) * 1000);
 				foreach (LootEntry item in value)
 				{
 					num -= item.Chance;
