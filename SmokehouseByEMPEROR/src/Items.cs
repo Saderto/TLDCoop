@@ -140,6 +140,14 @@ public static class Items
         var mesh = Assets.LoadMesh("meshes/" + def.Mesh + ".fpmesh", def.Bulky);      // stations are seen from all sides and from inside: every face is drawn from behind too
         SingleMesh(g, mesh, tex, def.Bulky);
         RefreshRenderers(g);
+        // (0.4.38) one size everywhere. A piece dropped out of the pack lies at the size 1, but the game's meat it is built on is 0.6-0.75 of that,
+        // and a piece read back from a save came at this smaller size: sausages left on the snow were smaller after a walk into a house and back
+        // (11-15 owner and a friend). The models are made for the size 1.
+        if (!def.Bulky)
+        {
+            g.transform.localScale = Vector3.one;
+            g.m_DefaultLocalScale = Vector3.one;
+        }
     }
 
     static bool loggedFood;
