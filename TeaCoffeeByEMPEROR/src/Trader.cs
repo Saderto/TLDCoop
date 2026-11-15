@@ -21,8 +21,8 @@ public static class TraderTea
 
     static readonly Slot[] Slots =
     {
-        new("common", 50, d => d.P.Loot >= 60, 2, new[] { new Ask(G.Cloth, 2) }),
-        new("good", 150, d => d.P.Loot >= 30 && d.P.Loot < 60, 1, new[] { new Ask(G.Cloth, 2), new Ask(G.Crow, 2) }),
+        new("common", 50, d => d.P.Loot >= 60, 2, new[] { new Ask(G.Cloth, 2), new Ask(G.Crow, 1) }),
+        new("good", 150, d => d.P.Loot >= 30 && d.P.Loot < 60, 1, new[] { new Ask(G.Cloth, 3), new Ask(G.Crow, 2) }),
         new("rare", 300, d => d.P.Loot < 30, 1, new[] { new Ask(G.Hides, 1, true), new Ask(G.Gut, 2) }),
     };
 

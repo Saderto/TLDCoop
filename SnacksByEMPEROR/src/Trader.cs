@@ -21,9 +21,9 @@ public static class TraderSnacks
 
     static readonly Slot[] Slots =
     {
-        new("snack", 50, d => d.Kind == Kind.Snack && !d.Rare, 2, new[] { new Ask(G.Cloth, 1), new Ask(G.Crow, 1) }),
+        new("snack", 50, d => d.Kind == Kind.Snack && !d.Rare, 2, new[] { new Ask(G.Cloth, 2), new Ask(G.Crow, 1) }),
         // one seasonal pack an aurora, dearer
-        new("rare", 50, d => d.Kind == Kind.Snack && d.Rare, 1, new[] { new Ask(G.Cloth, 2), new Ask(G.Crow, 2) }),
+        new("rare", 50, d => d.Kind == Kind.Snack && d.Rare, 1, new[] { new Ask(G.Cloth, 3), new Ask(G.Crow, 2) }),
     };
 
     static readonly Dictionary<string, TradeExchangeData> built = new();

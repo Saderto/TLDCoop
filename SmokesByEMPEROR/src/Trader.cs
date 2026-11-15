@@ -32,10 +32,10 @@ public static class TraderSmokes
 
     static readonly Slot[] Slots =
     {
-        new("pack", 100, d => d.Kind == Kind.Pack && d.CigTexture != null && !d.Rare && !d.Cigarillo, 2, new Ask[] { new CatKg(G.MeatOrFish, 2f), new Litres(G.Water, 1f) }),
-        new("cigarillo", 150, d => d.Kind == Kind.Pack && d.Cigarillo && !d.Rare, 1, new Ask[] { new CatKg(G.MeatOrFish, 3f), new Litres(G.Water, 1f) }),
+        new("pack", 100, d => d.Kind == Kind.Pack && d.CigTexture != null && !d.Rare && !d.Cigarillo, 2, new Ask[] { new CatKg(G.MeatOrFish, 3f), new Litres(G.Water, 1f) }),
+        new("cigarillo", 150, d => d.Kind == Kind.Pack && d.Cigarillo && !d.Rare, 1, new Ask[] { new CatKg(G.MeatOrFish, 4f), new Litres(G.Water, 1f) }),
         new("lighter", 100, d => d.Kind == Kind.Lighter, 1, new Ask[] { new GearN(G.Cloth, 3), new GearN(G.Crow, 2), new Litres(G.Kerosene, 1f) }),
-        new("refill", 100, d => d.Kind == Kind.Refill, 1, new Ask[] { new GearN(G.Cloth, 2), new Litres(G.Kerosene, .5f) }),
+        new("refill", 100, d => d.Kind == Kind.Refill, 1, new Ask[] { new GearN(G.Cloth, 3), new Litres(G.Kerosene, .5f) }),
         new("tube", 200, d => d.Kind == Kind.Tube, 1, new Ask[] { new CatN(G.Hides, 1), new CatKg(G.MeatOrFish, 3f) }),
         new("box", 200, d => d.Kind == Kind.Box, 1, new Ask[] { new CatN(G.Hides, 3), new CatKg(G.MeatOrFish, 8f), new GearN(G.Maple, 3) }),
         new("pouch", 200, d => d.Kind == Kind.Pouch, 1, new Ask[] { new CatN(G.Plants, 8), new GearN(G.Crow, 3) }),

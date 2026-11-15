@@ -21,7 +21,7 @@ public static class TraderNoodles
 
     static readonly Slot[] Slots =
     {
-        new("noodle", 100, d => d.Kind == Kind.Noodle, 2, new[] { new Ask(G.Cloth, 2), new Ask(G.Gut, 1) }),
+        new("noodle", 100, d => d.Kind == Kind.Noodle, 2, new[] { new Ask(G.Cloth, 3), new Ask(G.Gut, 1) }),
     };
 
     static readonly Dictionary<string, TradeExchangeData> built = new();

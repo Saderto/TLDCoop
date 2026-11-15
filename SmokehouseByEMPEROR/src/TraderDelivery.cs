@@ -59,14 +59,15 @@ internal static class TraderDelivery
         return false;
     }
 
-    /// <summary>Called just before the exchange box panel opens with the rewards: the list the game filled is the last one.</summary>
+    /// <summary>Called just before the exchange box panel opens with the rewards. The game puts rewards into the first list of the box
+    /// (ExchangeBox.PrepareAndShowRewards adds to m_Exchanges[0]) and the panel shows that list, so ours go there too.</summary>
     public static void Deliver(ExchangeBox box)
     {
         var owed = Owed(GameManager.GetTraderManager()?.m_CurrentState);
         if (owed.Count == 0) return;
         var lists = box.m_Exchanges;
         if (lists == null || lists.Count == 0) { Safe.Info("Trader: rewards shown, but the box has no list"); return; }
-        var last = lists[lists.Count - 1];
+        var last = lists[0];
         if (last == null) { Safe.Info("Trader: rewards shown, but the reward list is empty"); return; }
         var present = new Dictionary<string, int>();
         foreach (var o in last)
