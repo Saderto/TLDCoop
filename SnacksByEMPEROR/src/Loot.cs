@@ -9,7 +9,8 @@ namespace SnacksByEMPEROR;
 internal static class Loot
 {
     static readonly string[] Kitchen = { "kitchen", "cabinet", "cupboard", "fridge", "refrigerator", "freezer", "pantry", "food", "vending", "counter", "stove", "oven", "shelf" };
-    static readonly string[] Never = { "corpse", "body", "toolbox", "tool", "firstaid", "medic", "gun", "ammo", "safe", "mailbox", "washer", "dryer" };
+    // never: first-aid kits, toolboxes, safes, gun and ammo lockers, mailboxes, washers and dryers (user 11-17 asked to keep these out)
+    static readonly string[] Never = { "firstaid", "first_aid", "medic", "medkit", "aidkit", "toolbox", "tool", "gun", "ammo", "safe", "mailbox", "washer", "dryer" };
 
     static uint Fnv(string s)
     {
@@ -20,6 +21,21 @@ internal static class Loot
             h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15;
             return h;
         }
+    }
+
+    /// <summary>11-17 (user: «если ты нашёл в ящике наши снеки, там гарантированно лежит точно такая же пачка»): the game fills a container
+    /// more than once (Smokes saw it 11-10), and the second fill came after our first copy was already made, so the name check alone missed it.
+    /// Now nothing is added or made while the container already holds that snack.</summary>
+    public static bool Holds(Container c, string id)
+    {
+        try
+        {
+            var list = new Il2CppSystem.Collections.Generic.List<GearItem>();
+            c.GetItems(list);
+            foreach (var g in list) if (g != null && Defs.Is(g, out var d) && d.Id == id) return true;
+        }
+        catch (Exception e) { Safe.Log("Snack loot check", e); }
+        return false;
     }
 
     static string Place(Vector3 p) => $"{Mathf.RoundToInt(p.x * 10)}|{Mathf.RoundToInt(p.y * 10)}|{Mathf.RoundToInt(p.z * 10)}";
@@ -52,19 +68,20 @@ internal static class Loot
     {
         try
         {
-            if (__instance == null || __instance.m_IsCorpse) return;
+            if (__instance == null) return;
+            bool corpse = __instance.m_IsCorpse;
             var drawn = __instance.m_GearToInstantiate;
             if (drawn == null) return;
             string n = (__instance.gameObject.name ?? "").ToLowerInvariant();
-            if (Never.Any(n.Contains)) return;
-            bool kitchen = Kitchen.Any(n.Contains);
+            if (!corpse && Never.Any(n.Contains)) return;
+            bool kitchen = !corpse && Kitchen.Any(n.Contains);
             int seed = 0;
             try { seed = GameManager.m_SceneTransitionData != null ? GameManager.m_SceneTransitionData.m_GameRandomSeed : 0; } catch { }
             string place = Place(__instance.transform.position);
             string key = $"{seed}|{GameManager.m_ActiveScene}|{place}";
             // a cupboard of four doors is four containers: the chance is for the piece of furniture, not for each door
-            var (drawers, same, mine) = Furniture(__instance, place);
-            float chance = (kitchen ? Mod.KitchenChance : Mod.LootChance) * Math.Min(same, 4) / Math.Min(drawers, 4);
+            var (drawers, same, mine) = corpse ? (1, 1, 0) : Furniture(__instance, place);
+            float chance = corpse ? Mod.CorpseChance : (kitchen ? Mod.KitchenChance : Mod.LootChance) * Math.Min(same, 4) / Math.Min(drawers, 4);
             float roll = (Fnv("SNK|" + key) % 10000) / 100f;
             if (roll >= chance) return;
             if (same > 1 && Fnv("SNKwhich|" + key) % (uint)same != (uint)mine) return;   // one of the doors gets the find
@@ -75,8 +92,9 @@ internal static class Loot
             var def = pool[Fnv("SNKpick|" + key) % (uint)pool.Length];
             string name = Defs.Prefix + def.Id;
             if (drawn.Contains(name)) return;   // the game sometimes populates a container twice
+            if (Holds(__instance, def.Id)) { Safe.Info($"Loot: {def.Id} already in {__instance.name}, second fill skipped"); return; }
             drawn.Add(name);
-            Safe.Debug($"Loot: {def.Id} drawn for {__instance.name} ({(kitchen ? "kitchen" : "other")}, doors {same}/{drawers}, mine {mine})");
+            Safe.Info($"Loot: {def.Id} drawn for {__instance.name} ({(corpse ? "body" : kitchen ? "kitchen" : "other")}, doors {same}/{drawers})");
         }
         catch (Exception e) { Safe.Log("Snack loot", e); }
     }
@@ -112,6 +130,7 @@ internal static class ContainerOpenPatch
                 string n = list[i];
                 if (string.IsNullOrEmpty(n) || !Defs.TryGet(n, out var def)) continue;
                 list.RemoveAt(i);
+                if (Loot.Holds(__instance!, def.Id)) { Safe.Info($"Loot: {def.Id} already in {__instance!.gameObject.name}, not made twice"); continue; }
                 var gi = Items.Spawn(def.Id);
                 if (gi == null) { Safe.Info($"Loot: {def.Id} could not be made for a container"); continue; }
                 gi.m_RolledSpawnChance = true;
@@ -132,6 +151,7 @@ internal static class ContainerSpawnPatch
         if (string.IsNullOrEmpty(prefabName) || !Defs.TryGet(prefabName, out var def)) return true;
         try
         {
+            if (Loot.Holds(__instance, def.Id)) return false;
             var gi = Items.Spawn(def.Id);
             if (gi != null) { gi.m_RolledSpawnChance = true; __instance.AddGear(gi); }
         }

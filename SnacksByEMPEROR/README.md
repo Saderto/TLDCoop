@@ -1,12 +1,12 @@
 # SnacksByEMPEROR
 
-Снеки для The Long Dark: 1546 видов от 159 марок из 31 страны (чипсы, сухарики, семечки, орехи, крекеры, вяленое мясо и рыба, сладкие снеки), из них 177 редких сезонных пачек. У каждого вида своя пачка, значок и шуточное описание. Семь собственных эффектов со значками в карточке предмета и строками на экране состояния: «Соль держит воду», «Крепкая спина», «Сахарная печка», «Перец в крови», «Вместо сигареты» (вместе со SmokesByEMPEROR), «Пот градом», «Сухой ком». Снеки попадаются в шкафах и на кухнях и продаются у Торговца. Работает в кооперативе: находки одинаковы у всех игроков.
+Снеки для The Long Dark: 1546 видов от 159 марок из 31 страны (чипсы, сухарики, семечки, орехи, крекеры, вяленое мясо и рыба, сладкие снеки), из них 177 редких сезонных пачек. У каждого вида своя пачка, значок и шуточное описание. Семь собственных эффектов со значками в карточке предмета и строками на экране состояния: «Соль держит воду», «Крепкая спина», «Сахарная печка», «Перец в крови», «Вместо сигареты» (вместе со SmokesByEMPEROR), «Пот градом», «Сухой ком». Снеки попадаются на кухнях, в других шкафах и ящиках, в карманах трупов и продаются у Торговца. Работает в кооперативе: находки одинаковы у всех игроков.
 
-Snacks for The Long Dark: 1546 kinds from 159 brands of 31 countries (crisps, croutons, seeds, nuts, crackers, jerky and dried fish, sweet snacks), 177 of them rare seasonal packs. Every kind has its own pack, icon and a joke description. Seven own effects with icons on the item card and lines on the status screen: Salt Holds Water, Strong Back, Sugar Stove, Pepper in the Blood, Instead of a Smoke (with SmokesByEMPEROR), Dripping Sweat, Dry Lump. Snacks turn up in cupboards and kitchens and are sold by the Trader. Works in co-op: every player finds the same.
+Snacks for The Long Dark: 1546 kinds from 159 brands of 31 countries (crisps, croutons, seeds, nuts, crackers, jerky and dried fish, sweet snacks), 177 of them rare seasonal packs. Every kind has its own pack, icon and a joke description. Seven own effects with icons on the item card and lines on the status screen: Salt Holds Water, Strong Back, Sugar Stove, Pepper in the Blood, Instead of a Smoke (with SmokesByEMPEROR), Dripping Sweat, Dry Lump. Snacks turn up in kitchens, in other cupboards and boxes, on bodies, and are sold by the Trader. Works in co-op: every player finds the same.
 
 ![Пачки снеков / Snack packs](preview.jpg)
 
-Версия / Version: **0.7.5**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
+Версия / Version: **0.7.8**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Скачать и установить / Download and install
 
@@ -30,8 +30,9 @@ MelonLoader and the libraries needed, and keeps the mod updated.
 
 | Настройка / Setting | По умолчанию / Default | Что делает / What it does |
 |---|---|---|
-| `LootChance` | 2 | Сколько % обычных контейнеров получают снек / % of ordinary containers with a find |
 | `KitchenChance` | 8 | Сколько % кухонных шкафов, холодильников и ящиков с едой получают снек / % of kitchen cupboards, fridges and food boxes with a find |
+| `AnyContainerChance` | 3 | Сколько % прочих ящиков (на один предмет мебели; не аптечки, ящики с инструментами, сейфы, оружейные шкафы, почтовые ящики, стиральные и сушильные машины) / % of other containers (per piece of furniture; never first-aid kits, toolboxes, safes, gun lockers, mailboxes, washers, dryers) |
+| `CorpseChance` | 4 | Сколько % трупов с пачкой в карманах / % of bodies with a pack in the pockets |
 | `DebugLog` | false | Подробный лог / Detailed log |
 | `TestKeys` | false | Тест: Ctrl+Shift+F8 кладёт все снеки в рюкзак / Test: Ctrl+Shift+F8 puts every snack into the pack |
 

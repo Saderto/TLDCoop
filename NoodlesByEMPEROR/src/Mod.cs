@@ -8,28 +8,30 @@ namespace NoodlesByEMPEROR;
 /// Split out of SnacksByEMPEROR 0.1.0 (own prefix GEAR_NDL_). They turn up in kitchen cupboards, fridges and other containers, and the Trader sells two each aurora.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.6.9";
+    public const string VersionText = "0.6.11";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "NoodlesByEMPEROR");
 
     static MelonPreferences_Entry<bool> debugLog = null!, testKeys = null!;
-    static MelonPreferences_Entry<float> lootChance = null!, kitchenChance = null!;
+    static MelonPreferences_Entry<float> lootChance = null!, kitchenChance = null!, corpseChance = null!;
     public static bool DebugLog => debugLog.Value;
     public static float LootChance => lootChance.Value;
     public static float KitchenChance => kitchenChance.Value;
+    public static float CorpseChance => corpseChance.Value;
 
     public override void OnInitializeMelon()
     {
         var cat = MelonPreferences.CreateCategory("NoodlesByEMPEROR");
         debugLog = cat.CreateEntry("DebugLog", false, "Подробный лог / Detailed log");
         testKeys = cat.CreateEntry("TestKeys", false, "Ctrl+Shift+F8: по одной пачке каждого вида, котелок и вода в рюкзак / one of every kind, a pot and water into the pack");
-        lootChance = cat.CreateEntry("LootChance", 1.5f, "% обычных контейнеров с находкой / % of ordinary containers with a find");
+        lootChance = cat.CreateEntry("LootChance", 1.5f, "% прочих ящиков (на один предмет мебели) / % of other containers (per piece of furniture)");
         kitchenChance = cat.CreateEntry("KitchenChance", 5f, "% кухонных шкафов, холодильников, ящиков с едой / % of kitchen cupboards, fridges, food boxes");
+        corpseChance = cat.CreateEntry("CorpseChance", 2f, "% трупов с пачкой лапши в карманах / % of bodies with a pack of noodles in the pockets");
         ContainerOpenPatch.Apply(HarmonyInstance);
         LoggerInstance.Msg($"NoodlesByEMPEROR {VersionText}: {Defs.All.Length} items, {Texts.Count} text keys.");
     }
 
-    public override void OnSceneWasInitialized(int buildIndex, string sceneName) => ConsoleNames.Fill();
+    public override void OnSceneWasInitialized(int buildIndex, string sceneName) { Loot.Made.Clear(); ConsoleNames.Fill(); }
 
     public override void OnUpdate()
     {

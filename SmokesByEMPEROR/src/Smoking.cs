@@ -287,6 +287,7 @@ public static class Smoking
         {
             // a scene change re-makes the inventory: the lit item comes back as a new object; wait for it a while before giving up
             if (s.GoneAt < 0f) { s.GoneAt = Time.unscaledTime; Safe.Info("The smoke item is gone: waiting for it to come back with the scene"); }
+            TimeFlow.Reset();
             if (Time.unscaledTime - s.GoneAt < 30f) return;
             Safe.Info("The smoke item did not come back");
             s.Item = null;
@@ -319,7 +320,7 @@ public static class Smoking
             {
                 s.LostAt = Time.unscaledTime;
                 // waiting or sleeping with the hand emptied by the game: the smoke still burns along with the world's time
-                if (Settings.RealTime.Value && TimeFlow.ExtraSeconds > 0f)
+                if (Settings.RealTime.Value && TimeFlow.ExtraSeconds > 0f && TimeFlow.WaitingLately)
                 {
                     s.Smoked += TimeFlow.ExtraSeconds;
                     if (Share >= 1f) { Use.Say(s.Lit.Smoke == SmokeType.Pipe ? "SMOKES_MSG_PIPE_DONE" : "SMOKES_MSG_DONE"); End(false); }
@@ -376,7 +377,8 @@ public static class Smoking
         {
             if (!GameManager.m_IsPaused && Time.timeScale > 0f) s.Smoked += Time.unscaledDeltaTime;
             // 11-15 (the owner: waiting through the wheel left the smoke at its own pace): time the world skips or hurries burns it too
-            if (TimeFlow.ExtraSeconds > 0f)
+            // only waiting or sleeping burns it faster: any other jump of the clock (a scene change) is not smoking time
+            if (TimeFlow.ExtraSeconds > 0f && TimeFlow.WaitingLately)
             {
                 if (!fastLogged) { fastLogged = true; Safe.Info($"The world's time runs fast: the smoke burns with it ({s.Smoked:F0} of {s.Length:F0} s)"); }
                 s.Smoked += TimeFlow.ExtraSeconds;
@@ -770,7 +772,7 @@ public static class Smoking
                 Visual.ResumeLock = true;
                 s.Resumed = true;
                 // log 1638: the reloaded item came while the old one still existed, and was thrown away; the new one always wins
-                Safe.Info($"The smoke came back with the scene: going on (old item gone {itemGone})");
+                Safe.Info($"The smoke came back with the scene: going on (old item gone {itemGone})"); TimeFlow.Reset();
                 continue;
             }
             // 11-13 friend log: a save made with a lit pipe; at the load the item was destroyed at once, the game then put it in the

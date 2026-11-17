@@ -9,7 +9,8 @@ namespace NoodlesByEMPEROR;
 internal static class Loot
 {
     static readonly string[] Kitchen = { "kitchen", "cabinet", "cupboard", "fridge", "refrigerator", "freezer", "pantry", "food", "vending", "counter", "stove", "oven", "shelf" };
-    static readonly string[] Never = { "corpse", "body", "toolbox", "tool", "firstaid", "medic", "gun", "ammo", "safe", "mailbox", "washer", "dryer" };
+    // never: first-aid kits, toolboxes, safes, gun and ammo lockers, mailboxes, washers and dryers (user 11-17, same places as SnacksByEMPEROR 0.7.7)
+    static readonly string[] Never = { "firstaid", "first_aid", "medic", "medkit", "aidkit", "toolbox", "tool", "gun", "ammo", "safe", "mailbox", "washer", "dryer" };
 
     static uint Fnv(string s)
     {
@@ -20,6 +21,14 @@ internal static class Loot
             h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15;
             return h;
         }
+    }
+
+    /// <summary>Containers of this scene whose find was already made (cleared on every scene load: pointers are only good in one scene).</summary>
+    internal static readonly HashSet<IntPtr> Made = new();
+
+    internal static bool Has(Container c, string name)
+    {
+        try { return c.GetNumGearWithName(name) > 0; } catch { return false; }
     }
 
     static string Place(Vector3 p) => $"{Mathf.RoundToInt(p.x * 10)}|{Mathf.RoundToInt(p.y * 10)}|{Mathf.RoundToInt(p.z * 10)}";
@@ -52,19 +61,20 @@ internal static class Loot
     {
         try
         {
-            if (__instance == null || __instance.m_IsCorpse) return;
+            if (__instance == null) return;
+            bool corpse = __instance.m_IsCorpse;   // 11-17: bodies too, with their own chance, no furniture
             var drawn = __instance.m_GearToInstantiate;
             if (drawn == null) return;
             string n = (__instance.gameObject.name ?? "").ToLowerInvariant();
-            if (Never.Any(n.Contains)) return;
-            bool kitchen = Kitchen.Any(n.Contains);
+            if (!corpse && Never.Any(n.Contains)) return;
+            bool kitchen = !corpse && Kitchen.Any(n.Contains);
             int seed = 0;
             try { seed = GameManager.m_SceneTransitionData != null ? GameManager.m_SceneTransitionData.m_GameRandomSeed : 0; } catch { }
             string place = Place(__instance.transform.position);
             string key = $"{seed}|{GameManager.m_ActiveScene}|{place}";
             // a cupboard of four doors is four containers: the chance is for the piece of furniture, not for each door
-            var (drawers, same, mine) = Furniture(__instance, place);
-            float chance = (kitchen ? Mod.KitchenChance : Mod.LootChance) * Math.Min(same, 4) / Math.Min(drawers, 4);
+            var (drawers, same, mine) = corpse ? (1, 1, 0) : Furniture(__instance, place);
+            float chance = corpse ? Mod.CorpseChance : (kitchen ? Mod.KitchenChance : Mod.LootChance) * Math.Min(same, 4) / Math.Min(drawers, 4);
             float roll = (Fnv("NDL|" + key) % 10000) / 100f;
             if (roll >= chance) return;
             if (same > 1 && Fnv("NDLwhich|" + key) % (uint)same != (uint)mine) return;   // one of the doors gets the find
@@ -72,8 +82,11 @@ internal static class Loot
             var def = pool[Fnv("NDLpick|" + key) % (uint)pool.Length];
             string name = Defs.Prefix + def.Id;
             if (drawn.Contains(name)) return;   // the game sometimes populates a container twice
+            // 11-17 (user: every find had an identical twin in the same box): the container is populated again after it was opened
+            // (Start at load, then again on open), when our name had already been made and taken out of the list. Once made, never again.
+            if (Made.Contains(__instance.Pointer) || Has(__instance, name)) return;
             drawn.Add(name);
-            Safe.Debug($"Loot: {def.Id} drawn for {__instance.name} ({(kitchen ? "kitchen" : "other")}, doors {same}/{drawers}, mine {mine})");
+            Safe.Info($"Loot: {def.Id} drawn for {__instance.name} ({(corpse ? "body" : kitchen ? "kitchen" : "other")}, doors {same}/{drawers}, mine {mine})");
         }
         catch (Exception e) { Safe.Log("Noodle loot", e); }
     }
@@ -109,6 +122,8 @@ internal static class ContainerOpenPatch
                 string n = list[i];
                 if (string.IsNullOrEmpty(n) || !Defs.TryGet(n, out var def)) continue;
                 list.RemoveAt(i);
+                if (Loot.Has(__instance!, n)) { Safe.Debug($"Loot: {def.Id} already in {__instance!.gameObject.name}, not made again"); continue; }
+                Loot.Made.Add(__instance!.Pointer);
                 var gi = Items.Spawn(def.Id);
                 if (gi == null) { Safe.Info($"Loot: {def.Id} could not be made for a container"); continue; }
                 gi.m_RolledSpawnChance = true;
@@ -129,6 +144,8 @@ internal static class ContainerSpawnPatch
         if (string.IsNullOrEmpty(prefabName) || !Defs.TryGet(prefabName, out var def)) return true;
         try
         {
+            if (Loot.Has(__instance, def.Gear)) return false;   // 11-17: already made, never a twin
+            Loot.Made.Add(__instance.Pointer);
             var gi = Items.Spawn(def.Id);
             if (gi != null) { gi.m_RolledSpawnChance = true; __instance.AddGear(gi); }
         }

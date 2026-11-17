@@ -8,23 +8,27 @@ namespace SnacksByEMPEROR;
 /// They turn up in kitchen cupboards, fridges and other containers, and the Trader sells a couple each aurora.</summary>
 public class Mod : MelonMod
 {
-    public const string VersionText = "0.7.5";
+    public const string VersionText = "0.7.8";
 
     public static string Root => Path.Combine(MelonLoader.Utils.MelonEnvironment.ModsDirectory, "SnacksByEMPEROR");
 
     static MelonPreferences_Entry<bool> debugLog = null!, testKeys = null!;
-    static MelonPreferences_Entry<float> lootChance = null!, kitchenChance = null!;
+    static MelonPreferences_Entry<float> lootChance = null!, kitchenChance = null!, corpseChance = null!;
     public static bool DebugLog => debugLog.Value;
     public static float LootChance => lootChance.Value;
     public static float KitchenChance => kitchenChance.Value;
+    public static float CorpseChance => corpseChance.Value;
 
     public override void OnInitializeMelon()
     {
         var cat = MelonPreferences.CreateCategory("SnacksByEMPEROR");
         debugLog = cat.CreateEntry("DebugLog", false, "Подробный лог / Detailed log");
         testKeys = cat.CreateEntry("TestKeys", false, "Ctrl+Shift+F8: все снеки в рюкзак / every item into the pack");
-        lootChance = cat.CreateEntry("LootChance", 2f, "% обычных контейнеров с находкой / % of ordinary containers with a find");
+        // 11-17 user: «добавь 1-3% шанса спавна наших снеков в любые ящики (кроме аптечек)»; new key, so the old LootChance = 2 in players' cfg does not hold it back
+        lootChance = cat.CreateEntry("AnyContainerChance", 3f, "% прочих ящиков (на один предмет мебели) / % of other containers (per piece of furniture)");
         kitchenChance = cat.CreateEntry("KitchenChance", 8f, "% кухонных шкафов, холодильников, ящиков с едой / % of kitchen cupboards, fridges, food boxes");
+        // 11-17 user: «добавь в трупы тоже (на 4%)»
+        corpseChance = cat.CreateEntry("CorpseChance", 4f, "% трупов с пачкой в карманах / % of bodies with a pack in the pockets");
         Effects.Prepare();
         ContainerOpenPatch.Apply(HarmonyInstance);
         LoggerInstance.Msg($"SnacksByEMPEROR {VersionText}: {Defs.All.Length} items, {Texts.Count} text keys.");

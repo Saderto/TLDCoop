@@ -10,7 +10,7 @@ internal static class TimeFlow
     const float Window = .25f;
     const float FastRate = 3f;
 
-    static float lastHours = -1f, winReal, winHours, lastWait = -10f;
+    static float lastHours = -1f, winReal, winHours, lastWait = -10f, holdUntil = -1f;
     static bool logged;
 
     /// <summary>The world runs much faster than usual now.</summary>
@@ -23,6 +23,9 @@ internal static class TimeFlow
     public static void Reset()
     {
         lastHours = -1f; winReal = winHours = 0f; Fast = false; ExtraSeconds = 0f; FastMinutes = 0f; lastWait = -10f;
+        // 11-17 (the owner: going out of a building the smoke was thrown away as smoked to the end; log: right after the scene came
+        // back the world's hours jumped by about an hour, read as 1400 times the pace): nothing is measured for a while after a reset
+        holdUntil = Time.unscaledTime + 3f;
     }
 
     public static void Tick()
@@ -31,7 +34,7 @@ internal static class TimeFlow
         if (Fast) _ = Waiting;
         float now = Habit.Now, dt = Time.unscaledDeltaTime;
         // a load, another save: the counter jumps, nothing is measured across it
-        if (lastHours < 0f || now < lastHours || now - lastHours > 12f || dt <= 0f || dt > 2f) { lastHours = now; winReal = winHours = 0f; return; }
+        if (Time.unscaledTime < holdUntil || lastHours < 0f || now < lastHours || now - lastHours > 12f || dt <= 0f || dt > 2f) { lastHours = now; winReal = winHours = 0f; return; }
         winHours += now - lastHours;
         winReal += dt;
         lastHours = now;
