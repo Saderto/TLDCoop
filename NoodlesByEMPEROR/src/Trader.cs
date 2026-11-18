@@ -151,6 +151,15 @@ internal static class TraderPatches
         catch (Exception e) { Safe.Log("Trader purchase", e); }
     }
 
+    // the middle of the trader's window for our offers: the game's method stops with an error on items that are not addressables
+    [HarmonyPrefix, HarmonyPatch(typeof(Panel_TradeSelection), nameof(Panel_TradeSelection.UpdateSelectedExchange))]
+    static bool Preview(Panel_TradeSelection __instance)
+    {
+        var ex = __instance.SelectedTradeExchange;
+        if (!TraderNoodles.IsOurs(ex)) return true;
+        return !TraderPreview.Show(__instance, ex, Items.Template(TraderNoodles.IdOf(ex)!)!);
+    }
+
     [HarmonyPrefix, HarmonyPatch(typeof(TradeExchangeData), nameof(TradeExchangeData.GetGainedItemData))]
     static bool Gained(TradeExchangeData __instance, ref GearItemData __result)
     {

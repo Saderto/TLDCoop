@@ -163,7 +163,9 @@ public static class TraderSmokes
     }
 
     /// <summary>A hidden copy kept alive: its data is what the trade shows and gives.</summary>
-    public static GearItemData? DataOf(TradeExchangeData d)
+    public static GearItemData? DataOf(TradeExchangeData d) => TemplateOf(d)?.m_GearItemData;
+
+    public static GearItem? TemplateOf(TradeExchangeData d)
     {
         var id = IdOf(d);
         if (id == null) return null;
@@ -175,7 +177,7 @@ public static class TraderSmokes
             UnityEngine.Object.DontDestroyOnLoad(t.gameObject);
             templates[id] = t;
         }
-        return t.m_GearItemData;
+        return t;
     }
 }
 
@@ -203,6 +205,15 @@ internal static class TraderPatches
     {
         try { TraderSmokes.MarkBought(__instance); }
         catch (Exception e) { Safe.Log("Trader purchase", e); }
+    }
+
+    // the middle of the trader's window for our offers: the game's method stops with an error on items that are not addressables
+    [HarmonyPrefix, HarmonyPatch(typeof(Panel_TradeSelection), nameof(Panel_TradeSelection.UpdateSelectedExchange))]
+    static bool Preview(Panel_TradeSelection __instance)
+    {
+        var ex = __instance.SelectedTradeExchange;
+        if (!TraderSmokes.IsOurs(ex)) return true;
+        return !TraderPreview.Show(__instance, ex, TraderSmokes.TemplateOf(ex)!);
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(TradeExchangeData), nameof(TradeExchangeData.GetGainedItemData))]
