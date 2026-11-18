@@ -4,7 +4,7 @@
 
 Snacks for The Long Dark: 1546 kinds from 159 brands of 31 countries (crisps, croutons, seeds, nuts, crackers, jerky and dried fish, sweet snacks), 177 of them rare seasonal packs. Every kind has its own pack, icon and a joke description. Seven own effects with icons on the item card and lines on the status screen: Salt Holds Water, Strong Back, Sugar Stove, Pepper in the Blood, Instead of a Smoke (with SmokesByEMPEROR), Dripping Sweat, Dry Lump. Snacks turn up in kitchens, in other cupboards and boxes, on bodies, and are sold by the Trader. Works in co-op: every player finds the same.
 
-Версия / Version: **0.7.8**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
+Версия / Version: **0.7.9**. Игра 2.60, MelonLoader 0.7.2 (0.7.3 тоже подходит) / Game 2.60, MelonLoader 0.7.2 (0.7.3 works too).
 
 ## Скачать и установить / Download and install
 
