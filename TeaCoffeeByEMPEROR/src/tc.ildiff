@@ -1,0 +1,8 @@
+27217c27217
+< .field public static literal string VersionText = "0.5.8"
+---
+> .field public static literal string VersionText = "0.5.9"
+27282c27282
+< IL: ldstr "0.5.8"
+---
+> IL: ldstr "0.5.9"
