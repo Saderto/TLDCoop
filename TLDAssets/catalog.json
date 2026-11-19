@@ -211,8 +211,8 @@
   {
    "id": "TeaCoffeeByEMPEROR",
    "zip": "TeaCoffeeByEMPEROR.zip",
-   "version": "0.5.8",
-   "size": 512967514,
+   "version": "0.5.9",
+   "size": 512999390,
    "detect": "Mods/TeaCoffeeByEMPEROR.dll",
    "needs": [
     "AfflictionComponent",
@@ -232,8 +232,8 @@
   {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
-   "version": "1.1.11",
-   "size": 416802595,
+   "version": "1.1.12",
+   "size": 417819868,
    "detect": "Mods/FoodPackByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodPackBySeagull.dll",
