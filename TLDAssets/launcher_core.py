@@ -6,7 +6,8 @@ import os, sys, json, zipfile, shutil, tempfile, urllib.request, urllib.error, u
 import game_find
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-LAUNCHER_VERSION = '1.0.10'
+LAUNCHER_VERSION = '1.0.11'
+ML_TAG = 'v0.7.2'   # the MelonLoader our mods are made for (modders agreed on 0.7.2); used when a catalog names none
 DISCORD_URL = 'https://discord.gg/ezT7PRZmuS'
 CATALOG_URL = 'https://raw.githubusercontent.com/Saderto/TLDCoop/main/TLDAssets/catalog.json'
 MANIFEST = 'Mods/EMPERORMods.json'   # what the launcher installed: {id: {"version": .., "files": [..]}}
@@ -443,7 +444,8 @@ def install_lib(game, name, lib, tmpdir, log=lambda s: None, progress=None, cat=
     log('  %s -> %s' % (url, lib['path']))
 
 def install_melonloader(game, ml, tmpdir, log=lambda s: None, progress=None):
-    url = release_asset_url(ml['repo'], ml['asset'], ml.get('tag'))
+    # always a pinned release: without a tag GitHub's "latest" would be whatever LavaGang put out last
+    url = release_asset_url(ml['repo'], ml['asset'], ml.get('tag') or ML_TAG)
     z = os.path.join(tmpdir, ml['asset'])
     download(url, z, progress)
     with zipfile.ZipFile(z) as zf:
@@ -453,7 +455,7 @@ def install_melonloader(game, ml, tmpdir, log=lambda s: None, progress=None):
             dst = os.path.join(game, *n.split('/'))
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             with zf.open(info) as s, open(dst, 'wb') as o: shutil.copyfileobj(s, o)
-    log('  MelonLoader %s' % ml.get('tag', ''))
+    log('  MelonLoader %s' % (ml.get('tag') or ML_TAG))
 
 def needed_libs(cat, mods, game, manifest=None):
     """Libraries the chosen mods need that are not in the game yet, plus updates of ones the launcher put there: [(name, lib)]."""
