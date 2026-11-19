@@ -458,6 +458,14 @@ namespace TrainerByEMPEROR
             var pm = GameManager.GetPlayerManagerComponent();
             if (pm == null) throw new InvalidOperationException(L.T("Загрузите сохранение", "Load a save"));
             // Предметы FoodPack мод создаёт сам, консольная выдача их не знает — выдаём так же, как сам мод.
+            if (ModItems.IsModItem(gearName))
+            {
+                // Остальные наши моды: как сами моды; если не вышло — консольной выдачей ниже.
+                int left = Math.Max(1, count);
+                while (left > 0 && pm.InstantiateItemInPlayerInventory(gearName, 1, 1f, PlayerManager.InventoryInstantiateFlags.None) != null) left--;
+                if (left == 0) return;
+                count = left;
+            }
             if (gearName.StartsWith("GEAR_Seagull_", StringComparison.OrdinalIgnoreCase) || gearName.StartsWith(Smokes.Prefix, StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 0; i < Math.Max(1, count); i++)

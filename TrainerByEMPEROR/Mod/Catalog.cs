@@ -52,9 +52,10 @@ namespace TrainerByEMPEROR
         {
             if (_ready != null)
             {
-                // Предметы FoodPack не кэшируем: мод часто обновляется, список читается из его файлов.
+                // Предметы FoodPack, табака и других наших модов не кэшируем: мод часто обновляется, список читается из его файлов.
                 var pack = new List<ItemInfo>(FoodPacks.Items());
                 pack.AddRange(Smokes.Items());
+                pack.AddRange(ModItems.Items());
                 if (pack.Count == 0) return new { ready = true, items = _ready };
                 var known = new HashSet<string>(_ready.Select(i => i.Id), StringComparer.OrdinalIgnoreCase);
                 var all = new List<ItemInfo>(_ready);

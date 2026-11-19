@@ -47,6 +47,7 @@ namespace TrainerByEMPEROR
 
         private static void Serve(TcpClient client)
         {
+            client.NoDelay = true;
             using (client)
             using (var stream = client.GetStream())
             using (var reader = new StreamReader(stream, new UTF8Encoding(false)))

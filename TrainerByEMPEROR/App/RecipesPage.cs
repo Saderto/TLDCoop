@@ -16,7 +16,7 @@ namespace TrainerByEMPEROR.App
 
         private readonly Ctx _ctx;
         private readonly TextBox _search;
-        private readonly StackPanel _list;
+        private readonly VirtualList _list;
         private readonly TextBlock _status;
         private List<Recipe> _items = new();
         private int _loadId;
@@ -46,7 +46,7 @@ namespace TrainerByEMPEROR.App
             DockPanel.SetDock(refresh, Dock.Right);
             top.Children.Add(refresh);
             _search = new TextBox { ToolTip = L.T("Поиск рецепта или ингредиента", "Search recipes or ingredients") };
-            _search.TextChanged += (_, _) => Render();
+            VirtualList.Debounce(_search, Render);
             top.Children.Add(_search);
             Children.Add(top);
 
@@ -55,10 +55,9 @@ namespace TrainerByEMPEROR.App
             SetRow(_status, 1);
             Children.Add(_status);
 
-            _list = new StackPanel();
-            var scroll = new ScrollViewer { Content = _list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Padding = new Thickness(0, 0, 10, 0) };
-            SetRow(scroll, 2);
-            Children.Add(scroll);
+            _list = new VirtualList();
+            SetRow(_list, 2);
+            Children.Add(_list);
         }
 
         public async void Show() => await Load();
@@ -95,13 +94,12 @@ namespace TrainerByEMPEROR.App
 
         private void Render()
         {
-            _list.Children.Clear();
             string q = _search.Text.Trim();
             var found = _items.Where(b => q.Length == 0 || b.Name.Contains(q, StringComparison.CurrentCultureIgnoreCase)
                                                         || b.Ingredients.Contains(q, StringComparison.CurrentCultureIgnoreCase)).ToList();
             if (_items.Count > 0)
                 _status.Text = L.T($"Рецептов: {_items.Count}, открыто: {_items.Count(b => b.Unlocked)}. Показано: {found.Count}. Открытые рецепты сохраняются вместе с игрой.", $"Recipes: {_items.Count}, unlocked: {_items.Count(b => b.Unlocked)}. Shown: {found.Count}. Unlocked recipes are saved with the game.");
-            foreach (var b in found) _list.Children.Add(Row(b));
+            _list.Show(found, Row);
         }
 
         private FrameworkElement Row(Recipe rc)

@@ -16,7 +16,7 @@ namespace TrainerByEMPEROR.App
 
         private readonly Ctx _ctx;
         private readonly TextBox _search;
-        private readonly StackPanel _list;
+        private readonly VirtualList _list;
         private readonly TextBlock _status;
         private List<Bp> _items = new();
 
@@ -45,7 +45,7 @@ namespace TrainerByEMPEROR.App
             DockPanel.SetDock(refresh, Dock.Right);
             top.Children.Add(refresh);
             _search = new TextBox { ToolTip = L.T("Поиск чертежа", "Search blueprints") };
-            _search.TextChanged += (_, _) => Render();
+            VirtualList.Debounce(_search, Render);
             top.Children.Add(_search);
             Children.Add(top);
 
@@ -54,10 +54,9 @@ namespace TrainerByEMPEROR.App
             SetRow(_status, 1);
             Children.Add(_status);
 
-            _list = new StackPanel();
-            var scroll = new ScrollViewer { Content = _list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Padding = new Thickness(0, 0, 10, 0) };
-            SetRow(scroll, 2);
-            Children.Add(scroll);
+            _list = new VirtualList();
+            SetRow(_list, 2);
+            Children.Add(_list);
         }
 
         public async void Show() => await Load();
@@ -90,12 +89,11 @@ namespace TrainerByEMPEROR.App
 
         private void Render()
         {
-            _list.Children.Clear();
             string q = _search.Text.Trim();
             var found = _items.Where(b => q.Length == 0 || b.Name.Contains(q, StringComparison.CurrentCultureIgnoreCase)).ToList();
             if (_items.Count > 0)
                 _status.Text = L.T($"Чертежей: {_items.Count}, закрыто: {_items.Count(b => !b.Unlocked)}. Показано: {found.Count}.", $"Blueprints: {_items.Count}, locked: {_items.Count(b => !b.Unlocked)}. Shown: {found.Count}.");
-            foreach (var bp in found) _list.Children.Add(Row(bp));
+            _list.Show(found, Row);
         }
 
         private FrameworkElement Row(Bp bp)

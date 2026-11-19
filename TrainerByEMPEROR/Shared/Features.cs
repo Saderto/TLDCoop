@@ -38,7 +38,7 @@ namespace TrainerByEMPEROR.Shared
     public static class Features
     {
         public const int Port = 47811;
-        public const string Version = "2.5.28";
+        public const string Version = "2.5.29";
 
         public const string CatPlayer = "Игрок";
         public const string CatInventory = "Инвентарь";

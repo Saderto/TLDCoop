@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -10,41 +11,57 @@ namespace TrainerByEMPEROR.App
     // Связь со встроенной частью трейнера в игре (локальный TCP, строка JSON на запрос и на ответ).
     internal sealed class GameClient
     {
-        private readonly object _lock = new();
-        private TcpClient _client;
-        private StreamReader _reader;
-        private StreamWriter _writer;
+        // Несколько соединений: долгий запрос (карта, список предметов) или частый опрос не держат очередь,
+        // и нажатие кнопки уходит в игру сразу, а не ждёт, пока ответят на всё, что было раньше.
+        private const int MaxIdle = 4;
 
-        public JsonElement Send(object request)
+        private sealed class Conn : IDisposable
         {
-            lock (_lock)
+            public TcpClient Client;
+            public StreamReader Reader;
+            public StreamWriter Writer;
+
+            public void Dispose()
             {
                 try
                 {
-                    if (_client == null) Connect();
-                    _writer.WriteLine(JsonSerializer.Serialize(request));
-                    string line = _reader.ReadLine() ?? throw new IOException(L.T("Соединение закрыто", "Connection closed"));
-                    using var doc = JsonDocument.Parse(line);
-                    var root = doc.RootElement.Clone();
-                    if (root.TryGetProperty("ok", out var ok) && ok.ValueKind == JsonValueKind.False)
-                        throw new GameException(root.TryGetProperty("error", out var e) ? e.GetString() : L.T("Ошибка", "Error"));
-                    return root;
-                }
-                catch (GameException)
-                {
-                    throw;
+                    Client?.Dispose();
                 }
                 catch
                 {
-                    Close();
-                    throw;
+                    // уже закрыто
                 }
             }
         }
 
-        private void Connect()
+        private readonly ConcurrentBag<Conn> _idle = new();
+
+        public JsonElement Send(object request)
         {
-            var c = new TcpClient();
+            string json = JsonSerializer.Serialize(request);
+            var c = _idle.TryTake(out var free) ? free : Connect();
+            bool keep = false;
+            try
+            {
+                c.Writer.WriteLine(json);
+                string line = c.Reader.ReadLine() ?? throw new IOException(L.T("Соединение закрыто", "Connection closed"));
+                keep = true;
+                using var doc = JsonDocument.Parse(line);
+                var root = doc.RootElement.Clone();
+                if (root.TryGetProperty("ok", out var ok) && ok.ValueKind == JsonValueKind.False)
+                    throw new GameException(root.TryGetProperty("error", out var e) ? e.GetString() : L.T("Ошибка", "Error"));
+                return root;
+            }
+            finally
+            {
+                if (keep && _idle.Count < MaxIdle) _idle.Add(c);
+                else c.Dispose();
+            }
+        }
+
+        private static Conn Connect()
+        {
+            var c = new TcpClient { NoDelay = true };
             if (!c.ConnectAsync("127.0.0.1", Features.Port).Wait(400))
             {
                 c.Dispose();
@@ -52,24 +69,12 @@ namespace TrainerByEMPEROR.App
             }
             c.ReceiveTimeout = 25000;
             var stream = c.GetStream();
-            _client = c;
-            _reader = new StreamReader(stream, new UTF8Encoding(false));
-            _writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true, NewLine = "\n" };
-        }
-
-        private void Close()
-        {
-            try
+            return new Conn
             {
-                _client?.Dispose();
-            }
-            catch
-            {
-                // уже закрыто
-            }
-            _client = null;
-            _reader = null;
-            _writer = null;
+                Client = c,
+                Reader = new StreamReader(stream, new UTF8Encoding(false)),
+                Writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true, NewLine = "\n" },
+            };
         }
     }
 

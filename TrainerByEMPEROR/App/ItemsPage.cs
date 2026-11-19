@@ -13,15 +13,14 @@ namespace TrainerByEMPEROR.App
     // Раздел «Предметы»: все предметы игры по группам, выдача 1 / 5 / 10 штук.
     internal sealed class ItemsPage : Grid
     {
-        private const int MaxRows = 400;
-        private const string AllGroups = "Все предметы";
+                private const string AllGroups = "Все предметы";
 
         private sealed record Item(string Id, string Name, string Group);
 
         private readonly Ctx _ctx;
         private readonly TextBox _search;
         private readonly StackPanel _groups;
-        private readonly StackPanel _list;
+        private readonly VirtualList _list;
         private readonly TextBlock _status;
         private readonly DispatcherTimer _loadTimer;
         private List<Item> _items;
@@ -54,7 +53,7 @@ namespace TrainerByEMPEROR.App
             DockPanel.SetDock(refresh, Dock.Right);
             top.Children.Add(refresh);
             _search = new TextBox { ToolTip = L.T("Поиск по названию или коду", "Search by name or code") };
-            _search.TextChanged += (_, _) => Render();
+            VirtualList.Debounce(_search, Render);
             top.Children.Add(_search);
             SetColumnSpan(top, 2);
             Children.Add(top);
@@ -70,11 +69,10 @@ namespace TrainerByEMPEROR.App
             SetRow(gs, 2);
             Children.Add(gs);
 
-            _list = new StackPanel();
-            var ls = new ScrollViewer { Content = _list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Padding = new Thickness(0, 0, 10, 0) };
-            SetRow(ls, 2);
-            SetColumn(ls, 1);
-            Children.Add(ls);
+            _list = new VirtualList();
+            SetRow(_list, 2);
+            SetColumn(_list, 1);
+            Children.Add(_list);
 
             _loadTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _loadTimer.Tick += async (_, _) => await Load();
@@ -161,6 +159,13 @@ namespace TrainerByEMPEROR.App
             "Табак: сигары" => "Tobacco: cigars",
             "Табак: трубки и табак" => "Tobacco: pipes and tobacco",
             "Табак: прочее" => "Tobacco: other",
+            "Снеки" => "Snacks",
+            "Лапша" => "Noodles",
+            "Чай и кофе" => "Tea and coffee",
+            "Медузы" => "Jellyfish",
+            "Спичечные коробки" => "Matchboxes",
+            "Коптильня и колбасы" => "Smokehouse and sausages",
+            "Метки" => "Markers",
             _ => g,
         };
 
@@ -191,8 +196,11 @@ namespace TrainerByEMPEROR.App
 
         private void Render()
         {
-            _list.Children.Clear();
-            if (_items == null) return;
+            if (_items == null)
+            {
+                _list.Clear();
+                return;
+            }
 
             string q = _search.Text.Trim();
             var found = _items
@@ -200,11 +208,8 @@ namespace TrainerByEMPEROR.App
                 .Where(i => q.Length == 0 || i.Name.Contains(q, StringComparison.CurrentCultureIgnoreCase) || i.Id.Contains(q, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            _status.Text = found.Count > MaxRows
-                ? L.T($"Найдено {found.Count}, показаны первые {MaxRows}. Уточните поиск.", $"Found {found.Count}, showing the first {MaxRows}. Narrow the search.")
-                : L.T($"Найдено: {found.Count}. Предметы появляются в инвентаре сразу.", $"Found: {found.Count}. Items appear in the inventory right away.");
-
-            foreach (var item in found.Take(MaxRows)) _list.Children.Add(Row(item));
+            _status.Text = L.T($"Найдено: {found.Count}. Предметы появляются в инвентаре сразу.", $"Found: {found.Count}. Items appear in the inventory right away.");
+            _list.Show(found, Row);
         }
 
         private FrameworkElement Row(Item item)
