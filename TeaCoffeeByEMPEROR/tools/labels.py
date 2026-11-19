@@ -498,13 +498,14 @@ def T_PolarCaravan(p, L):
         for k in range(26):
             rr = random.Random(k)
             c.circle(rr.uniform(x0 - 60, x1 + 60), rr.uniform(y0 + 20, y0 + 220), rr.uniform(1, 2.6), fill=(240, 240, 255, 220))
-        hill = [(x0 - 80, y1 - 120), (cx - 120, y1 - 175), (cx + 40, y1 - 150), (cx + 200, y1 - 185), (x1 + 80, y1 - 140), (x1 + 80, y1), (x0 - 80, y1)]
+        # the whole caravan stands on the snow: on the sky it would vanish (same navy)
+        hill = [(x0 - 80, y1 - 215), (cx - 150, y1 - 262), (cx + 40, y1 - 250), (cx + 190, y1 - 268), (x1 + 80, y1 - 222), (x1 + 80, y1), (x0 - 80, y1)]
         c.poly(hill, fill=(222, 230, 240, 255))
-        for i, xx in enumerate((cx - 160, cx - 70, cx + 20, cx + 110)):
-            yy = y1 - 160 + (i % 2) * 4
-            if i == 3: sled(c, xx + 30, yy + 4, 70, navy)
-            else: reindeer(c, xx, yy - 10, 60, navy)
-        c.line([(cx - 120, y1 - 175), (cx + 160, y1 - 160)], rgba(navy, 200), 2)
+        # they go to the right: the sled behind, the reindeer pulling it
+        sled(c, cx - 145, y1 - 152, 70, navy)
+        c.line([(cx - 100, y1 - 170), (cx + 140, y1 - 183)], rgba(navy, 220), 2.5)
+        for i, xx in enumerate((cx - 40, cx + 50, cx + 140)):
+            reindeer(c, xx, y1 - 177 + (i % 2) * 3, 60, navy)
         border(c, x0, y0 + 14, x1, y1 - 14, GOLD, 3, 8)
         c.text(cx, y1 - 96, 'POLAR', 'ruslan-display-400', 64, GOLD, maxw=440)
         c.text(cx, y1 - 42, 'CARAVAN', 'ruslan-display-400', 56, GOLD, maxw=440)

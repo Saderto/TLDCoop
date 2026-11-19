@@ -11,7 +11,7 @@ namespace FoodPackByEMPEROR;
 
 public class Mod : MelonMod
 {
-	public const string VersionText = "1.1.11";
+	public const string VersionText = "1.1.12";
 
 	private bool showTestWindow;
 
