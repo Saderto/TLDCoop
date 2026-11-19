@@ -64,8 +64,8 @@
   {
    "id": "SmokesBySeagull",
    "zip": "SmokesByEMPEROR.zip",
-   "version": "0.1.172",
-   "size": 292500848,
+   "version": "0.1.173",
+   "size": 292501775,
    "detect": "Mods/SmokesByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokesBySeagull.dll",
@@ -93,8 +93,8 @@
   {
    "id": "SmokehouseBySeagull",
    "zip": "SmokehouseByEMPEROR.zip",
-   "version": "0.4.41",
-   "size": 111802537,
+   "version": "0.4.42",
+   "size": 111803344,
    "detect": "Mods/SmokehouseByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokehouseBySeagull.dll",
@@ -169,8 +169,8 @@
   {
    "id": "SnacksByEMPEROR",
    "zip": "SnacksByEMPEROR.zip",
-   "version": "0.7.8",
-   "size": 421886469,
+   "version": "0.7.9",
+   "size": 421887395,
    "detect": "Mods/SnacksByEMPEROR.dll",
    "needs": [
     "AfflictionComponent",
@@ -190,8 +190,8 @@
   {
    "id": "NoodlesByEMPEROR",
    "zip": "NoodlesByEMPEROR.zip",
-   "version": "0.6.11",
-   "size": 103054456,
+   "version": "0.6.12",
+   "size": 103055332,
    "detect": "Mods/NoodlesByEMPEROR.dll",
    "needs": [
     "AfflictionComponent",
@@ -211,8 +211,8 @@
   {
    "id": "TeaCoffeeByEMPEROR",
    "zip": "TeaCoffeeByEMPEROR.zip",
-   "version": "0.5.7",
-   "size": 512966549,
+   "version": "0.5.8",
+   "size": 512967514,
    "detect": "Mods/TeaCoffeeByEMPEROR.dll",
    "needs": [
     "AfflictionComponent",
@@ -232,8 +232,8 @@
   {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
-   "version": "1.1.8",
-   "size": 416793773,
+   "version": "1.1.10",
+   "size": 416794736,
    "detect": "Mods/FoodPackByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodPackBySeagull.dll",
