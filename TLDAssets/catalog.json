@@ -232,8 +232,8 @@
   {
    "id": "FoodPackBySeagull",
    "zip": "FoodPackByEMPEROR.zip",
-   "version": "1.1.10",
-   "size": 416794736,
+   "version": "1.1.11",
+   "size": 416802595,
    "detect": "Mods/FoodPackByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/FoodPackBySeagull.dll",
@@ -355,8 +355,8 @@
   {
    "id": "TLDTrainer",
    "zip": "TrainerByEMPEROR.zip",
-   "version": "2.5.28",
-   "size": 66290064,
+   "version": "2.5.29",
+   "size": 66311044,
    "detect": "Mods/TrainerByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/TLDTrainer.dll",
