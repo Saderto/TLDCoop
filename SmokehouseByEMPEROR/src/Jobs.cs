@@ -34,6 +34,11 @@ public static partial class Barrels
         catch (Exception e) { Safe.Log("Unfinished sausages unreadable", e); }
     }
 
+    /// <summary>11-20 (Ivan, smoking effects kept after loading an older save): the jobs file is written with the game's own save only
+    /// (Barrels.Save). The meat, gut and salt a job took leave the pack in the game's save at the same moment, so a quit without
+    /// saving brings back both the ingredients and no job, never ingredients plus a job.</summary>
+    public static void JobsChanged() { }
+
     public static void SaveJobs()
     {
         try

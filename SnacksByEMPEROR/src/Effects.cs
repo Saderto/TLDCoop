@@ -38,7 +38,7 @@ public static class Effects
     public static void End(string id)
     {
         if (!until.Remove(id)) return;
-        on.Remove(id); nextCheck = 0f; Save();
+        on.Remove(id); nextCheck = 0f;   // written with the game's save only (FxSavePatch)
     }
 
     public static bool SmokesHere { get; private set; }
@@ -78,7 +78,8 @@ public static class Effects
         }
         if (def.Fx.Contains("DryLump")) Body.LumpFrom(def.Id);
         nextCheck = 0f;
-        Save();
+        // 11-20 (Ivan): not written to the file here, only with the game's own save (FxSavePatch): eaten after the last save,
+        // quit without saving and that save loaded again, the effects were still on.
     }
 
     public static void Tick()

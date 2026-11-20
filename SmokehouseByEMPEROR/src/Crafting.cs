@@ -273,7 +273,7 @@ internal static class Crafting
                         if (Count(s.id + "Wip") == 0)
                             GameManager.GetPlayerManagerComponent()?.InstantiateItemInPlayerInventory(Defs.Prefix + s.id + "Wip", 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
                         uj.Kg = 1f;      // the piece was handed over
-                        Barrels.SaveJobs();
+                        Barrels.JobsChanged();
                     }
                     Apply(); RefreshPanel();
                 }
@@ -302,7 +302,7 @@ internal static class Crafting
                 bool wip = Count(r.Id + "Wip") > 0;
                 hadWip[r.Id] = wip;
                 // a piece picked up again after its station was begun anew: it is an unfinished station all the same
-                if (wip && Unfinished(r.Id) == null) { Barrels.Jobs.Add(new Job { Kind = JobPrefix + r.Id, Done = .02f, Kg = 1f }); Barrels.SaveJobs(); }
+                if (wip && Unfinished(r.Id) == null) { Barrels.Jobs.Add(new Job { Kind = JobPrefix + r.Id, Done = .02f, Kg = 1f }); Barrels.JobsChanged(); }
                 state += Active(r.Id) ? "1" : "0";
             }
             if (state != shownState) { shownState = state; Apply(); RefreshPanel(); }
@@ -311,7 +311,7 @@ internal static class Crafting
                 if (Unfinished(r.Id) is { Kg: < 1f } old && GameManager.GetPlayerManagerComponent() is { } pm && GameManager.GetInventoryComponent() != null)
                 {
                     pm.InstantiateItemInPlayerInventory(Defs.Prefix + r.Id + "Wip", 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
-                    old.Kg = 1f; Barrels.SaveJobs(); Apply();
+                    old.Kg = 1f; Barrels.JobsChanged(); Apply();
                 }
         }
         catch (Exception e) { Safe.Log("Station build tick", e); }
@@ -344,7 +344,7 @@ internal static class Crafting
             job.Done = Mathf.Clamp(Math.Max(job.Done, pct), 0f, .98f);
             job.Kg = 1f;
             if (Count(r.Id + "Wip") == 0) pm.InstantiateItemInPlayerInventory(Defs.Prefix + r.Id + "Wip", 1, 1f, PlayerManager.InventoryInstantiateFlags.None);
-            Barrels.SaveJobs();
+            Barrels.JobsChanged();
             Apply();
             MelonLogger.Msg($"Station {r.Id}: the game's own unfinished one ({pct:0.00}) is turned into our unfinished piece");
         }
@@ -467,7 +467,7 @@ internal static class Crafting
             // the unfinished piece is not at hand: this is a new station, the old record goes
             if (Unfinished(id) is { Kg: >= 1f } stale && !(hadWip.TryGetValue(id, out var hw) && hw))
             {
-                Barrels.Jobs.Remove(stale); Barrels.SaveJobs();
+                Barrels.Jobs.Remove(stale); Barrels.JobsChanged();
                 Safe.Info($"Station {id}: begun anew, the unfinished piece is not in the pack");
             }
             working = id; workingOp = __instance.Pointer; ended = false; sweep = null;
@@ -517,7 +517,7 @@ internal static class Crafting
             Wear(op, id, go * part);
             if (share >= .97f)
             {
-                if (job != null) { Barrels.Jobs.Remove(job); Barrels.SaveJobs(); }
+                if (job != null) { Barrels.Jobs.Remove(job); Barrels.JobsChanged(); }
                 Apply();
                 finished = id;
                 sweep = (id, 90);
@@ -526,7 +526,7 @@ internal static class Crafting
             }
             if (job == null) { job = new Job { Kind = JobPrefix + id }; Barrels.Jobs.Add(job); }
             job.Done = Mathf.Clamp(after, 0f, .98f);
-            Barrels.SaveJobs();
+            Barrels.JobsChanged();
             Apply();
             sweep = (id, 90);
             refreshIn = 4;

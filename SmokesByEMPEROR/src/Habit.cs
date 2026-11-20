@@ -98,7 +98,8 @@ public static class Habit
         State.LastSmoke = now;
         Safe.Debug($"Smoked {cause}: share {share:0.00}, fatigue -{s.FatiguePct * share:0.0}%, HP -{s.HealthPct * share:0.0}%, hunger dulled until {State.HungerUntil:0.00}");
         nextCheck = 0f;
-        Save();
+        // 11-20 (Ivan): not written to the file here. The file is written only with the game's own save (HabitSavePatch):
+        // a smoke after the last save, then quitting without saving and loading that save, kept the smoke's effects.
     }
 
     public static void Tick()
@@ -119,12 +120,10 @@ public static class Habit
         if (!State.Addicted && recent >= Settings.AddictionCount.Value - .001f)
         {
             State.Addicted = true;
-            Save();
         }
         if (State.Addicted && now - State.LastSmoke >= Settings.AddictionEndsHours.Value)
         {
             State.Addicted = false;
-            Save();
         }
         Craving = State.Addicted && now - State.LastSmoke >= Settings.CravingAfterHours.Value && !Smoking.Active;
         Sync("Hunger", HungerDulled, State.HungerUntil - now);

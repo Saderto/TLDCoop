@@ -214,7 +214,7 @@ public static partial class Window
                         Barrels.Say("T_PAUSED", (int)Math.Round(job.Done * 100f));
                     }
                     goingCache.Clear();
-                    Barrels.SaveJobs();
+                    Barrels.JobsChanged();
                     Safe.Debug($"Sausage {k.Id}: work over, done {job.Done:0.00}, success {success}, cancelled {cancelled}, progress {progress:0.00}");
                 }
                 catch (Exception e) { Safe.Log("Sausage work end", e); }
@@ -228,7 +228,7 @@ public static partial class Window
         {
             Safe.Log("Sausage work", e);
             // no progress bar in this build: the sausage is not lost, it is simply made
-            job.Done = 1f; Barrels.Jobs.Remove(job); Barrels.SaveJobs();
+            job.Done = 1f; Barrels.Jobs.Remove(job); Barrels.JobsChanged();
             TakeNamed(Defs.Prefix + k.WipId);
             Items.GiveFood(Defs.Prefix + k.RawId, job.Kg + Tune.SausageSkin, job.Cal, job.Cond);
         }
