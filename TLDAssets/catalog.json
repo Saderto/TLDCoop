@@ -64,8 +64,8 @@
   {
    "id": "SmokesBySeagull",
    "zip": "SmokesByEMPEROR.zip",
-   "version": "0.1.173",
-   "size": 292501775,
+   "version": "0.1.176",
+   "size": 292502166,
    "detect": "Mods/SmokesByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokesBySeagull.dll",
@@ -93,8 +93,8 @@
   {
    "id": "SmokehouseBySeagull",
    "zip": "SmokehouseByEMPEROR.zip",
-   "version": "0.4.42",
-   "size": 111803344,
+   "version": "0.4.43",
+   "size": 111803361,
    "detect": "Mods/SmokehouseByEMPEROR.dll",
    "legacy": {
     "dll": "Mods/SmokehouseBySeagull.dll",
@@ -169,8 +169,8 @@
   {
    "id": "SnacksByEMPEROR",
    "zip": "SnacksByEMPEROR.zip",
-   "version": "0.7.9",
-   "size": 421887395,
+   "version": "0.7.10",
+   "size": 421887401,
    "detect": "Mods/SnacksByEMPEROR.dll",
    "needs": [
     "AfflictionComponent",
