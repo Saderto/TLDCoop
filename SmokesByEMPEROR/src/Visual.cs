@@ -222,13 +222,14 @@ public static class Visual
     static void ShowHiddenMeshes()
     {
         int n = 0;
+        var names = new List<string>();
         foreach (var r in hiddenMeshes)
         {
-            try { if (r != null && !r.enabled) { r.enabled = true; n++; } }
+            try { if (r != null && !r.enabled) { r.enabled = true; n++; names.Add(r.gameObject.name); } }
             catch { }
         }
         hiddenMeshes.Clear();
-        if (n > 0) Safe.Debug($"Torch rig: turned back on {n} of its own meshes hidden for the smoke");
+        if (n > 0) Safe.Debug($"Torch rig: turned back on {n} of its own parts hidden for the smoke: {string.Join(", ", names)}");
     }
 
     public static void Reset()
@@ -319,9 +320,10 @@ public static class Visual
             {
                 r.enabled = false;
                 // 11-20 (friends: a lit torch in their own hands showed only its flame, no stick): the game turns the
-                // flame back on, but never the stick's mesh, which is always on for it. Remember the meshes we hid and
-                // turn them back on when the smoke ends (Reset)
-                if (r.TryCast<ParticleSystemRenderer>() == null && !hiddenMeshes.Exists(h => h != null && h.Pointer == r.Pointer)) hiddenMeshes.Add(r);
+                // flame back on, but never the stick's mesh, which is always on for it. 0.1.175: with the stick back the
+                // flame stayed off (Ivan). Remember everything we hid, flame and smoke too, and turn it all back on when
+                // the smoke ends (Reset): the rig is then as the game left it
+                if (!hiddenMeshes.Exists(h => h != null && h.Pointer == r.Pointer)) hiddenMeshes.Add(r);
             }
         foreach (var l in rig.GetComponentsInChildren<Light>(true))
             if (l != null && l.enabled && l != light) l.enabled = false;
